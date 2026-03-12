@@ -9,7 +9,11 @@ const config: Config = {
     extend: {
       colors: {
         carbon: '#0D0D0D',
-        'carbon-light': '#1a1a1a',
+        'carbon-surface': '#1A1A1A',
+        soyuz: '#CC0000',
+        muted: '#888888',
+        background: '#0D0D0D',
+        foreground: '#FFFFFF',
       },
       animation: {
         ticker: 'ticker 25s linear infinite',

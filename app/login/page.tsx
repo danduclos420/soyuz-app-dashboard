@@ -21,16 +21,32 @@ export default function LoginPage() {
     // For adminprotos, we use the initialized email
     const email = username === 'adminprotos' ? 'admin@soyuzbc.com' : username;
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (signInError) {
+      setError(signInError.message);
       setLoading(false);
-    } else {
-      useRouterInstance.push('/admin');
+      return;
+    }
+
+    if (user) {
+      // Fetch role from profiles
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        useRouterInstance.push('/admin');
+      } else if (profile?.role === 'rep') {
+        useRouterInstance.push('/rep/dashboard');
+      } else {
+        useRouterInstance.push('/account');
+      }
     }
   };
 

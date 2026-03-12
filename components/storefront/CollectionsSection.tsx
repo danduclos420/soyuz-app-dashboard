@@ -40,39 +40,41 @@ export default function CollectionsSection() {
   };
 
   return (
-    <section id="collections" className="py-24 bg-background relative overflow-hidden">
+    <section id="collections" className="py-32 bg-background relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className="text-soyuz font-bold uppercase tracking-[0.3em] text-sm mb-4">Discover</h2>
-            <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white">Nos Collections</h3>
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+          <div className="text-left">
+            <h2 className="text-soyuz font-black uppercase tracking-[0.4em] text-[10px] mb-4">The Lineup</h2>
+            <h3 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white italic leading-none">
+              Nos <span className="outline-text-cyan">Collections</span>
+            </h3>
           </div>
-          <div className="hidden md:flex gap-4">
+          <div className="flex gap-2">
             <button 
               onClick={() => scroll('left')}
-              className="p-4 border border-white/10 hover:border-white/30 text-white transition-all rounded-full"
+              className="p-5 border border-white/5 hover:border-soyuz text-white transition-all rounded-full bg-carbon-surface shadow-lg"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} />
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="p-4 border border-white/10 hover:border-white/30 text-white transition-all rounded-full"
+              className="p-5 border border-white/5 hover:border-soyuz text-white transition-all rounded-full bg-carbon-surface shadow-lg"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} />
             </button>
           </div>
         </div>
 
         <div 
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-8"
+          className="flex gap-8 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-12"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {collections.map((col) => (
             <motion.div 
               key={col.id}
-              whileHover={{ y: -10 }}
-              className="min-w-[85vw] sm:min-w-[450px] aspect-[4/5] relative rounded-2xl overflow-hidden snap-start group border border-white/5"
+              whileHover={{ scale: 0.98, y: -5 }}
+              className="min-w-[85vw] sm:min-w-[420px] aspect-[4/5] relative rounded-3xl overflow-hidden snap-start group border border-white/5 bg-carbon-surface hover:border-soyuz/30 transition-all duration-500 shadow-2xl"
             >
               {/* Image Background */}
               <div 

@@ -15,9 +15,9 @@ export default function HomePage() {
     <div className="flex flex-col w-full">
       {/* 1. HERO SECTION (README Step 3.1.1) */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
-        <div className="absolute inset-0 z-0 opacity-60">
+        <div className="absolute inset-0 z-0 opacity-40">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background z-10" />
-          <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1580748141549-716500ca23ae?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale" />
+          <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1580748141549-716500ca23ae?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale contrast-125" />
         </div>
 
         <div className="relative z-20 text-center px-4 max-w-5xl mx-auto mt-20">
@@ -25,41 +25,41 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-soyuz font-bold uppercase tracking-[0.5em] text-xs sm:text-sm mb-6"
+            className="text-soyuz font-black uppercase tracking-[0.5em] text-[10px] sm:text-xs mb-6"
           >
-            Professional Hockey Sticks
+            SOYUZ BC NORTH AMERICA
           </motion.p>
           
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white mb-4 leading-none"
+            className="text-6xl md:text-9xl font-black uppercase tracking-tighter text-white mb-2 leading-none italic"
           >
-            Designed for <br />
-            <span className="text-white outline-text">Elite Athletes</span>
+            PURE <br />
+            <span className="text-white outline-text-cyan glow-text-cyan">POWER</span>
           </motion.h1>
 
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="text-lg md:text-xl uppercase tracking-widest text-muted mb-12 max-w-2xl mx-auto"
+            className="text-sm md:text-base uppercase tracking-[0.3em] text-muted mb-12 max-w-2xl mx-auto font-bold"
           >
-            SOYUZ BC NORTH AMERICA — THE GOLDEN SHOT
+            The Golden Shot — Elite Performance Gear
           </motion.p>
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button variant="primary" size="lg" className="min-w-[200px]" asChild>
-              <a href="/products">Shop All</a>
+            <Button variant="primary" size="lg" className="min-w-[220px] rounded-none py-4" asChild>
+              <a href="/products">Shop Catalog</a>
             </Button>
-            <Button variant="outline" size="lg" className="min-w-[200px]" asChild>
-              <a href="#b2b">Devenir Revendeur</a>
+            <Button variant="outline" size="lg" className="min-w-[220px] rounded-none py-4 border-soyuz text-soyuz" asChild>
+              <a href="#b2b">Partner Portal</a>
             </Button>
           </motion.div>
         </div>
@@ -74,10 +74,10 @@ export default function HomePage() {
       </section>
 
       {/* 2. BANNIERE SCROLLANTE (README Step 3.1.2) */}
-      <div className="bg-soyuz py-6 overflow-hidden border-y border-white/10 relative z-20">
+      <div className="bg-soyuz py-4 overflow-hidden border-y border-white/5 relative z-20 shadow-[0_0_30px_rgba(0,229,255,0.2)]">
         <div className="ticker-track">
           {[...Array(12)].map((_, i) => (
-            <span key={i} className="mx-8 text-xl sm:text-2xl font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">
+            <span key={i} className="mx-12 text-sm sm:text-base font-black uppercase tracking-[0.4em] text-black italic whitespace-nowrap">
               {tickerText}
             </span>
           ))}

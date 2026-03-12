@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ShoppingBag, User } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function Header() {
@@ -54,14 +54,42 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Icons */}
-          <div className="flex items-center gap-4">
+          {/* Icons & Selectors */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Language Selector (Desktop) */}
+            <div className="hidden lg:flex items-center gap-1 group relative">
+              <button className="text-[10px] text-muted font-bold tracking-widest uppercase hover:text-soyuz flex items-center gap-1">
+                EN <ChevronDown size={10} />
+              </button>
+              <div className="absolute top-full right-0 mt-2 w-32 bg-carbon-surface border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-2 z-50">
+                {['EN', 'FR', 'ES', 'ZH', 'DE', 'RU'].map((l) => (
+                  <button key={l} className="block w-full text-left px-2 py-1 text-[10px] text-muted hover:text-white uppercase font-bold tracking-widest">
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Currency Selector (Desktop) */}
+            <div className="hidden lg:flex items-center gap-1 group relative">
+              <button className="text-[10px] text-muted font-bold tracking-widest uppercase hover:text-soyuz flex items-center gap-1">
+                CAD <ChevronDown size={10} />
+              </button>
+              <div className="absolute top-full right-0 mt-2 w-24 bg-carbon-surface border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-2 z-50">
+                {['CAD', 'USD'].map((c) => (
+                  <button key={c} className="block w-full text-left px-2 py-1 text-[10px] text-muted hover:text-white uppercase font-bold tracking-widest">
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button className="text-white hover:text-soyuz transition-colors p-2">
-              <ShoppingBag size={24} />
+              <ShoppingBag size={20} />
               <span className="sr-only">Cart</span>
             </button>
             <Link href={user ? "/account" : "/login"} className="text-white hover:text-soyuz transition-colors p-2">
-              <User size={24} />
+              <User size={20} />
               <span className="sr-only">Account</span>
             </Link>
             {/* Mobile menu button */}

@@ -8,11 +8,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        carbon: '#0D0D0D',
-        'carbon-surface': '#1A1A1A',
-        soyuz: '#CC0000',
-        muted: '#888888',
-        background: '#0D0D0D',
+        carbon: '#000000',
+        'carbon-surface': '#121212',
+        soyuz: '#00E5FF', // Mother site Cyan Glow
+        muted: '#CCCCCC',
+        background: '#000000',
         foreground: '#FFFFFF',
       },
       animation: {

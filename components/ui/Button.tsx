@@ -1,8 +1,8 @@
 import { ButtonHTMLAttributes } from 'react';
+import { Slot } from '@radix-ui/react-slot';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// Utility for tailwind classes
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -11,6 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'accent' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
+  asChild?: boolean;
 }
 
 export function Button({ 
@@ -18,8 +19,11 @@ export function Button({
   variant = 'primary', 
   size = 'md', 
   fullWidth = false,
+  asChild = false,
   ...props 
 }: ButtonProps) {
+  const Comp = asChild ? Slot : 'button';
+
   const variants = {
     primary: 'bg-white text-black hover:bg-gray-200',
     accent: 'bg-soyuz text-white hover:opacity-90',
@@ -34,7 +38,7 @@ export function Button({
   };
 
   return (
-    <button
+    <Comp
       className={cn(
         'font-bold uppercase tracking-widest transition-all duration-200 inline-block text-center disabled:opacity-50 disabled:cursor-not-allowed',
         variants[variant],
@@ -42,7 +46,7 @@ export function Button({
         fullWidth ? 'w-full' : '',
         className
       )}
-      {...props}
+      {...(props as any)}
     />
   );
 }

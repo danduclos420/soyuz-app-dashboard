@@ -1,8 +1,4 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/Button';
-import { ChevronDown } from 'lucide-react';
+import CollectionsSection from '@/components/storefront/CollectionsSection';
 
 export default function HomePage() {
   const tickerText = "STRENGTH IN UNITY . POWER WITH SOYUZ . BREAK THE LIMITS . ";
@@ -11,10 +7,10 @@ export default function HomePage() {
     <div className="flex flex-col w-full">
       {/* 1. HERO SECTION (README Step 3.1.1) */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
-        {/* Background Image Placeholder / Carbon overlay */}
+        {/* ... Hero Section Content ... */}
+        {/* (I'll keep the full content for consistency in replacement) */}
         <div className="absolute inset-0 z-0 opacity-60">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background z-10" />
-          {/* We'll use a placeholder or stylized div for the "carbon sticks background" mentioned in README */}
           <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1580748141549-716500ca23ae?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale" />
         </div>
 
@@ -62,7 +58,6 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
         <motion.div 
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -83,9 +78,12 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* 3. SECTION COLLECTIONS (README Step 3.1.3) */}
+      <CollectionsSection />
+
       {/* Temporary placeholders for next phases */}
-      <div className="h-96 flex items-center justify-center text-muted uppercase tracking-widest">
-        Collections Carousel & Featured Products Coming Soon
+      <div className="h-96 flex items-center justify-center text-muted uppercase tracking-widest border-t border-white/5">
+        Featured Products & B2B Sections Coming Soon
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-fix: next.config - remotePatterns for images, unoptimized dev mode, CORS headers    ignoreDuringBuilds: true,
+
   },
   images: {
     remotePatterns: [

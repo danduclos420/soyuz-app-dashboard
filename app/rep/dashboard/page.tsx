@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   ChevronRight,
   BarChart3,
-  Calendar
+  Calendar,
+  ShoppingBag
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';

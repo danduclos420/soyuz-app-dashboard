@@ -1,79 +1,94 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Youtube, Send } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-background border-t border-white/5 pt-16 pb-8">
+    <footer className="bg-background border-t border-white/5 pt-24 pb-12 overflow-hidden relative">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-soyuz to-transparent opacity-20" />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
           {/* Brand */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <Image 
               src="/assets/logo-long.png" 
               alt="SOYUZ BC" 
-              width={140} 
-              height={35} 
-              className="h-8 w-auto grayscale brightness-200"
+              width={160} 
+              height={40} 
+              className="h-10 w-auto object-contain brightness-200"
             />
-            <p className="text-muted text-sm leading-relaxed">
-              Professional hockey sticks designed for elite athletes. SOYUZ BC North America.
+            <p className="text-muted text-[11px] uppercase tracking-widest leading-loose font-medium max-w-xs">
+              Elite performance sticks for the next generation of hockey players. Engineer your shot with SOYUZ BC technology.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-muted hover:text-white transition-colors"><Facebook size={20} /></a>
-              <a href="#" className="text-muted hover:text-white transition-colors"><Instagram size={20} /></a>
-              <a href="#" className="text-muted hover:text-white transition-colors"><Twitter size={20} /></a>
+            <div className="flex space-x-6">
+              {[
+                { icon: <Facebook size={18} />, href: '#' },
+                { icon: <Instagram size={18} />, href: '#' },
+                { icon: <Twitter size={18} />, href: '#' },
+                { icon: <Youtube size={18} />, href: '#' },
+              ].map((social, i) => (
+                <a key={i} href={social.href} className="text-muted hover:text-soyuz transition-all duration-300 transform hover:scale-110">
+                  {social.icon}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Shop */}
+          {/* Navigation */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Shop</h4>
+            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8 italic">Catalogue</h4>
             <ul className="space-y-4">
-              <li><Link href="/products" className="text-muted hover:text-white text-sm transition-colors">All Products</Link></li>
-              <li><Link href="/#collections" className="text-muted hover:text-white text-sm transition-colors">Collections</Link></li>
-              <li><Link href="/rep/register" className="text-muted hover:text-white text-sm transition-colors">Affiliate Program</Link></li>
-              <li><Link href="#b2b" className="text-muted hover:text-white text-sm transition-colors">B2B Portal</Link></li>
+              {['All Products', 'Flex Guide', 'B2B Portal', 'Affiliate Rewards'].map((item) => (
+                <li key={item}>
+                  <Link href="#" className="text-muted hover:text-white text-[11px] uppercase tracking-widest font-bold transition-all hover:translate-x-1 inline-block">
+                    {item}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Legal / Company */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Support</h4>
+            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8 italic">Company</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-muted hover:text-white text-sm transition-colors">Contact Us</Link></li>
-              <li><Link href="#" className="text-muted hover:text-white text-sm transition-colors">Shipping Policy</Link></li>
-              <li><Link href="#" className="text-muted hover:text-white text-sm transition-colors">Returns & Refunds</Link></li>
-              <li><Link href="#" className="text-muted hover:text-white text-sm transition-colors">FAQ</Link></li>
+              {['About Heritage', 'Privacy Protocol', 'Shipping Intel', 'Returns & FAQ'].map((item) => (
+                <li key={item}>
+                  <Link href="#" className="text-muted hover:text-white text-[11px] uppercase tracking-widest font-bold transition-all hover:translate-x-1 inline-block">
+                    {item}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* Newsletter / The List */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Newsletter</h4>
-            <p className="text-muted text-sm mb-4">Subscribe to receive updates and exclusive offers.</p>
-            <form className="flex gap-2">
+            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8 italic">The Insider List</h4>
+            <p className="text-muted text-[11px] uppercase tracking-widest mb-6 font-medium">Join the elite list for secure drops and performance updates.</p>
+            <form className="relative group">
               <input 
                 type="email" 
-                placeholder="Email address" 
-                className="bg-carbon-surface border border-white/10 px-4 py-2 text-sm text-white focus:outline-none focus:border-soyuz w-full"
+                placeholder="SECURE EMAIL ADDRESS" 
+                className="bg-carbon-surface border border-white/5 px-6 py-4 text-[10px] text-white focus:outline-none focus:border-soyuz w-full uppercase tracking-tighter transition-all font-black placeholder:text-white/20"
               />
-              <button className="bg-white text-black px-4 py-2 text-sm font-bold uppercase hover:bg-gray-200 transition-colors">
-                Join
+              <button className="absolute right-4 top-1/2 -translate-y-1/2 text-muted group-hover:text-soyuz transition-colors">
+                <Send size={16} />
               </button>
             </form>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-muted text-xs uppercase tracking-widest">
-            © {currentYear} SOYUZ BC NORTH AMERICA. ALL RIGHTS RESERVED.
+        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-muted text-[9px] uppercase tracking-[0.4em] font-black">
+            © {currentYear} SOYUZ BC NORTH AMERICA. ENGINEERED FOR PERFORMANCE.
           </p>
-          <div className="flex gap-6">
-            <Link href="#" className="text-muted hover:text-white text-[10px] uppercase tracking-widest transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-muted hover:text-white text-[10px] uppercase tracking-widest transition-colors">Terms of Service</Link>
+          <div className="flex gap-8">
+            <Link href="#" className="text-muted hover:text-white text-[9px] uppercase tracking-widest font-black transition-colors">System Protocol</Link>
+            <Link href="#" className="text-muted hover:text-white text-[9px] uppercase tracking-widest font-black transition-colors">Access Controls</Link>
           </div>
         </div>
       </div>

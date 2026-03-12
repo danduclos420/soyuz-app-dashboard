@@ -2,16 +2,15 @@ import { supabaseAdmin } from './supabase-admin';
 
 function getErplainConfig() {
   const key = process.env.ERPLAIN_API_KEY;
-  const subdomain = process.env.ERPLAIN_SUBDOMAIN;
+  const url = process.env.ERPLAIN_API_URL || 'https://app.erplain.net/public-api/graphql/endpoint';
   
-  if (!key || !subdomain) {
-    throw new Error('Missing Erplain API configuration (ERPLAIN_API_KEY or ERPLAIN_SUBDOMAIN)');
+  if (!key) {
+    throw new Error('Missing Erplain API Key (ERPLAIN_API_KEY)');
   }
   
   return {
     key,
-    subdomain,
-    url: `https://${subdomain}.erplain.app/api/v1`,
+    url,
     headers: {
       'Authorization': `Bearer ${key}`,
       'Accept': 'application/json',
@@ -20,35 +19,56 @@ function getErplainConfig() {
   };
 }
 
-export async function fetchFromErplain(endpoint: string) {
-  const { url: baseUrl, headers } = getErplainConfig();
-  const url = `${baseUrl}/${endpoint}`;
-  console.log(`Fetching from Erplain: ${url}`);
-  try {
-    const response = await fetch(url, { headers });
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Erplain API error (${response.status}):`, errorData);
-      throw new Error(`Erplain API error: ${response.status} ${response.statusText}`);
-    }
-    return response.json();
-  } catch (err: any) {
-    console.error(`Fetch failed for ${url}:`, err.message);
-    throw err;
-  }
-}
-
 export async function syncErplainProducts() {
   try {
-    const { url: apiURL } = getErplainConfig();
-    console.log('Starting Erplain sync... URL:', apiURL);
+    const { url, headers } = getErplainConfig();
+    console.log('Starting Erplain GraphQL sync... URL:', url);
     
-    // 1. Fetch products from Erplain
-    const data = await fetchFromErplain('products');
-    const products = data.products || [];
+    // GraphQL Query as specified in README
+    const query = `
+      query {
+        products {
+          id
+          name
+          reference
+          description
+          category {
+            name
+          }
+          price_retail
+          price_b2b
+          stock_on_hand
+          images {
+            url
+          }
+          variants {
+            id
+            name
+            sku
+            price_retail
+            price_b2b
+            stock_on_hand
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Erplain API error (${response.status}): ${errorText}`);
+    }
+
+    const { data } = await response.json();
+    const products = data?.products || [];
+    console.log(`Fetched ${products.length} products from Erplain.`);
 
     for (const epProduct of products) {
-      console.log(`Syncing product: ${epProduct.name}`);
       const slug = epProduct.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
       
       const { data: savedProduct, error: pError } = await supabaseAdmin
@@ -58,7 +78,8 @@ export async function syncErplainProducts() {
           name: epProduct.name,
           slug,
           description: epProduct.description || '',
-          category: epProduct.category || 'Hockey Sticks',
+          category: epProduct.category?.name || 'Hockey Sticks',
+          images: epProduct.images?.map((img: any) => img.url) || [],
           is_active: true,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'erplain_id' })
@@ -70,7 +91,7 @@ export async function syncErplainProducts() {
         continue;
       }
 
-      // 3. Sync Variants
+      // Sync Variants
       if (epProduct.variants && Array.isArray(epProduct.variants)) {
         for (const epVariant of epProduct.variants) {
           const nameParts = epVariant.name.split(' - ');
@@ -85,7 +106,7 @@ export async function syncErplainProducts() {
             .upsert({
               product_id: savedProduct.id,
               erplain_variant_id: epVariant.id.toString(),
-              sku: epVariant.sku || `EP-${epVariant.id}`,
+              sku: epVariant.sku || epVariant.reference || `EP-${epVariant.id}`,
               name: epVariant.name,
               flex,
               side,

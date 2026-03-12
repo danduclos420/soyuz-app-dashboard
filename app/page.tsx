@@ -1,125 +1,92 @@
-import Navbar from '@/components/Navbar';
+'use client';
+
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/Button';
+import { ChevronDown } from 'lucide-react';
 
 export default function HomePage() {
-  const tickerText = "STRENGTH IN UNITY, POWER WITH SOYUZ · BREAK THE LIMITS · ";
+  const tickerText = "STRENGTH IN UNITY . POWER WITH SOYUZ . BREAK THE LIMITS . ";
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a]">
-      <Navbar />
-
-      {/* HERO */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20"
-        style={{
-          backgroundColor: '#0D0D0D',
-          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px)',
-        }}>
-        <p className="text-gray-400 uppercase tracking-[0.4em] text-sm mb-6">WELCOME TO SOYUZ STORE</p>
-        <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-widest text-white mb-4 leading-tight">
-          STRENGTH IN UNITY
-        </h1>
-        <p className="text-2xl md:text-3xl uppercase tracking-wider text-gray-300 mb-12 italic font-light">
-          Power with SOYUZ
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <a href="#collections" className="bg-white text-black font-bold uppercase tracking-widest px-10 py-4 hover:bg-gray-100 transition-all duration-200">
-            SHOP ALL STICKS
-          </a>
-          <a href="#b2b" className="border border-white text-white font-bold uppercase tracking-widest px-10 py-4 hover:bg-white hover:text-black transition-all duration-200">
-            PORTAIL B2B
-          </a>
+    <div className="flex flex-col w-full">
+      {/* 1. HERO SECTION (README Step 3.1.1) */}
+      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
+        {/* Background Image Placeholder / Carbon overlay */}
+        <div className="absolute inset-0 z-0 opacity-60">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background z-10" />
+          {/* We'll use a placeholder or stylized div for the "carbon sticks background" mentioned in README */}
+          <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1580748141549-716500ca23ae?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale" />
         </div>
+
+        <div className="relative z-20 text-center px-4 max-w-5xl mx-auto mt-20">
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-soyuz font-bold uppercase tracking-[0.5em] text-xs sm:text-sm mb-6"
+          >
+            Professional Hockey Sticks
+          </motion.p>
+          
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white mb-4 leading-none"
+          >
+            Designed for <br />
+            <span className="text-white outline-text">Elite Athletes</span>
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="text-lg md:text-xl uppercase tracking-widest text-muted mb-12 max-w-2xl mx-auto"
+          >
+            SOYUZ BC NORTH AMERICA — THE GOLDEN SHOT
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6"
+          >
+            <Button variant="primary" size="lg" className="min-w-[200px]" asChild>
+              <a href="/products">Shop All</a>
+            </Button>
+            <Button variant="outline" size="lg" className="min-w-[200px]" asChild>
+              <a href="#b2b">Devenir Revendeur</a>
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div 
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-white opacity-50"
+        >
+          <ChevronDown size={32} />
+        </motion.div>
       </section>
 
-      {/* TICKER */}
-      <div className="bg-white text-black py-4 overflow-hidden">
-        <div className="flex w-max" style={{ animation: 'ticker 25s linear infinite' }}>
-          {[...Array(10)].map((_, i) => (
-            <span key={i} className="mx-10 text-sm font-bold uppercase tracking-widest whitespace-nowrap">
+      {/* 2. BANNIERE SCROLLANTE (README Step 3.1.2) */}
+      <div className="bg-soyuz py-6 overflow-hidden border-y border-white/10 relative z-20">
+        <div className="ticker-track">
+          {[...Array(12)].map((_, i) => (
+            <span key={i} className="mx-8 text-xl sm:text-2xl font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">
               {tickerText}
             </span>
           ))}
         </div>
       </div>
 
-      {/* COLLECTIONS */}
-      <section id="collections" className="py-24 px-6 bg-[#0a0a0a]">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold uppercase tracking-widest text-white text-center mb-16">
-            OUR COLLECTIONS
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { name: 'SOYUZ PRO', desc: 'Elite performance stick for pro players', price: 'CAD $299' },
-              { name: 'SOYUZ ELITE', desc: 'Premium carbon fiber construction', price: 'CAD $249' },
-              { name: 'SOYUZ CORE', desc: 'The perfect balance of power and control', price: 'CAD $199' },
-            ].map((product) => (
-              <div key={product.name} className="bg-[#0D0D0D] border border-white/10 p-8 hover:border-white/30 transition-all duration-300 group">
-                <div className="bg-[#1a1a1a] h-48 mb-6 flex items-center justify-center">
-                  <span className="text-gray-600 uppercase tracking-widest text-xs">PRODUCT IMAGE</span>
-                </div>
-                <h3 className="text-white font-bold uppercase tracking-widest text-lg mb-2">{product.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{product.desc}</p>
-                <p className="text-white font-bold mb-6">{product.price}</p>
-                <button className="w-full bg-white text-black font-bold uppercase tracking-widest py-3 hover:bg-gray-100 transition-all duration-200 text-sm">
-                  ADD TO CART
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* B2B SECTION */}
-      <section id="b2b" style={{
-        backgroundColor: '#0D0D0D',
-        backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px)',
-      }} className="py-24 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-500 uppercase tracking-[0.4em] text-xs mb-4">PROGRAMME REVENDEUR</p>
-          <h2 className="text-4xl font-bold uppercase tracking-widest text-white mb-6">
-            DEVENEZ REVENDEUR SOYUZ BC
-          </h2>
-          <p className="text-gray-400 text-lg mb-12 max-w-2xl mx-auto">
-            Accédez à nos prix de gros exclusifs et commandez directement via notre portail B2B professionnel.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {[
-              { icon: '◈', label: 'Prix exclusifs revendeurs' },
-              { icon: '◉', label: 'Inventaire en temps réel' },
-              { icon: '◎', label: 'Commandes simplifiées' },
-              { icon: '◆', label: 'Support dédié' },
-            ].map((item) => (
-              <div key={item.label} className="border border-white/10 p-6 text-center">
-                <div className="text-2xl text-white mb-3">{item.icon}</div>
-                <p className="text-gray-400 text-sm uppercase tracking-wider">{item.label}</p>
-              </div>
-            ))}
-          </div>
-          <a
-            href="https://soyuz-hockey.erplain.app/b2b/login"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-white text-black font-bold uppercase tracking-widest px-12 py-5 hover:bg-gray-100 transition-all duration-200 text-lg"
-          >
-            ACCÉDER AU PORTAIL B2B →
-          </a>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-black border-t border-white/10 py-12 px-6 text-center">
-        <p className="text-white font-bold uppercase tracking-widest text-lg mb-2">SOYUZ BC NORTH AMERICA</p>
-        <p className="text-gray-600 text-sm uppercase tracking-widest">Official Partner of the KHL</p>
-        <p className="text-gray-700 text-xs mt-6">© 2026 SOYUZ BC North America. All rights reserved.</p>
-      </footer>
-
-      {/* TICKER KEYFRAMES */}
-      <style>{`
-        @keyframes ticker {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
-    </main>
+      {/* Temporary placeholders for next phases */}
+      <div className="h-96 flex items-center justify-center text-muted uppercase tracking-widest">
+        Collections Carousel & Featured Products Coming Soon
+      </div>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import BackButton from '@/components/BackButton';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
@@ -51,6 +52,7 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white p-8">
+      <BackButton />
       <div className="max-w-2xl mx-auto pt-10">
         <div className="flex justify-between items-center mb-12">
           <h1 className="text-3xl font-bold uppercase tracking-widest">ACCOUNT SETTINGS</h1>

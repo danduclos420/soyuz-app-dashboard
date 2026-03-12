@@ -36,6 +36,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
+      <BackButton />
       <div className="w-full max-w-md bg-[#0D0D0D] border border-white/10 p-10">
         <div className="text-center mb-10 flex flex-col items-center">
           <Image 

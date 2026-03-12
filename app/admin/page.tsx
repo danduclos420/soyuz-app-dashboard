@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import BackButton from '@/components/BackButton';
 
 export default async function AdminPage() {
   const { data: orders } = await supabaseAdmin
@@ -16,6 +17,7 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white p-8">
+      <BackButton />
       <h1 className="text-3xl font-bold uppercase tracking-widest mb-12">ADMIN DASHBOARD</h1>
 
       {/* Stats */}

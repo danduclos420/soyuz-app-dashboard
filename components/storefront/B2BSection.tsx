@@ -28,33 +28,33 @@ export default function B2BSection() {
           <div className="absolute inset-0 carbon-texture opacity-5 pointer-events-none" />
           
           <div className="relative z-10">
-            <h2 className="text-soyuz font-bold uppercase tracking-[0.3em] text-xs mb-6">Partnership</h2>
-            <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-8">
-              Portail Revendeurs <br />
-              <span className="text-white opacity-50">B2B Professionnel</span>
+            <h2 className="text-soyuz font-black uppercase tracking-[0.4em] text-[10px] mb-6">Partnership</h2>
+            <h3 className="text-4xl md:text-7xl font-black uppercase tracking-tighter text-white mb-8 italic leading-none">
+              Portail <span className="outline-text-cyan">Revendeurs</span> <br />
+              <span className="text-white opacity-40">B2B Elite</span>
             </h3>
-            <p className="text-muted text-lg max-w-2xl mx-auto mb-16">
+            <p className="text-muted text-lg max-w-2xl mx-auto mb-16 font-medium">
               Rejoignez l'élite. Accédez à notre inventaire en temps réel, gérez vos commandes groupées et bénéficiez de marges compétitives avec le programme partenaire SOYUZ BC North America.
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
               {benefits.map((benefit, i) => (
-                <div key={i} className="flex flex-col items-center gap-4">
-                  <div className="p-4 bg-background border border-white/5 rounded-2xl group-hover:border-soyuz/50 transition-colors">
+                <div key={i} className="flex flex-col items-center gap-4 group">
+                  <div className="p-5 bg-background border border-white/5 rounded-2xl group-hover:border-soyuz transition-all group-hover:shadow-[0_0_20px_rgba(0,229,255,0.1)]">
                     {benefit.icon}
                   </div>
-                  <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">{benefit.label}</p>
+                  <p className="text-[10px] text-white/60 font-black uppercase tracking-widest">{benefit.label}</p>
                 </div>
               ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <Button variant="accent" size="lg" className="min-w-[250px]" asChild>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button variant="primary" size="lg" className="min-w-[280px] rounded-none py-4" asChild>
                 <a href="https://soyuz-hockey.erplain.app/b2b/login" target="_blank" rel="noopener noreferrer">
                   Accéder au Portail
                 </a>
               </Button>
-              <Button variant="outline" size="lg" className="min-w-[250px]" asChild>
+              <Button variant="outline" size="lg" className="min-w-[280px] rounded-none py-4 border-white/20 text-white" asChild>
                 <a href="/rep/register">Devenir Partenaire</a>
               </Button>
             </div>

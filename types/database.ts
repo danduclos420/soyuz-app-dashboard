@@ -6,7 +6,10 @@ export type OrderType = 'retail' | 'b2b';
 export interface Profile {
   id: string;
   email: string;
-  full_name?: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  birth_date?: string;
   role: UserRole;
   status: UserStatus;
   company_name?: string;

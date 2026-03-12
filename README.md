@@ -182,3 +182,98 @@ git merge feature/storefront
 ---
 
 *Dernière mise à jour: 2026 — SOYUZ BC North America*
+
+---
+
+## Section B2B — Spec Storefront
+
+### Objectif
+Ajouter une section visible sur le storefront public qui invite les revendeurs/boutiques à s'inscrire au programme B2B.
+Lorsqu'un visiteur clique sur le CTA, il est redirigé vers le portail d'inscription Erplain.
+
+### Comportement attendu
+- **Lien de redirection :** `https://soyuz-hockey.erplain.app/b2b/login`
+- **Cible :** `_blank` (ouvre dans un nouvel onglet)
+- **Placement :** Section dédiée sur la page d'accueil, après les collections
+
+### Design de la section
+```
+[FOND CARBONE FONCÉ / GRADIENT NOIR]
+
+TITLE:  "DEVENEZ REVENDEUR SOYUZ BC"
+SUBTITLE: "Accédez à nos prix de gros et commandez directement via notre portail B2B."
+
+[LISTE D'AVANTAGES]
+✔ Prix exclusifs revendeurs
+✔ Inventaire en temps réel
+✔ Commandes simplifiées
+✔ Support dédié
+
+[BOUTON CTA] "ACCEDER AU PORTAIL B2B" → https://soyuz-hockey.erplain.app/b2b/login
+```
+
+### Code composant (Next.js / Tailwind)
+```tsx
+// components/storefront/B2BSection.tsx
+export default function B2BSection() {
+  return (
+    <section className="bg-[#0D0D0D] py-20 px-6">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="text-3xl font-bold text-white uppercase tracking-widest mb-4">
+          Devenez Revendeur SOYUZ BC
+        </h2>
+        <p className="text-gray-400 text-lg mb-8">
+          Accédez à nos prix de gros et commandez directement via notre portail B2B.
+        </p>
+        <ul className="text-left inline-block text-gray-300 mb-10 space-y-2">
+          <li>✔ Prix exclusifs revendeurs</li>
+          <li>✔ Inventaire en temps réel</li>
+          <li>✔ Commandes simplifiées</li>
+          <li>✔ Support dédié</li>
+        </ul>
+        <div>
+          <a
+            href="https://soyuz-hockey.erplain.app/b2b/login"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-white text-black font-bold uppercase tracking-widest px-10 py-4 hover:bg-gray-200 transition"
+          >
+            Accéder au Portail B2B
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+### Intégration dans la page d'accueil
+```tsx
+// app/page.tsx
+import B2BSection from "@/components/storefront/B2BSection";
+
+export default function HomePage() {
+  return (
+    <main>
+      <HeroSection />
+      <CollectionsSection />
+      <B2BSection />  {/* <- Ajouter ici */}
+      <Footer />
+    </main>
+  );
+}
+```
+
+### Navigation (optionnel)
+Ajouter un lien "B2B" dans la barre de navigation principale qui fait un scroll vers la section ou redirige directement vers le portail.
+
+```tsx
+<a
+  href="https://soyuz-hockey.erplain.app/b2b/login"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="nav-link"
+>
+  B2B
+</a>
+```

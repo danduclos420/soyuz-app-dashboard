@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
+    const addr = session.shipping_details?.address;
+    const shippingAddress = addr ? (addr as unknown as Record<string, string>) : {};
 
     await supabaseAdmin.from('orders').insert({
       customer_email: session.customer_email || '',
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
       total_amount: (session.amount_total || 0) / 100,
       stripe_session_id: session.id,
       affiliate_code: session.metadata?.affiliate_code || null,
-      shipping_address: session.shipping_details?.address as Record<string, string> || {},
+      shipping_address: shippingAddress,
     });
   }
 

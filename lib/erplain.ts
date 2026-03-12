@@ -11,16 +11,25 @@ const headers = {
 };
 
 export async function fetchFromErplain(endpoint: string) {
-  const response = await fetch(`${ERPLAIN_API_URL}/${endpoint}`, { headers });
-  if (!response.ok) {
-    throw new Error(`Erplain API error: ${response.statusText}`);
+  const url = `${ERPLAIN_API_URL}/${endpoint}`;
+  console.log(`Fetching from Erplain: ${url}`);
+  try {
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error(`Erplain API error (${response.status}):`, errorData);
+      throw new Error(`Erplain API error: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  } catch (err: any) {
+    console.error(`Fetch failed for ${url}:`, err.message);
+    throw err;
   }
-  return response.json();
 }
 
 export async function syncErplainProducts() {
   try {
-    console.log('Starting Erplain sync...');
+    console.log('Starting Erplain sync... URL:', ERPLAIN_API_URL);
     
     // 1. Fetch products from Erplain
     // Note: Erplain API pagination might be needed for large catalogs
@@ -82,8 +91,8 @@ export async function syncErplainProducts() {
 
     console.log('Erplain sync completed successfully.');
     return { success: true };
-  } catch (error) {
-    console.error('Erplain sync failed:', error);
-    return { success: false, error };
+  } catch (error: any) {
+    console.error('Erplain sync failed:', error.message || error);
+    return { success: false, error: error.message || String(error) };
   }
 }

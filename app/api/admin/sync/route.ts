@@ -35,13 +35,17 @@ export async function POST() {
   }
 
   try {
+    console.log('API: Starting inventory sync...');
     const result = await syncErplainProducts();
     if (result.success) {
+      console.log('API: Sync completed successfully');
       return NextResponse.json({ message: 'Sync completed successfully' });
     } else {
+      console.error('API: Sync failed with result:', result.error);
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('API: Sync route exception:', error.message || error);
+    return NextResponse.json({ error: error.message || String(error) }, { status: 500 });
   }
 }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +16,10 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    // Map username to email if necessary
+    // For adminprotos, we use the initialized email
+    const email = username === 'adminprotos' ? 'admin@soyuzbc.com' : username;
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -47,14 +51,14 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-gray-400 text-xs uppercase tracking-widest mb-2">Email Address</label>
+            <label className="block text-gray-400 text-xs uppercase tracking-widest mb-2">Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors"
-              placeholder="admin@soyuzbc.com"
+              placeholder="adminprotos"
             />
           </div>
 

@@ -3,15 +3,17 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+fix: next.config - remotePatterns for images, unoptimized dev mode, CORS headers    ignoreDuringBuilds: true,
   },
   images: {
-    domains: [
-      'ppbboujuyrnumzxelkmm.supabase.co',
-      'images.unsplash.com',
-      'soyuzhockey.com',
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'soyuzhockey.com' },
+      { protocol: 'https', hostname: 'cdn.shopify.com' },
     ],
+    // Also allow local dev
+    unoptimized: process.env.NODE_ENV === 'development',
   },
   async headers() {
     return [

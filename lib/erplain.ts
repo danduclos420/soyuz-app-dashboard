@@ -1,17 +1,28 @@
 import { supabaseAdmin } from './supabase-admin';
 
-const ERPLAIN_API_KEY = process.env.ERPLAIN_API_KEY!;
-const ERPLAIN_SUBDOMAIN = process.env.ERPLAIN_SUBDOMAIN!;
-const ERPLAIN_API_URL = `https://${ERPLAIN_SUBDOMAIN}.erplain.app/api/v1`;
-
-const headers = {
-  'Authorization': `Bearer ${ERPLAIN_API_KEY}`,
-  'Accept': 'application/json',
-  'Content-Type': 'application/json',
-};
+function getErplainConfig() {
+  const key = process.env.ERPLAIN_API_KEY;
+  const subdomain = process.env.ERPLAIN_SUBDOMAIN;
+  
+  if (!key || !subdomain) {
+    throw new Error('Missing Erplain API configuration (ERPLAIN_API_KEY or ERPLAIN_SUBDOMAIN)');
+  }
+  
+  return {
+    key,
+    subdomain,
+    url: `https://${subdomain}.erplain.app/api/v1`,
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  };
+}
 
 export async function fetchFromErplain(endpoint: string) {
-  const url = `${ERPLAIN_API_URL}/${endpoint}`;
+  const { url: baseUrl, headers } = getErplainConfig();
+  const url = `${baseUrl}/${endpoint}`;
   console.log(`Fetching from Erplain: ${url}`);
   try {
     const response = await fetch(url, { headers });
@@ -29,15 +40,15 @@ export async function fetchFromErplain(endpoint: string) {
 
 export async function syncErplainProducts() {
   try {
-    console.log('Starting Erplain sync... URL:', ERPLAIN_API_URL);
+    const { url: apiURL } = getErplainConfig();
+    console.log('Starting Erplain sync... URL:', apiURL);
     
     // 1. Fetch products from Erplain
-    // Note: Erplain API pagination might be needed for large catalogs
     const data = await fetchFromErplain('products');
     const products = data.products || [];
 
     for (const epProduct of products) {
-      // 2. Map Erplain Product to Supabase Product
+      console.log(`Syncing product: ${epProduct.name}`);
       const slug = epProduct.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
       
       const { data: savedProduct, error: pError } = await supabaseAdmin
@@ -46,7 +57,7 @@ export async function syncErplainProducts() {
           erplain_id: epProduct.id.toString(),
           name: epProduct.name,
           slug,
-          description: epProduct.description,
+          description: epProduct.description || '',
           category: epProduct.category || 'Hockey Sticks',
           is_active: true,
           updated_at: new Date().toISOString(),
@@ -55,36 +66,39 @@ export async function syncErplainProducts() {
         .single();
 
       if (pError) {
-        console.error(`Error syncing product ${epProduct.name}:`, pError);
+        console.error(`Error syncing product ${epProduct.name}:`, pError.message);
         continue;
       }
 
-      // 3. Fetch variants for this product
-      // Erplain usually returns variants within the product call or requires a separate fetch
-      if (epProduct.variants) {
+      // 3. Sync Variants
+      if (epProduct.variants && Array.isArray(epProduct.variants)) {
         for (const epVariant of epProduct.variants) {
-          // Map side, flex, lie if possible from variant name or attributes
-          // Example: "SOYUZ BULL - 85 - LEFT"
           const nameParts = epVariant.name.split(' - ');
-          const flex = nameParts.find((p: string) => /\d+/.test(p));
-          const side = epVariant.name.toLowerCase().includes('left') ? 'left' : 
-                       epVariant.name.toLowerCase().includes('right') ? 'right' : null;
+          const flex = nameParts.find((p: string) => /\d+/.test(p)) || null;
+          
+          let side: 'left' | 'right' | null = null;
+          if (epVariant.name.toLowerCase().includes('left')) side = 'left';
+          else if (epVariant.name.toLowerCase().includes('right')) side = 'right';
 
-          await supabaseAdmin
+          const { error: vError } = await supabaseAdmin
             .from('product_variants')
             .upsert({
               product_id: savedProduct.id,
               erplain_variant_id: epVariant.id.toString(),
-              sku: epVariant.sku,
+              sku: epVariant.sku || `EP-${epVariant.id}`,
               name: epVariant.name,
               flex,
               side,
-              price_retail: epVariant.price_retail || 0,
-              price_b2b: epVariant.price_b2b || null,
-              stock_qty: epVariant.stock_on_hand || 0,
+              price_retail: Number(epVariant.price_retail) || 0,
+              price_b2b: epVariant.price_b2b ? Number(epVariant.price_b2b) : null,
+              stock_qty: Math.max(0, Number(epVariant.stock_on_hand) || 0),
               is_active: true,
               updated_at: new Date().toISOString(),
             }, { onConflict: 'erplain_variant_id' });
+
+          if (vError) {
+            console.error(`Error syncing variant ${epVariant.name}:`, vError.message);
+          }
         }
       }
     }

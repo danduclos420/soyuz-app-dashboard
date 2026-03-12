@@ -1,16 +1,53 @@
-import { supabaseAdmin } from '@/lib/supabase-admin';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import BackButton from '@/components/BackButton';
 
-export default async function AdminPage() {
-  const { data: orders } = await supabaseAdmin
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(20);
+export default function AdminPage() {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [syncing, setSyncing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const { data: products } = await supabaseAdmin
-    .from('products')
-    .select('*, product_variants(*)');
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    const { data: oData } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    
+    const { data: pData } = await supabase
+      .from('products')
+      .select('*, product_variants(*)');
+
+    setOrders(oData || []);
+    setProducts(pData || []);
+    setLoading(false);
+  }
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch('/api/admin/sync', { method: 'POST' });
+      const data = await res.json();
+      if (data.error) alert(`Sync Error: ${data.error}`);
+      else {
+        alert('Sync completed successfully!');
+        fetchData();
+      }
+    } catch (err) {
+      alert('Sync failed. Check console.');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white italic">Loading Command Center...</div>;
 
   const totalRevenue = orders?.reduce((sum, o) => sum + o.total_amount, 0) || 0;
   const totalOrders = orders?.length || 0;
@@ -18,7 +55,16 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white p-8">
       <BackButton />
-      <h1 className="text-3xl font-bold uppercase tracking-widest mb-12">ADMIN DASHBOARD</h1>
+      <div className="flex justify-between items-center mb-12">
+        <h1 className="text-3xl font-bold uppercase tracking-widest">ADMIN DASHBOARD</h1>
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="bg-white text-black text-xs font-bold uppercase tracking-widest px-6 py-3 hover:bg-gray-200 transition-colors disabled:opacity-50"
+        >
+          {syncing ? 'SYNCING CATALOG...' : 'SYNC INVENTORY (ERPLAIN)'}
+        </button>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

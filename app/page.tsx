@@ -1,3 +1,9 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/Button';
+import { ChevronDown } from 'lucide-react';
+import CollectionsSection from '@/components/storefront/CollectionsSection';
 import FeaturedProductsSection from '@/components/storefront/FeaturedProductsSection';
 import AboutSection from '@/components/storefront/AboutSection';
 import B2BSection from '@/components/storefront/B2BSection';

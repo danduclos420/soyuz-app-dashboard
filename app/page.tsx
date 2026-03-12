@@ -1,17 +1,11 @@
+import Navbar from '@/components/Navbar';
+
 export default function HomePage() {
   const tickerText = "STRENGTH IN UNITY, POWER WITH SOYUZ · BREAK THE LIMITS · ";
 
   return (
     <main className="min-h-screen bg-[#0a0a0a]">
-      {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <span className="text-white font-bold text-xl tracking-widest uppercase">SOYUZ BC</span>
-        <div className="flex items-center gap-8">
-          <a href="#collections" className="text-white uppercase tracking-widest text-sm hover:text-gray-300 transition-colors">Products</a>
-          <a href="#b2b" className="text-white uppercase tracking-widest text-sm hover:text-gray-300 transition-colors">B2B</a>
-          <a href="#b2b" className="border border-white text-white font-bold uppercase tracking-widest text-sm px-6 py-2 hover:bg-white hover:text-black transition-all duration-200">Contact</a>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* HERO */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20"

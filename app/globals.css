@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --carbon: #0D0D0D;
+  --carbon-light: #1a1a1a;
+  --accent: #ffffff;
+  --muted: #6b7280;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Arial', sans-serif;
+}
+
+/* Carbon texture background */
+.carbon-bg {
+  background-color: #0D0D0D;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.015) 2px,
+      rgba(255,255,255,0.015) 4px
+    );
+}
+
+/* Ticker animation */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 25s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-white text-black font-bold uppercase tracking-widest px-8 py-3 hover:bg-gray-100 transition-all duration-200;
+}
+
+.btn-outline {
+  @apply border border-white text-white font-bold uppercase tracking-widest px-8 py-3 hover:bg-white hover:text-black transition-all duration-200;
+}
+
+/* Nav link */
+.nav-link {
+  @apply text-white uppercase tracking-widest text-sm hover:text-gray-300 transition-colors;
+}

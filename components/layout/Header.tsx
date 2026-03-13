@@ -220,35 +220,31 @@ export default function Header() {
               </button>
 
               {/* ACCOUNT ICON REDIRECT LOGIC */}
-              {user ? (
-                <div className="flex items-center gap-2">
-                  <Link 
-                    href={
-                      userProfile?.role === 'admin' ? '/admin' :
-                      userProfile?.role === 'rep' ? '/affiliate' :
-                      '/account'
-                    } 
-                    className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" 
-                    aria-label="Account"
-                  >
-                    <User size={18} />
-                  </Link>
-                  <button 
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      router.push('/');
-                    }}
-                    className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-soyuz transition-colors" 
-                    aria-label="Logout"
-                  >
-                    <LogOut size={16} />
-                    <span className="hidden lg:block text-[9px] font-black ml-1 uppercase">DÉCONNEXION</span>
-                  </button>
-                </div>
-              ) : (
-                <Link href="/login" className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" aria-label="Account">
-                  <User size={18} />
-                </Link>
+              <Link 
+                href={
+                  !user ? '/login' :
+                  userProfile?.role === 'admin' ? '/admin' :
+                  userProfile?.role === 'rep' ? '/affiliate' :
+                  '/account'
+                } 
+                className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" 
+                aria-label="Account"
+              >
+                <User size={18} />
+              </Link>
+
+              {user && (
+                <button 
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    router.push('/');
+                  }}
+                  className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-soyuz transition-colors" 
+                  aria-label="Logout"
+                >
+                  <LogOut size={16} />
+                  <span className="hidden lg:block text-[9px] font-black ml-1 uppercase">DÉCONNEXION</span>
+                </button>
               )}
 
               {/* CART */}

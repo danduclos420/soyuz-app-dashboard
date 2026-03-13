@@ -14,17 +14,19 @@ import {
   ShoppingBag,
   Zap,
   Share2,
-  Trophy
+  Trophy,
+  Target
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase-client';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
 import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function AffiliateDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [commissions, setCommissions] = useState<any[]>([]);
+  const [objectives, setObjectives] = useState<any[]>([]);
+  const [pointsConfig, setPointsConfig] = useState({ dollars_per_point: 1000 });
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -41,13 +43,50 @@ export default function AffiliateDashboard() {
           .single();
         setProfile(profileData);
 
-        // Fetch Commissions
+        // Fetch Commissions & total sales calculation
         const { data: comms } = await supabase
           .from('commissions')
-          .select('*, orders(total, affiliate_code)')
+          .select('*, orders(total)')
           .eq('affiliate_id', user.id)
           .order('created_at', { ascending: false });
         setCommissions(comms || []);
+
+        // Fetch Points Config
+        const { data: sData } = await supabase
+           .from('app_settings')
+           .select('*')
+           .eq('key', 'points_config')
+           .single();
+        if (sData?.value) setPointsConfig(sData.value);
+
+        // Fetch Targeted Objectives
+        const { data: objData } = await supabase
+           .from('affiliate_objectives')
+           .select('*')
+           .or(`is_global.eq.true,id.in.(${
+             // This is a bit complex for a single query if objective_assignments is large
+             // but we'll use a subquery or join if Supabase client allows easily.
+             // For now, let's fetch global + those where user is assigned.
+             'SELECT objective_id FROM objective_assignments WHERE affiliate_id = \'' + user.id + '\''
+           })`);
+        
+        // Simpler approach if subquery fails:
+        const { data: directObjs } = await supabase
+           .from('affiliate_objectives')
+           .select('*, objective_assignments!inner(affiliate_id)')
+           .eq('objective_assignments.affiliate_id', user.id);
+        
+        const { data: globalObjs } = await supabase
+           .from('affiliate_objectives')
+           .select('*')
+           .eq('is_global', true);
+
+        const merged = [...(globalObjs || [])];
+        directObjs?.forEach(dobj => {
+           if (!merged.find(m => m.id === dobj.id)) merged.push(dobj);
+        });
+        
+        setObjectives(merged.sort((a, b) => a.target_amount - b.target_amount));
       }
       setLoading(false);
     }
@@ -61,8 +100,14 @@ export default function AffiliateDashboard() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const totalSales = commissions.reduce((sum, c) => sum + (c.orders?.total || 0), 0);
   const totalCommissions = commissions.reduce((sum, c) => sum + (c.amount || 0), 0);
   const pendingCommissions = commissions.filter(c => c.status === 'pending').reduce((sum, c) => sum + (c.amount || 0), 0);
+
+  // Points Logic
+  const ptsRatio = pointsConfig.dollars_per_point || 1000;
+  const currentPoints = Math.floor(totalSales / ptsRatio);
+  const nextPointProgress = ((totalSales % ptsRatio) / ptsRatio) * 100;
 
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-8">
@@ -93,9 +138,9 @@ export default function AffiliateDashboard() {
       {/* 2. STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-20">
         {[
-          { label: 'REVENUS TOTAUX', value: `$${totalCommissions.toFixed(2)}`, icon: <DollarSign size={20} />, sub: 'Commissions totales' },
-          { label: 'EN ATTENTE', value: `$${pendingCommissions.toFixed(2)}`, icon: <Zap size={20} />, sub: 'Cycle en cours' },
-          { label: 'TAILLE DU RÉSEAU', value: commissions.length, icon: <Users size={20} />, sub: 'Référencements réussis' },
+          { label: 'VENTES TOTALES', value: `$${totalSales.toFixed(2)}`, icon: <TrendingUp size={20} />, sub: 'Volume généré' },
+          { label: 'REVENUS TOTAUX', value: `$${totalCommissions.toFixed(2)}`, icon: <DollarSign size={20} />, sub: 'Commissions gagnées' },
+          { label: 'POINTS DASHBOARD', value: currentPoints, icon: <Award size={20} />, sub: `${ptsRatio}$ = 1pt` },
           { label: 'STATUT ÉLITE', value: 'TIER PRO', icon: <Trophy size={20} />, sub: 'Top 5% performance' },
         ].map((stat, i) => (
           <motion.div 
@@ -117,6 +162,80 @@ export default function AffiliateDashboard() {
             </div>
           </motion.div>
         ))}
+      </div>
+
+      {/* 3. OBJECTIVES SECTION */}
+      <div className="mb-20 bg-[#0A0A0A] border border-white/5 p-12">
+        <div className="flex justify-between items-end mb-12">
+          <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">OBJECTIFS DE <span className="outline-text-white">VENTE</span></h3>
+          <p className="text-[9px] text-soyuz font-black uppercase tracking-[0.3em]">CADEAUX & RÉCOMPENSES</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Accumulation Bar */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-end">
+              <div className="space-y-1">
+                <p className="text-[10px] text-white font-black uppercase tracking-widest">PROCHAIN POINT DASHBOARD</p>
+                <p className="text-[9px] text-[#444444] font-bold italic">RÈGLE : 1 POINT PAR CHAQUE {ptsRatio}$ VENDU</p>
+              </div>
+              <p className="text-lg font-display italic text-soyuz">{nextPointProgress.toFixed(0)}%</p>
+            </div>
+            <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${nextPointProgress}%` }}
+                className="h-full bg-gradient-to-r from-soyuz/40 to-soyuz shadow-[0_0_20px_rgba(255,0,0,0.3)]"
+              />
+            </div>
+            <div className="flex justify-between text-[8px] font-black text-[#262626] uppercase tracking-widest">
+              <span>0$</span>
+              <span className="text-white/20">PROGRESSION : ${(totalSales % ptsRatio).toFixed(2)} / {ptsRatio}$</span>
+              <span>{ptsRatio}$</span>
+            </div>
+          </div>
+
+          {/* Dynamic Gift Bars */}
+          <div className="grid grid-cols-1 gap-12">
+            {objectives.map((obj) => {
+               const progress = Math.min(100, (totalSales / obj.target_amount) * 100);
+               return (
+                 <div key={obj.id} className="space-y-4 group">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <p className="text-xs font-black text-white uppercase tracking-tight group-hover:text-soyuz transition-colors">{obj.title}</p>
+                          {obj.is_global && (
+                             <span className="text-[7px] border border-white/10 px-1.5 py-0.5 text-[#444444]">PASS GLOBAL</span>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-[#666666] italic leading-none">{obj.description}</p>
+                      </div>
+                      <p className="text-sm font-display italic text-white">${obj.target_amount}</p>
+                    </div>
+                    <div className="h-1 bg-white/5 overflow-hidden">
+                       <motion.div 
+                         initial={{ width: 0 }}
+                         animate={{ width: `${progress}%` }}
+                         className={`h-full ${progress >= 100 ? 'bg-green-500' : 'bg-white/20'}`}
+                       />
+                    </div>
+                    <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
+                       <p className={progress >= 100 ? 'text-green-500' : 'text-[#222222]'}>
+                         {progress >= 100 ? 'COMPLÉTÉ' : 'EN COURS'}
+                       </p>
+                       <p className="text-white/10">{progress.toFixed(1)}%</p>
+                    </div>
+                 </div>
+               );
+            })}
+            {objectives.length === 0 && (
+              <p className="text-[10px] text-[#222222] font-black uppercase italic tracking-widest py-8 border border-dashed border-white/5 text-center">
+                AUCUN OBJECTIF SPÉCIFIQUE ACTIF
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -171,7 +290,7 @@ export default function AffiliateDashboard() {
                 { name: 'ALEX T.', sales: '$42.1K', tier: 'LEGEND' },
                 { name: 'SARAH C.', sales: '$38.5K', tier: 'ELITE' },
                 { name: 'DAVID M.', sales: '$12.4K', tier: 'PRO' },
-                { name: 'VOUS', sales: `$${totalCommissions > 0 ? (totalCommissions * 6.6).toFixed(1) : '0'}K`, tier: 'AGENT', current: true },
+                { name: 'VOUS', sales: `$${totalSales > 0 ? (totalSales / 1000).toFixed(1) : '0'}K`, tier: 'AGENT', current: true },
               ].map((rep, i) => (
                 <div key={i} className={`flex items-center justify-between p-5 ${rep.current ? 'bg-soyuz/10 border border-soyuz/20' : 'bg-black border border-white/5'}`}>
                   <div className="flex items-center gap-4">

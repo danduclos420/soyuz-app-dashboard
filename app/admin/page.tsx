@@ -16,12 +16,16 @@ import {
   ChevronRight,
   Database,
   ArrowUpRight,
-  Zap
+  Zap,
+  Plus,
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase-client';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { FormLayout } from '@/components/layout/FormLayout';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'affiliates' | 'products' | 'invites' | 'settings'>('overview');
@@ -33,9 +37,13 @@ export default function AdminDashboard() {
   const [affiliates, setAffiliates] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [inviteCodes, setInviteCodes] = useState<any[]>([]);
+  const [objectives, setObjectives] = useState<any[]>([]);
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
+  
+  // Settings State
   const [pointsConfig, setPointsConfig] = useState({ dollars_per_point: 1000 });
-  const [giftsConfig, setGiftsConfig] = useState({ gift_1_threshold: 5000, gift_2_threshold: 10000 });
+  const [editingObjective, setEditingObjective] = useState<any>(null);
+  const [isSavingObjective, setIsSavingObjective] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -47,19 +55,19 @@ export default function AdminDashboard() {
     const { data: pData } = await supabase.from('products').select('id');
     const { data: aData } = await supabase.from('profiles').select('*').in('role', ['affiliate']).order('status', { ascending: false });
     const { data: iData } = await supabase.from('invite_codes').select('*').order('created_at', { ascending: false });
+    const { data: objData } = await supabase.from('affiliate_objectives').select('*, objective_assignments(affiliate_id)').order('created_at', { ascending: true });
 
     const { data: sData } = await supabase.from('app_settings').select('*');
     
     if (sData) {
       const pCfg = sData.find(s => s.key === 'points_config')?.value;
-      const gCfg = sData.find(s => s.key === 'gifts_config')?.value;
       if (pCfg) setPointsConfig(pCfg);
-      if (gCfg) setGiftsConfig(gCfg);
     }
 
     setOrders(oData || []);
     setAffiliates(aData || []);
     setInviteCodes(iData || []);
+    setObjectives(objData || []);
     
     setStats({
       revenue: oData?.reduce((sum, o) => sum + (o.total || 0), 0) || 0,
@@ -71,7 +79,7 @@ export default function AdminDashboard() {
     setLoading(false);
   }
 
-  const updateSettings = async (key: string, value: any) => {
+  const updateGlobalSettings = async (key: string, value: any) => {
     setUpdatingSettings(true);
     const { error } = await supabase
       .from('app_settings')
@@ -79,12 +87,54 @@ export default function AdminDashboard() {
     
     if (!error) {
       if (key === 'points_config') setPointsConfig(value);
-      if (key === 'gifts_config') setGiftsConfig(value);
       alert('Paramètres mis à jour');
     } else {
       alert('Erreur lors de la mise à jour');
     }
     setUpdatingSettings(false);
+  };
+
+  const saveObjective = async () => {
+    if (!editingObjective.title || !editingObjective.target_amount) return;
+    setIsSavingObjective(true);
+
+    const { data, error } = await supabase
+      .from('affiliate_objectives')
+      .upsert({
+        id: editingObjective.id || undefined,
+        title: editingObjective.title,
+        description: editingObjective.description,
+        target_amount: editingObjective.target_amount,
+        is_global: editingObjective.is_global
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      // Clear and re-sync assignments if not global
+      if (!editingObjective.is_global && editingObjective.assigned_affiliates?.length > 0) {
+        await supabase.from('objective_assignments').delete().eq('objective_id', data.id);
+        const assignments = editingObjective.assigned_affiliates.map((aid: string) => ({
+          objective_id: data.id,
+          affiliate_id: aid
+        }));
+        await supabase.from('objective_assignments').insert(assignments);
+      } else if (editingObjective.is_global) {
+        await supabase.from('objective_assignments').delete().eq('objective_id', data.id);
+      }
+      
+      fetchData();
+      setEditingObjective(null);
+    } else {
+      alert('Erreur lors de la sauvegarde de l\'objectif');
+    }
+    setIsSavingObjective(false);
+  };
+
+  const deleteObjective = async (id: string) => {
+    if (!confirm('Supprimer cet objectif définitivement ?')) return;
+    const { error } = await supabase.from('affiliate_objectives').delete().eq('id', id);
+    if (!error) fetchData();
   };
 
   const handleSync = async () => {
@@ -413,91 +463,111 @@ export default function AdminDashboard() {
              exit={{ opacity: 0, y: -20 }}
              className="space-y-12"
           >
+             {/* 1. Global Points Config */}
              <div className="bg-[#0A0A0A] border border-white/5 p-12">
-                <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">CONTRÔLE DES <span className="outline-text-white">OBJECTIFS</span></h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-8">
-                     <div className="space-y-4">
-                        <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Ratio de Points ($/pt)</label>
-                        <div className="flex gap-4">
-                          <input 
-                             type="number" 
-                             value={pointsConfig.dollars_per_point}
-                             onChange={(e) => setPointsConfig({ ...pointsConfig, dollars_per_point: parseInt(e.target.value) })}
-                             className="bg-black border border-white/10 p-4 text-white font-display italic text-xl flex-1 focus:border-soyuz outline-none transition-colors"
-                          />
-                          <button 
-                             onClick={() => updateSettings('points_config', pointsConfig)}
-                             disabled={updatingSettings}
-                             className="px-8 py-4 bg-soyuz/20 border border-soyuz/40 text-soyuz text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-30"
-                          >
-                             {updatingSettings ? '...' : 'SAVE'}
-                          </button>
-                        </div>
-                        <p className="text-[9px] text-white/20 italic">Définit combien de dollars de ventes valent 1 point dashboard.</p>
-                     </div>
+                <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">VALEUR DES <span className="outline-text-white">POINTS</span></h3>
+                <div className="max-w-xl space-y-4">
+                  <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Ratio de Points ($/pt)</label>
+                  <div className="flex gap-4">
+                    <input 
+                       type="number" 
+                       value={pointsConfig.dollars_per_point}
+                       onChange={(e) => setPointsConfig({ ...pointsConfig, dollars_per_point: parseInt(e.target.value) })}
+                       className="bg-black border border-white/10 p-4 text-white font-display italic text-xl flex-1 focus:border-soyuz outline-none transition-colors"
+                    />
+                    <button 
+                       onClick={() => updateGlobalSettings('points_config', pointsConfig)}
+                       disabled={updatingSettings}
+                       className="px-8 py-4 bg-soyuz/10 border border-soyuz/20 text-soyuz text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-30"
+                    >
+                       {updatingSettings ? '...' : 'ENREGISTRER'}
+                    </button>
                   </div>
+                  <p className="text-[9px] text-white/20 italic">Définit combien de dollars de ventes valent 1 point dashboard.</p>
+                </div>
+             </div>
 
-                  <div className="space-y-8">
-                     <div className="space-y-4">
-                        <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Seuil Cadeau 1 (Points)</label>
-                        <div className="flex gap-4">
-                          <input 
-                             type="number" 
-                             value={giftsConfig.gift_1_threshold}
-                             onChange={(e) => setGiftsConfig({ ...giftsConfig, gift_1_threshold: parseInt(e.target.value) })}
-                             className="bg-black border border-white/10 p-4 text-white font-display italic text-xl flex-1 focus:border-soyuz outline-none transition-colors"
-                          />
-                          <button 
-                             onClick={() => updateSettings('gifts_config', giftsConfig)}
-                             disabled={updatingSettings}
-                             className="px-8 py-4 bg-soyuz/20 border border-soyuz/40 text-soyuz text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-30"
-                          >
-                             {updatingSettings ? '...' : 'SAVE'}
-                          </button>
+             {/* 2. Dynamic Objectives Grid */}
+             <div className="bg-[#0A0A0A] border border-white/5 p-12">
+                <div className="flex justify-between items-end mb-12">
+                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">OBJECTIFS <span className="outline-text-white">DE VENTE</span></h3>
+                  <button 
+                    onClick={() => setEditingObjective({ title: '', description: '', target_amount: 0, is_global: true, assigned_affiliates: [] })}
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all"
+                  >
+                    <Plus size={14} /> AJOUTER UN OBJECTIF
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {objectives.map((obj) => (
+                    <div key={obj.id} className="bg-black border border-white/5 p-10 flex flex-col justify-between group hover:border-white/10 transition-all relative">
+                      <div className="absolute top-6 right-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => setEditingObjective({ 
+                            ...obj, 
+                            assigned_affiliates: obj.objective_assignments?.map((a: any) => a.affiliate_id) || [] 
+                          })}
+                          className="p-2 bg-white/5 text-[#888888] hover:text-white transition-colors"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          onClick={() => deleteObjective(obj.id)}
+                          className="p-2 bg-white/5 text-[#888888] hover:text-soyuz transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <p className="text-xl font-display italic text-white uppercase">{obj.title}</p>
+                          <Badge variant="outline" className={`text-[8px] h-4 ${obj.is_global ? 'border-soyuz/20 text-soyuz' : 'border-white/10 text-[#444444]'}`}>
+                            {obj.is_global ? 'GLOBAL' : 'CIBLÉ'}
+                          </Badge>
                         </div>
-                     </div>
-                     <div className="space-y-4">
-                        <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Seuil Cadeau 2 (Points)</label>
-                        <div className="flex gap-4">
-                          <input 
-                             type="number" 
-                             value={giftsConfig.gift_2_threshold}
-                             onChange={(e) => setGiftsConfig({ ...giftsConfig, gift_2_threshold: parseInt(e.target.value) })}
-                             className="bg-black border border-white/10 p-4 text-white font-display italic text-xl flex-1 focus:border-soyuz outline-none transition-colors"
-                          />
-                          <button 
-                             onClick={() => updateSettings('gifts_config', giftsConfig)}
-                             disabled={updatingSettings}
-                             className="px-8 py-4 bg-soyuz/20 border border-soyuz/40 text-soyuz text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-30"
-                          >
-                             {updatingSettings ? '...' : 'SAVE'}
-                          </button>
+                        <p className="text-xs text-[#666666] italic line-clamp-2">{obj.description}</p>
+                      </div>
+
+                      <div className="mt-8 pt-8 border-t border-white/5 flex justify-between items-end">
+                        <div className="space-y-1">
+                          <p className="text-[9px] text-[#444444] font-black uppercase">MONTANT CIBLE</p>
+                          <p className="text-2xl font-display italic text-white">${obj.target_amount}</p>
                         </div>
-                     </div>
-                  </div>
+                        {!obj.is_global && (
+                          <div className="text-right">
+                             <p className="text-[9px] text-[#444444] font-black uppercase">AUDIENCE</p>
+                             <p className="text-[10px] font-bold text-soyuz">{obj.objective_assignments?.length || 0} AFFILIÉS</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {objectives.length === 0 && (
+                    <div className="col-span-full py-20 text-center border border-dashed border-white/5">
+                      <p className="text-[10px] font-black text-[#222222] uppercase tracking-[0.4em]">AUCUN OBJECTIF CONFIGURÉ</p>
+                    </div>
+                  )}
                 </div>
              </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Affiliate Details Modal */}
+      {/* 4. MODALS */}
       <AnimatePresence>
+        {/* Affiliate Details Modal */}
         {selectedAffiliate && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12">
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSelectedAffiliate(null)}
               className="absolute inset-0 bg-black/90 backdrop-blur-xl"
             />
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="bg-[#0A0A0A] border border-white/10 w-full max-w-2xl relative z-10 overflow-hidden rounded-3xl"
             >
               <div className="p-10 sm:p-16 space-y-12">
@@ -512,7 +582,6 @@ export default function AdminDashboard() {
                     <X size={20} />
                   </button>
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-[11px] uppercase tracking-widest">
                   <div className="space-y-6">
                     <div className="space-y-1">
@@ -535,33 +604,123 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-
                 {selectedAffiliate.bio && (
                   <div className="space-y-4 pt-8 border-t border-white/5">
                     <p className="text-[#444444] text-[9px] font-black uppercase tracking-widest">MOTIVATIONS / BIO</p>
                     <p className="text-white/60 text-xs leading-relaxed italic">"{selectedAffiliate.bio}"</p>
                   </div>
                 )}
-
                 <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                  <button 
-                    onClick={() => updateAffiliateStatus(selectedAffiliate.id, 'rejected')}
-                    className="flex-1 py-5 bg-white/5 border border-white/10 text-[#CC0000] text-[10px] font-black uppercase tracking-widest hover:bg-[#CC0000] hover:text-white transition-all"
-                  >
-                    REFUSER LA DEMANDE
-                  </button>
-                  <button 
-                    onClick={() => updateAffiliateStatus(selectedAffiliate.id, 'approved')}
-                    className="flex-1 py-5 bg-soyuz text-black text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_40px_rgba(255,0,0,0.2)]"
-                  >
-                    APPROUVER L'AFFILIÉ
-                  </button>
+                  <button onClick={() => updateAffiliateStatus(selectedAffiliate.id, 'rejected')} className="flex-1 py-5 bg-white/5 border border-white/10 text-[#CC0000] text-[10px] font-black uppercase tracking-widest hover:bg-[#CC0000] hover:text-white transition-all">REFUSER LA DEMANDE</button>
+                  <button onClick={() => updateAffiliateStatus(selectedAffiliate.id, 'approved')} className="flex-1 py-5 bg-soyuz text-black text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_40px_rgba(255,0,0,0.2)]">APPROUVER L'AFFILIÉ</button>
                 </div>
               </div>
             </motion.div>
           </div>
         )}
+
+        {/* Dynamic Objective Modal */}
+        {editingObjective && (
+          <FormLayout
+            title={editingObjective.id ? "MODIFIER L'OBJECTIF" : "NOUVEL OBJECTIF"}
+            onClose={() => setEditingObjective(null)}
+          >
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Titre de l'objectif</label>
+                <input 
+                  type="text" 
+                  value={editingObjective.title}
+                  onChange={(e) => setEditingObjective({ ...editingObjective, title: e.target.value })}
+                  className="w-full bg-black border border-white/10 p-4 text-white font-display italic text-lg outline-none focus:border-soyuz"
+                  placeholder="Ex: Prime de Noël"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Description</label>
+                <textarea 
+                  value={editingObjective.description}
+                  onChange={(e) => setEditingObjective({ ...editingObjective, description: e.target.value })}
+                  className="w-full bg-black border border-white/10 p-4 text-white text-xs outline-none focus:border-soyuz h-24 resize-none"
+                  placeholder="Détails sur l'objectif..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Montant cible ($)</label>
+                <input 
+                  type="number" 
+                  value={editingObjective.target_amount}
+                  onChange={(e) => setEditingObjective({ ...editingObjective, target_amount: parseFloat(e.target.value) })}
+                  className="w-full bg-black border border-white/10 p-4 text-white font-display italic text-2xl outline-none focus:border-soyuz"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="pt-8 border-t border-white/5 space-y-6">
+                 <div className="flex items-center justify-between">
+                    <div>
+                       <p className="text-[10px] text-white uppercase font-black">Audience Globale</p>
+                       <p className="text-[9px] text-[#444444] font-bold">L'objectif est-il visible par tous les affiliés ?</p>
+                    </div>
+                    <button 
+                      onClick={() => setEditingObjective({ ...editingObjective, is_global: !editingObjective.is_global })}
+                      className={`w-12 h-6 rounded-full transition-all relative ${editingObjective.is_global ? 'bg-soyuz' : 'bg-white/10'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${editingObjective.is_global ? 'left-7' : 'left-1'}`} />
+                    </button>
+                 </div>
+
+                 {!editingObjective.is_global && (
+                   <div className="space-y-4">
+                      <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Assigner à des affiliés spécifiques</p>
+                      <div className="flex flex-wrap gap-2">
+                        {affiliates.filter(a => a.status === 'approved').map((aff) => (
+                          <button
+                            key={aff.id}
+                            onClick={() => {
+                              const current = editingObjective.assigned_affiliates || [];
+                              const exists = current.includes(aff.id);
+                              setEditingObjective({
+                                ...editingObjective,
+                                assigned_affiliates: exists 
+                                  ? current.filter((id: string) => id !== aff.id)
+                                  : [...current, aff.id]
+                              });
+                            }}
+                            className={`px-4 py-2 text-[8px] font-black uppercase border transition-all ${
+                              editingObjective.assigned_affiliates?.includes(aff.id)
+                                ? 'bg-soyuz border-soyuz text-black'
+                                : 'bg-white/5 border-white/10 text-[#666666] hover:border-white/20'
+                            }`}
+                          >
+                            {aff.full_name || aff.email}
+                          </button>
+                        ))}
+                      </div>
+                   </div>
+                 )}
+              </div>
+
+              <button 
+                onClick={saveObjective}
+                disabled={isSavingObjective}
+                className="w-full py-5 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-soyuz hover:text-white transition-all shadow-xl disabled:opacity-30"
+              >
+                {isSavingObjective ? 'SAUVEGARDE...' : 'ENREGISTRER L\'OBJECTIF'}
+              </button>
+            </div>
+          </FormLayout>
+        )}
       </AnimatePresence>
     </PageLayout>
+  );
+}
+
+// Simple internal Badge component
+function Badge({ variant = 'default', children, className = '' }: any) {
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${className}`}>
+      {children}
+    </span>
   );
 }

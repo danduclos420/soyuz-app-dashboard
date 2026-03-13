@@ -15,7 +15,7 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
-  repCode: string | null;
+  affiliateCode: string | null;
   discount: number;
   isCartOpen: boolean;
   
@@ -23,7 +23,7 @@ interface CartStore {
   addItem: (item: CartItem) => void;
   removeItem: (id: string, variantId: string) => void;
   updateQuantity: (id: string, variantId: string, quantity: number) => void;
-  setRepCode: (code: string | null, discount?: number) => void;
+  setAffiliateCode: (code: string | null, discount?: number) => void;
   toggleCart: (open?: boolean) => void;
   clearCart: () => void;
   
@@ -38,7 +38,7 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      repCode: null,
+      affiliateCode: null,
       discount: 0,
       isCartOpen: false,
 
@@ -72,8 +72,8 @@ export const useCartStore = create<CartStore>()(
         }));
       },
 
-      setRepCode: (code, discount = 0) => {
-        set({ repCode: code, discount });
+      setAffiliateCode: (code, discount = 0) => {
+        set({ affiliateCode: code, discount });
       },
 
       toggleCart: (open) => {
@@ -81,7 +81,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => {
-        set({ items: [], repCode: null, discount: 0 });
+        set({ items: [], affiliateCode: null, discount: 0 });
       },
 
       getTotalItems: () => {

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       subtotal: (session.amount_subtotal || 0) / 100,
       discount_amount: (session.total_details?.amount_discount || 0) / 100,
       total: (session.amount_total || 0) / 100,
-      rep_code: session.metadata?.affiliate_code || null,
+      affiliate_code: session.metadata?.affiliate_code || null,
       stripe_payment_id: session.payment_intent as string,
       stripe_payment_status: session.payment_status,
       status: 'paid', // Since it's checkout.session.completed
@@ -56,18 +56,18 @@ export async function POST(req: NextRequest) {
       console.error('Error creating order in Supabase:', orderError);
     }
 
-    // 3. Handle Rep Commission (Phase 5/6)
+    // 3. Handle Affiliate Commission
     if (order && session.metadata?.affiliate_code) {
-      const { data: rep } = await (supabaseAdmin
-        .from('reps')
+      const { data: affiliate } = await (supabaseAdmin
+        .from('affiliates')
         .select('id, commission_rate') as any)
         .eq('code', session.metadata.affiliate_code)
         .single();
 
-      if (rep) {
-        const commissionAmount = ((order as any).subtotal * (rep.commission_rate || 10)) / 100;
+      if (affiliate) {
+        const commissionAmount = ((order as any).subtotal * (affiliate.commission_rate || 10)) / 100;
         await (supabaseAdmin.from('commissions') as any).insert({
-          rep_id: rep.id,
+          affiliate_id: affiliate.id,
           order_id: (order as any).id,
           amount: commissionAmount,
           status: 'pending'

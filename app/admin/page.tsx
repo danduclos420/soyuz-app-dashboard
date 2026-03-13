@@ -15,7 +15,7 @@ import {
   Settings as SettingsIcon,
   ChevronRight
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-client';
 import BackButton from '@/components/BackButton';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';

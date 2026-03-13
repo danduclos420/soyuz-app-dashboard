@@ -58,30 +58,31 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
-        <div className="relative z-10 text-center soyuz-container -mt-16 md:-mt-20">
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-8 md:-mt-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full flex flex-col items-center"
           >
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-4 backdrop-blur-md">
               DESIGNED FOR ELITE ATHLETES
             </span>
             
-            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl mb-8 leading-[0.9] tracking-tighter italic">
+            <h1 className="font-display text-4xl sm:text-6xl md:text-8xl lg:text-9xl mb-8 leading-[0.9] tracking-tighter italic w-full">
               ENGINEERED <br />
               <span className="outline-text-white block mt-2">FOR POWER</span>
             </h1>
 
-            <p className="text-[#AAAAAA] text-sm md:text-lg mb-12 uppercase tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed">
+            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-12 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-4">
               SOYUZ BC North America — The standard in <br className="hidden md:block" /> professional performance hockey.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-sm sm:max-w-none px-6 sm:px-0">
+              <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black whitespace-nowrap">
                 SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/affiliate/register" className="btn-outline h-14 flex items-center justify-center w-full sm:w-[240px] text-sm font-black bg-white/5 backdrop-blur-sm">
+              <Link href="/affiliate/register" className="btn-outline h-14 flex items-center justify-center w-full sm:w-[240px] text-sm font-black bg-white/5 backdrop-blur-sm whitespace-nowrap">
                 JOIN THE TEAM
               </Link>
             </div>

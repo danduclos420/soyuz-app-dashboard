@@ -401,29 +401,77 @@ export default function Header() {
         <div className="mobile-menu pt-16">
           <div className="flex flex-col gap-1 mt-4">
             {NAV_LINKS.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="py-4 px-2 text-white text-xl font-black uppercase tracking-wider border-b border-white/5 hover:text-[#CC0000] transition-colors"
-              >
-                {link.name}
-              </Link>
+              <Fragment key={link.name}>
+                {link.hasMegaMenu ? (
+                  <div className="flex flex-col">
+                    <button
+                      onClick={() => setMegaMenuOpen(!megaMenuOpen)}
+                      className="py-4 px-2 text-white text-xl font-black uppercase tracking-wider border-b border-white/5 flex items-center justify-between"
+                    >
+                      {link.name}
+                      <ChevronDown size={20} className={`transition-transform duration-300 ${megaMenuOpen ? 'rotate-180 text-soyuz' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {megaMenuOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden bg-white/[0.02]"
+                        >
+                          <div className="grid grid-cols-1 gap-2 p-4">
+                            {STICK_GUIDE_ITEMS.map((item) => (
+                              <Link
+                                key={item.title}
+                                href={item.href}
+                                onClick={() => setMobileOpen(false)}
+                                className="py-3 px-4 text-[#888888] text-sm font-bold uppercase tracking-widest border-l-2 border-transparent hover:border-soyuz hover:text-white transition-all"
+                              >
+                                {item.title}
+                              </Link>
+                            ))}
+                            <Link
+                              href="/guide"
+                              onClick={() => setMobileOpen(false)}
+                              className="py-3 px-4 text-soyuz text-sm font-black uppercase tracking-widest mt-2"
+                            >
+                              View All Guides
+                            </Link>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <Link
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="py-4 px-2 text-white text-xl font-black uppercase tracking-wider border-b border-white/5 hover:text-[#CC0000] transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                )}
+              </Fragment>
             ))}
             <Link
               href="https://soyuz-hockey.erplain.app/b2b/login"
               target="_blank"
               onClick={() => setMobileOpen(false)}
-              className="py-4 px-2 text-[#CC0000] text-xl font-black uppercase tracking-wider border-b border-white/5"
+              className="py-4 px-2 text-[#CC0000] text-xl font-black uppercase tracking-wider border-b border-white/5 flex items-center justify-between"
             >
-              B2B Portal
+              B2B Portal <ArrowRight size={18} />
             </Link>
             <Link
-              href="/login"
+              href={
+                !user ? '/login' :
+                userProfile?.role === 'admin' ? '/admin' :
+                userProfile?.role === 'rep' ? '/affiliate' :
+                '/account'
+              }
               onClick={() => setMobileOpen(false)}
               className="py-4 px-2 text-[#888888] text-xl font-black uppercase tracking-wider border-b border-white/5 hover:text-white transition-colors"
             >
-              My Account
+              {user ? 'My Account' : 'Login'}
             </Link>
           </div>
 

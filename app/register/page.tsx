@@ -10,7 +10,9 @@ import Link from 'next/link';
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [dob, setDob] = useState('');
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,6 +23,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    const dob = (year && month && day) ? `${year}-${month}-${day}` : '';
 
     const { data: { user }, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -89,13 +93,58 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-gray-400 text-xs uppercase tracking-widest mb-2">Date de naissance</label>
-            <input
-              type="date"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              required
-              className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors text-xs"
-            />
+            <div className="grid grid-cols-3 gap-2">
+              <select
+                value={day}
+                onChange={(e) => setDay(e.target.value)}
+                required
+                className="w-full bg-black border border-white/10 px-2 py-3 text-white focus:border-white outline-none transition-colors text-xs appearance-none"
+              >
+                <option value="" disabled>Jour</option>
+                {[...Array(31)].map((_, i) => (
+                  <option key={i + 1} value={(i + 1).toString().padStart(2, '0')}>
+                    {(i + 1).toString().padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                required
+                className="w-full bg-black border border-white/10 px-2 py-3 text-white focus:border-white outline-none transition-colors text-xs appearance-none"
+              >
+                <option value="" disabled>Mois</option>
+                {[
+                  { v: '01', l: 'Janvier' },
+                  { v: '02', l: 'Février' },
+                  { v: '03', l: 'Mars' },
+                  { v: '04', l: 'Avril' },
+                  { v: '05', l: 'Mai' },
+                  { v: '06', l: 'Juin' },
+                  { v: '07', l: 'Juillet' },
+                  { v: '08', l: 'Août' },
+                  { v: '09', l: 'Septembre' },
+                  { v: '10', l: 'Octobre' },
+                  { v: '11', l: 'Novembre' },
+                  { v: '12', l: 'Décembre' },
+                ].map((m) => (
+                  <option key={m.v} value={m.v}>{m.l}</option>
+                ))}
+              </select>
+
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                required
+                className="w-full bg-black border border-white/10 px-2 py-3 text-white focus:border-white outline-none transition-colors text-xs appearance-none"
+              >
+                <option value="" disabled>Année</option>
+                {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                  <option key={y} value={y.toString()}>{y}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

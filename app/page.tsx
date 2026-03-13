@@ -36,7 +36,7 @@ export default function HomePage() {
       {/* 1. HERO SECTION (RESET) */}
       <section 
         ref={heroRef}
-        className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden border-b border-white/5"
+        className="relative h-[90dvh] md:h-[100dvh] w-full flex items-center justify-center overflow-hidden border-b border-white/5"
       >
         <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 h-full w-full bg-[#111111]">
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-background" />
@@ -51,13 +51,13 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
-        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-16 md:-mt-24">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-6 backdrop-blur-md">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-4 backdrop-blur-md">
               DESIGNED FOR ELITE ATHLETES
             </span>
             
@@ -98,13 +98,13 @@ export default function HomePage() {
             {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center whitespace-nowrap gap-16 px-8 h-full">
                 <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">STRENGTH IN UNITY</span>
-                <img src="/assets/player-banner.webp" alt="" className="h-4 w-auto grayscale brightness-150 block" />
+                <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150 block object-contain" />
                 <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">POWER WITH SOYUZ</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-3 w-auto brightness-0 invert opacity-80 block" />
+                <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80 block object-contain" />
                 <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">BREAK EVERY LIMIT</span>
-                <img src="/assets/player-banner.webp" alt="" className="h-4 w-auto grayscale brightness-150 block" />
+                <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150 block object-contain" />
                 <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">SOYUZ NORTH AMERICA</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-3 w-auto brightness-0 invert opacity-80 block" />
+                <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80 block object-contain" />
               </div>
             ))}
           </div>

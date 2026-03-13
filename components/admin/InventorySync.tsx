@@ -86,14 +86,13 @@ export default function InventorySync() {
               >
                 FORCER LA SYNCHRONISATION
               </SoyuzButton>
-              <SoyuzButton 
+              <a 
                 href="/api/auth/quickbooks/login"
-                variant="outline" 
-                icon={ExternalLink}
-                className="w-full"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black tracking-widest uppercase rounded-xl"
               >
+                <ExternalLink size={14} />
                 RE-CONNECTER QB
-              </SoyuzButton>
+              </a>
            </div>
         </div>
       </div>

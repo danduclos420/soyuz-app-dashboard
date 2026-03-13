@@ -23,19 +23,25 @@ export default function InventorySync() {
   }
 
   async function fetchSyncInfo() {
-    const { data: cfg } = await supabase
-      .from('app_config')
-      .select('*')
-      .eq('key', 'quickbooks_token')
-      .maybeSingle();
-    
-    setConfig(cfg);
-    
-    if (cfg && cfg.updated_at) {
-      setLastSync(new Date(cfg.updated_at));
-      addLog('TOKEN VÉRIFIÉ & VALIDE.', 'success');
-    } else {
-      addLog('AUCUNE CONNEXION QUICKBOOKS DÉTECTÉE.', 'error');
+    try {
+      const { data: cfg, error } = await supabase
+        .from('app_config')
+        .select('*')
+        .eq('key', 'quickbooks_token')
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      setConfig(cfg);
+      
+      if (cfg && cfg.updated_at) {
+        setLastSync(new Date(cfg.updated_at));
+        addLog('TOKEN VÉRIFIÉ & VALIDE.', 'success');
+      } else {
+        addLog('AUCUNE CONNEXION QUICKBOOKS TROUVÉE DANS LA RÉGION PRODUCTION.', 'error');
+      }
+    } catch (err: any) {
+      addLog(`ERREUR LECTURE CONFIG : ${err.message}`, 'error');
     }
   }
 
@@ -45,7 +51,8 @@ export default function InventorySync() {
     
     try {
       addLog('APPEL DE L\'API DE SYNCHRONISATION (Vercel Production)...', 'info');
-      const res = await fetch('/api/sync/quickbooks', { method: 'POST' });
+      // Use the standard admin sync endpoint which already handles auth and role check
+      const res = await fetch('/api/admin/sync', { method: 'POST' });
       const data = await res.json();
       
       if (data.success) {
@@ -53,8 +60,9 @@ export default function InventorySync() {
         toast.success(`Synchronisation terminée : ${data.count} items mis à jour.`);
         await fetchSyncInfo();
       } else {
-        addLog(`ERREUR API : ${data.error || 'Erreur inconnue'}`, 'error');
-        throw new Error(data.error || 'Erreur inconnue');
+        const errorMsg = data.error || 'Erreur inconnue';
+        addLog(`ERREUR API : ${errorMsg}`, 'error');
+        toast.error(`Erreur de synchro : ${errorMsg}`);
       }
     } catch (err: any) {
       console.error('Sync Error:', err);

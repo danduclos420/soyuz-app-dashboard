@@ -32,7 +32,7 @@ export default function HomePage() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const scrollToCollections = () => {
-    const nextSection = document.getElementById('collections-top');
+    const nextSection = document.getElementById('collections');
     if (nextSection) {
       nextSection.scrollIntoView({ behavior: 'smooth' });
     }
@@ -40,10 +40,10 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
-      {/* 1. HERO SECTION (RESET) */}
+      {/* 1. HERO SECTION */}
       <section 
         ref={heroRef}
-        className="relative min-h-[100dvh] flex flex-col items-center justify-center pt-16 overflow-hidden carbon-bg"
+        className="relative h-dvh flex flex-col items-center justify-center overflow-hidden carbon-bg"
       >
         <div className="absolute inset-0 z-0">
           <motion.div 
@@ -56,27 +56,28 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-8 md:-mt-20 px-[2%] w-full">
+        {/* HERO CONTENT */}
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-16 md:-mt-24 px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="w-full flex flex-col items-center"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-10 md:mb-14 backdrop-blur-md">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-12 md:mb-16 backdrop-blur-md">
               DESIGNED FOR ELITE ATHLETES
             </span>
             
-            <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-14 md:mb-18 leading-[0.85] tracking-tighter italic w-full">
+            <h1 className="font-display text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-12 md:mb-16 leading-[0.85] tracking-tighter italic w-full">
               ENGINEERED <br />
               <span className="outline-text-white block mt-2">FOR POWER</span>
             </h1>
 
-            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-18 md:mb-22 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-12 md:mb-16 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-2">
               SOYUZ BC North America — The standard in <br className="hidden md:block" /> professional performance hockey.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 mt-8">
               <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black whitespace-nowrap">
                 SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
@@ -87,38 +88,38 @@ export default function HomePage() {
           </motion.div>
         </div>
 
+        {/* DISCOVER BUTTON (Just above ticker) */}
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-10 left-0 right-0 z-10 flex justify-center"
+          className="absolute bottom-[20%] left-1/2 -translate-x-1/2 z-10 hidden sm:flex flex-col items-center gap-2 group cursor-pointer"
         >
-          <button onClick={scrollToCollections} className="flex flex-col items-center gap-2 group cursor-pointer px-4">
+          <button onClick={scrollToCollections} className="flex flex-col items-center gap-2">
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
             <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
           </button>
         </motion.div>
 
-      </section>
-
-      {/* 2. INFINITE TICKER (RED) */}
-      <div id="collections-top" className="bg-soyuz overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[24px]">
-        <div className="ticker-wrap flex items-center h-12 md:h-14">
-          <div className="ticker-inner gap-16 md:gap-24 items-center">
-            {[...Array(4)].map((_, i) => (
-              <Fragment key={i}>
-                <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">STRENGTH IN UNITY</span>
-                <img src="/assets/player-banner.webp" alt="" className="h-[38px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
-                <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">POWER WITH SOYUZ</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-[30px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
-                <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">BREAK EVERY LIMIT</span>
-                <img src="/assets/player-banner.webp" alt="" className="h-[38px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
-                <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">SOYUZ NORTH AMERICA</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-[30px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
-              </Fragment>
-            ))}
+        {/* 2. INFINITE TICKER (INSIDE HERO AT BOTTOM) */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)]">
+          <div className="ticker-wrap flex items-center h-12 md:h-14">
+            <div className="ticker-inner gap-16 md:gap-24 items-center">
+              {[...Array(4)].map((_, i) => (
+                <Fragment key={i}>
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">STRENGTH IN UNITY</span>
+                  <img src="/assets/player-banner.webp" alt="" className="h-[38px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">POWER WITH SOYUZ</span>
+                  <img src="/assets/logo-banner.png" alt="" className="h-[30px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">BREAK EVERY LIMIT</span>
+                  <img src="/assets/player-banner.webp" alt="" className="h-[38px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">SOYUZ NORTH AMERICA</span>
+                  <img src="/assets/logo-banner.png" alt="" className="h-[30px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
+                </Fragment>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* 3. COLLECTIONS GRID */}
       <section className="section-padding carbon-bg relative overflow-hidden" id="collections">

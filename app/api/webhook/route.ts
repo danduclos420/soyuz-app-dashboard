@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Stripe from 'stripe';
+import { resend, DEFAULT_FROM_EMAIL } from '@/lib/resend';
+import { getOrderConfirmationTemplate } from '@/lib/email-templates';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +76,20 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Trigger Email Notification via Resend (Phase 8)
+    if (order) {
+      try {
+        await resend.emails.send({
+          from: DEFAULT_FROM_EMAIL,
+          to: [(order as any).customer_email],
+          subject: `Confirmed: Transmission Received (#${(order as any).id.slice(-8)})`,
+          html: getOrderConfirmationTemplate(order),
+        });
+        console.log('Order confirmation email sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send order confirmation email:', emailError);
+      }
+    }
+
     console.log('Order created successfully:', (order as any)?.id);
   }
 

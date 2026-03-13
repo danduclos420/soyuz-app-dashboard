@@ -5,10 +5,10 @@ import { Activity, Info, Table, CheckCircle2 } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 
 const CURVE_DATA = [
-  { pattern: 'S92', description: 'Most popular all-around curve. Great for snappers and stick handling.', brandEquiv: 'P92 / P29 / TC2' },
+  { pattern: 'S29', description: 'Most popular all-around curve. Great for snappers and stick handling.', brandEquiv: 'P92 / P29 / TC2' },
   { pattern: 'S28', description: 'Toe curve for quick release and high shots. Elite choice.', brandEquiv: 'P28 / TC4' },
   { pattern: 'S88', description: 'Mid-curve with closed face. Excellent for backhands and precision.', brandEquiv: 'P88 / MC' },
-  { pattern: 'S91', description: 'Heel curve, open face. Best for defensemen and hard slap shots.', brandEquiv: 'P91' },
+  { pattern: 'S90TM', description: 'Heel curve, open face. Best for defensemen and hard slap shots.', brandEquiv: 'P91' },
 ];
 
 export default function CurveGuide() {
@@ -80,7 +80,7 @@ export default function CurveGuide() {
               <div>
                 <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
                 <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
-                  If you're unsure, the S92 is the safest choice for most players, offering a balance of all performance aspects.
+                  If you're unsure, the S29 is the safest choice for most players, offering a balance of all performance aspects.
                 </p>
               </div>
             </div>

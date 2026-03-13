@@ -128,10 +128,22 @@ export default function HockeyCard({
   const theme = getRankTheme();
 
   return (
-    <div className="flex flex-col items-center gap-12">
+    <div className={`flex flex-col items-center transition-all duration-700 ${editMode ? 'gap-24' : 'gap-12'}`}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Great+Vibes&family=Playball&display=swap');
       `}</style>
+
+      {/* BACKDROP FOR EDIT MODE */}
+      <AnimatePresence>
+        {editMode && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[90] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
 
       <div 
         ref={cardRef}
@@ -207,9 +219,13 @@ export default function HockeyCard({
             {/* EDIT TOOLS OVERLAY */}
             {editMode && (
                <div 
-                className="absolute inset-x-0 top-0 z-50 bg-black/80 backdrop-blur-xl p-6 flex flex-col items-center gap-4 rounded-t-[4px] border-b border-white/10"
-                style={{ transform: 'translateZ(50px)' }}
+                className="absolute inset-x-0 top-0 z-50 bg-black/95 backdrop-blur-2xl p-6 flex flex-col items-center gap-5 rounded-t-[4px] border-b border-soyuz/20"
+                style={{ transform: 'translateZ(60px)' }}
                >
+                  <div className="flex flex-col items-center gap-2 mb-2">
+                     <p className="text-[10px] font-black italic text-soyuz tracking-[0.4em] uppercase">MODE AJUSTEMENT</p>
+                     <p className="text-[8px] text-white/40 uppercase tracking-widest whitespace-nowrap">DÉPLACEZ ET ZOOMEZ VOTRE PHOTO</p>
+                  </div>
                   <div className="flex items-center gap-4 w-full px-2">
                      <Maximize2 size={12} className="text-white/40" />
                      <input 
@@ -234,9 +250,9 @@ export default function HockeyCard({
                            e.stopPropagation(); 
                            onSaveEdit?.({ x: photoX.get(), y: photoY.get(), scale: zoom }); 
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-soyuz/20 border border-soyuz/40 rounded-full text-[8px] font-bold uppercase tracking-widest text-soyuz hover:bg-soyuz/40 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-soyuz border border-soyuz text-black rounded-full text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white hover:border-white transition-all shadow-[0_0_30px_rgba(255,0,0,0.3)]"
                      >
-                        <Check size={12} /> ENREGISTRER
+                        <Check size={14} /> ENREGISTRER
                      </button>
                   </div>
                </div>

@@ -34,7 +34,6 @@ export default function HomePage() {
   const scrollToCollections = () => {
     const nextSection = document.getElementById('ticker-target');
     if (nextSection) {
-      // We use a slight manual offset calculation or just trust scroll-mt now that z-index is fixed
       nextSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
@@ -42,12 +41,12 @@ export default function HomePage() {
   return (
     <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
       {/* 1. HERO SECTION 
-          - h-[calc(100dvh-92px)] ensures the ticker is at the bottom of the visible screen.
-          - z-[45] allows it to slide OVER the Logo Bar (z-40) but UNDER the Announcement Bar (z-60).
+          - h-[calc(100dvh-92px)] ensures the ticker stays at the bottom of the initial screen.
+          - Removed z-index to allow Ticker (z-10) to pass underneath the Header (z-40).
       */}
       <section 
         ref={heroRef}
-        className="relative h-[calc(100dvh-92px)] flex flex-col items-center overflow-hidden carbon-bg z-[45]"
+        className="relative h-[calc(100dvh-92px)] flex flex-col items-center overflow-hidden carbon-bg"
       >
         <div className="absolute inset-0 z-0">
           <motion.div 
@@ -107,12 +106,12 @@ export default function HomePage() {
         </div>
 
         {/* 2. INFINITE TICKER (Stuck to bottom initially)
-            - scroll-mt-[27px] is used to align it exactly below the announcement bar.
-            - Because the section has z-[45], it will cover the black logo bar (z-40) when scrolling.
+            - z-10 ensures it passes UNDERNEATH the Header (z-40) and Announcement Bar (z-60).
+            - scroll-mt-[92px] aligns it below the entire header (28px announcement + 64px header).
         */}
         <div 
           id="ticker-target"
-          className="absolute bottom-0 left-0 right-0 z-[50] bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[27px]"
+          className="absolute bottom-0 left-0 right-0 z-10 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]"
         >
           <div className="ticker-wrap flex items-center h-12 md:h-14">
             <div className="ticker-inner gap-16 md:gap-24 items-center">

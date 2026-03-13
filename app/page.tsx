@@ -91,20 +91,31 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* DISCOVER BUTTON (Centered wrapper) 
-            - bottom-[25%] avoids collision with the ticker at bottom-0.
+        {/* DISCOVER BUTTON (Centered wrapper with Protection Zone)
+            - Increased bottom margin on mobile to bottom-[30%] for maximum spacing.
+            - Added p-6 protection zone to prevent content collisions.
+            - z-40 ensures it stays above the ticker (z-30) and aligned with header depth.
         */}
-        <div className="absolute bottom-[25%] sm:bottom-[15%] left-0 right-0 z-20 flex justify-center pointer-events-none">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-2 group cursor-pointer pointer-events-auto"
-          >
-            <button onClick={scrollToCollections} className="flex flex-col items-center gap-2">
-              <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
-              <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
-            </button>
-          </motion.div>
+        <div className="absolute bottom-[30%] sm:bottom-[15%] left-0 right-0 z-40 flex justify-center pointer-events-none">
+          <div className="p-12 pointer-events-none">
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="flex flex-col items-center gap-2 group cursor-pointer pointer-events-auto"
+            >
+              <button 
+                onClick={scrollToCollections} 
+                className="flex flex-col items-center gap-2 relative"
+                aria-label="Discover sections below"
+              >
+                {/* Shield background - invisible but ensures no overlap */}
+                <div className="absolute -inset-8 bg-transparent" />
+                
+                <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors relative z-10">Discover</span>
+                <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors relative z-10" />
+              </button>
+            </motion.div>
+          </div>
         </div>
 
         {/* 2. INFINITE TICKER (Stuck to bottom initially)

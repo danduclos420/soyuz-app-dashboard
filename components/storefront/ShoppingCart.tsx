@@ -3,13 +3,21 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, Plus, Minus, ShoppingBag, ArrowRight, Ticket, Loader2 } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, ArrowRight, Ticket, Loader2, CheckCircle2 } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import { toast } from 'react-hot-toast';
 
 export default function ShoppingCart() {
+  const { 
+    items, 
+    isCartOpen, 
+    toggleCart, 
+    updateQuantity, 
+    removeItem, 
+    getSubtotal, 
+    getDiscountAmount, 
     getTotal 
   } = useCartStore();
 

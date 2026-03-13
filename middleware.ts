@@ -42,12 +42,12 @@ export async function middleware(request: NextRequest) {
   
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login');
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-  const isRepRoute = request.nextUrl.pathname.startsWith('/rep');
+  const isRepDashboardRoute = request.nextUrl.pathname.startsWith('/rep') && !request.nextUrl.pathname.startsWith('/rep/register');
   
   // Public routes that don't need auth (Header/Footer are usually everywhere, 
   // but we only want to protect specifically the dashboards)
   
-  if (!user && (isAdminRoute || isRepRoute)) {
+  if (!user && (isAdminRoute || isRepDashboardRoute)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

@@ -340,9 +340,9 @@ export default function Header() {
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="md:hidden flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors"
-                aria-label="Toggle menu"
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
               >
-                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+                {mobileOpen ? <X size={28} className="text-soyuz" /> : <Menu size={28} />}
               </button>
             </div>
           </div>
@@ -473,6 +473,18 @@ export default function Header() {
             >
               {user ? 'My Account' : 'Login'}
             </Link>
+            {user && (
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setMobileOpen(false);
+                  router.push('/');
+                }}
+                className="py-4 px-2 text-soyuz text-xl font-black uppercase tracking-wider border-b border-white/5 flex items-center gap-2 hover:text-white transition-colors"
+              >
+                <LogOut size={20} /> Se déconnecter
+              </button>
+            )}
           </div>
 
           {/* MOBILE LANG + CURRENCY */}

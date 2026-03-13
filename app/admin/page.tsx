@@ -56,10 +56,17 @@ export default function AdminDashboard() {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      await fetch('/api/admin/sync', { method: 'POST' });
+      const resp = await fetch('/api/admin/sync', { method: 'POST' });
+      const data = await resp.json();
+      if (data.success || resp.ok) {
+        alert(`Sync successful: ${data.count || 0} items updated from QuickBooks.`);
+      } else {
+        alert(`Sync failed: ${data.error}`);
+      }
       fetchData();
     } catch (err) {
       console.error('Sync failed', err);
+      alert('Sync failed. Check console for details.');
     } finally {
       setSyncing(false);
     }
@@ -90,6 +97,13 @@ export default function AdminDashboard() {
             </h2>
           </div>
           <div className="flex gap-4">
+            <Button 
+              onClick={() => window.location.href = '/api/auth/quickbooks'}
+              variant="outline"
+              className="border-soyuz/50 text-soyuz/50 hover:border-soyuz hover:text-white rounded-none italic"
+            >
+              Connect QuickBooks
+            </Button>
             <Button 
               onClick={handleSync}
               disabled={syncing}
@@ -141,7 +155,7 @@ export default function AdminDashboard() {
               {[
                 { label: 'Total Revenue', value: `CAD $${stats.revenue.toFixed(2)}`, icon: <TrendingUp className="text-soyuz" /> },
                 { label: 'Active Orders', value: stats.orders, icon: <ShoppingBag className="text-soyuz" /> },
-                { label: 'Sync Status', value: 'Healthy', icon: <RefreshCw className="text-soyuz" /> },
+                { label: 'QBO Sync', value: stats.products > 0 ? 'ACTIVE' : 'READY', icon: <RefreshCw className="text-soyuz" /> },
                 { label: 'New Apps', value: reps.filter(r => r.status === 'pending').length, icon: <Users className="text-soyuz" /> },
               ].map((stat, i) => (
                 <div key={i} className="bg-carbon-surface border border-white/5 p-8 rounded-3xl relative overflow-hidden shadow-2xl">

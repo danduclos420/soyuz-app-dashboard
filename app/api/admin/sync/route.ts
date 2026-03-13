@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { syncErplainProducts } from '@/lib/erplain';
+import { syncQuickBooksInventory } from '@/lib/quickbooks';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -35,11 +35,11 @@ export async function POST() {
   }
 
   try {
-    console.log('API: Starting inventory sync...');
-    const result = await syncErplainProducts();
+    console.log('API: Starting QuickBooks inventory sync...');
+    const result = await syncQuickBooksInventory() as any;
     if (result.success) {
       console.log('API: Sync completed successfully');
-      return NextResponse.json({ message: 'Sync completed successfully' });
+      return NextResponse.json({ message: 'Sync completed successfully', count: result.count });
     } else {
       console.error('API: Sync failed with result:', result.error);
       return NextResponse.json({ error: result.error }, { status: 500 });

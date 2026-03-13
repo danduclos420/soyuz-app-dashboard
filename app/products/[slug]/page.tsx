@@ -1,336 +1,344 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useParams } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase-client';
 import { 
   ChevronRight, 
   ShieldCheck, 
   Truck, 
   Heart, 
-  Info,
   Maximize2,
   Activity,
   Zap,
-  Layers
+  Layers,
+  ShoppingBag,
+  ArrowRight,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '@/lib/store/cart';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import { dummyProducts } from '@/lib/mock-products';
+import Image from 'next/image';
 import AnimatedKickPoint from '@/components/tech-guide/AnimatedKickPoint';
 import CurveProfile from '@/components/tech-guide/CurveProfile';
 
+// TYPES
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  images: string[];
+  category: string;
+  stock_qty: number;
+  description: string;
+  tech?: {
+    flex: number[];
+    curves: string[];
+    kickPoint: 'low' | 'mid' | 'high';
+    weight: string;
+    construction: string;
+  };
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string;
   
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedMainImage, setSelectedMainImage] = useState(0);
+  const [selectedHand, setSelectedHand] = useState('LEFT');
+  const [selectedFlex, setSelectedFlex] = useState<number | null>(null);
+  const [selectedCurve, setSelectedCurve] = useState<string | null>(null);
+
   const { addItem, toggleCart } = useCartStore();
 
-  // Find product or default to first dummy
-  const product = useMemo(() => {
-    return dummyProducts.find(p => p.slug === slug) || dummyProducts[0];
+  useEffect(() => {
+    async function fetchProduct() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (data) {
+        setProduct(data);
+        // Set defaults if tech data exists
+        if (data.tech) {
+          if (data.tech.flex?.length > 0) setSelectedFlex(data.tech.flex[0]);
+          if (data.tech.curves?.length > 0) setSelectedCurve(data.tech.curves[0]);
+        }
+      } else {
+        // Fallback or 404
+        console.error("Product not found", error);
+      }
+      setLoading(false);
+    }
+    if (slug) fetchProduct();
   }, [slug]);
 
-  const [selectedMainImage, setSelectedMainImage] = useState(0);
-  const [selectedHand, setSelectedHand] = useState('Gauche');
-  const [selectedFlex, setSelectedFlex] = useState(product.tech.flex[0]);
-  const [selectedCurve, setSelectedCurve] = useState(product.tech.curves[0]);
-
   const handleAddToCart = () => {
+    if (!product) return;
+
     addItem({
-      id: product.id.toString(),
+      id: product.id,
       name: product.name,
-      price: product.priceRaw,
+      price: product.price,
       image: product.images[0],
       quantity: 1,
       variantId: `${selectedHand}-${selectedFlex}-${selectedCurve}`,
-      flex: selectedFlex.toString(),
-      side: selectedHand === 'Gauche' ? 'left' : 'right',
+      flex: selectedFlex?.toString() || 'Standard',
+      side: selectedHand.toLowerCase() as 'left' | 'right',
       sku: (product as any).sku || `SOYUZ-${product.id}`,
     });
     
-    toast.success(`${product.name} added to locker`, {
+    toast.success(`${product.name} ADDED TO LOCKER`, {
       style: {
-        background: '#1A1A1A',
+        background: '#111111',
         color: '#fff',
-        border: '1px solid rgba(255,255,255,0.1)',
-        fontSize: '12px',
-        fontWeight: 'bold',
+        border: '1px solid rgba(255,0,0,0.1)',
+        fontSize: '10px',
+        fontWeight: '900',
         textTransform: 'uppercase',
+        letterSpacing: '0.1em',
       },
     });
     
     toggleCart(true);
   };
 
+  if (loading) {
+    return (
+      <div className="bg-black min-h-screen pt-40 flex flex-col items-center justify-center space-y-8">
+        <div className="w-12 h-12 border-2 border-soyuz border-t-transparent rounded-full animate-spin" />
+        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">INITIALIZING ASSET...</p>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="bg-black min-h-screen pt-40 flex flex-col items-center justify-center space-y-8">
+        <p className="text-white font-display italic text-4xl">404: ASSET NOT FOUND</p>
+        <Link href="/products" className="btn-primary py-3 px-8 text-xs font-black uppercase tracking-widest">
+          RETURN TO CATALOG
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-black min-h-screen pt-24 pb-24 overflow-x-hidden">
-      {/* Background Glows */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-soyuz/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-soyuz/5 blur-[120px] rounded-full" />
+    <div className="bg-black min-h-screen pt-32 pb-32 overflow-hidden selection:bg-soyuz selection:text-white">
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-soyuz/5 blur-[150px] rounded-full" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-soyuz/5 blur-[150px] rounded-full" />
+        <div className="absolute inset-0 carbon-texture opacity-5" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-[9px] text-muted font-black uppercase tracking-[0.3em] mb-12">
-          <Link href="/" className="hover:text-soyuz transition-colors">Home</Link>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* BREADCRUMBS */}
+        <nav className="flex items-center gap-3 text-[9px] text-[#444444] font-black uppercase tracking-[0.3em] mb-16">
+          <Link href="/" className="hover:text-white transition-colors">HOME</Link>
           <ChevronRight size={10} />
-          <Link href="/products" className="hover:text-soyuz transition-colors">Elite Gear</Link>
+          <Link href="/products" className="hover:text-white transition-colors">ELITE GEAR</Link>
           <ChevronRight size={10} />
-          <span className="text-white opacity-50">{product.name}</span>
+          <span className="text-soyuz">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-32">
-          {/* 1. Technical Showcase (Gallery) */}
-          <div className="lg:col-span-7 space-y-8">
-            <div className="relative group">
-              <motion.div 
-                key={selectedMainImage}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="aspect-[4/5] bg-carbon-surface rounded-[40px] overflow-hidden border border-white/5 relative shadow-2xl"
-              >
-                <img 
-                  src={product.images[selectedMainImage]} 
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
-                />
-                
-                {/* Image Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                <div className="absolute top-8 left-8 flex flex-col gap-3">
-                  <Badge variant="accent" className="bg-soyuz text-black font-black uppercase tracking-widest text-[10px] py-1.5 px-4 shadow-[0_0_20px_rgba(0,229,255,0.4)]">
-                    {product.tag}
-                  </Badge>
-                </div>
-
-                <button className="absolute bottom-8 right-8 p-4 bg-white/10 backdrop-blur-md rounded-full text-white border border-white/10 hover:bg-soyuz hover:text-black transition-all group-hover:translate-y-0 translate-y-4 opacity-0 group-hover:opacity-100 duration-500">
-                  <Maximize2 size={20} />
-                </button>
-              </motion.div>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 xl:gap-32">
+          {/* GALLERY */}
+          <div className="lg:col-span-7 space-y-10">
+            <motion.div 
+              key={selectedMainImage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="aspect-[4/5] bg-[#0A0A0A] border border-white/5 relative group overflow-hidden"
+            >
+              <Image 
+                src={product.images[selectedMainImage]} 
+                alt={product.name}
+                fill
+                className="object-contain p-12 transition-transform duration-[2s] group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <button className="absolute bottom-8 right-8 p-4 bg-white/5 backdrop-blur-xl border border-white/10 text-white hover:bg-soyuz hover:text-black transition-all">
+                <Maximize2 size={20} />
+              </button>
+            </motion.div>
             
-            <div className="flex gap-4 sm:gap-6 justify-center">
+            <div className="flex gap-4">
               {product.images.map((img, idx) => (
                 <button 
                   key={idx}
                   onClick={() => setSelectedMainImage(idx)}
-                  className={`relative w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-500 group ${selectedMainImage === idx ? 'border-soyuz scale-105 shadow-[0_0_15px_rgba(0,229,255,0.2)]' : 'border-white/5 opacity-50 hover:opacity-100 hover:border-white/20'}`}
+                  className={`relative w-24 h-24 border transition-all duration-300 ${selectedMainImage === idx ? 'border-soyuz scale-105' : 'border-white/5 opacity-40 hover:opacity-100'}`}
                 >
-                  <img src={img} alt="Thumbnail" className="w-full h-full object-cover" />
+                  <Image src={img} alt="Thumb" fill className="object-cover" />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* 2. Configuration Engine */}
-          <div className="lg:col-span-5 space-y-12">
+          {/* CONFIGURATION */}
+          <div className="lg:col-span-5 space-y-16">
             <div>
-              <motion.p 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="text-soyuz font-black uppercase tracking-[0.4em] text-[10px] mb-6 flex items-center gap-2"
-              >
-                <span className="w-8 h-[1px] bg-soyuz" /> {product.category}
-              </motion.p>
-              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white mb-6 italic leading-[0.85] outline-text-cyan">
+              <span className="inline-block px-3 py-1 bg-soyuz/10 border border-soyuz/20 text-soyuz font-label text-[9px] mb-6 uppercase tracking-[0.2em] rounded-full">
+                {product.category} SERIES
+              </span>
+              <h1 className="text-5xl md:text-7xl font-display italic tracking-tighter leading-[0.85] mb-8 uppercase">
                 {product.name.split(' ').slice(0, -1).join(' ')} <br />
-                <span className="text-white not-italic">{product.name.split(' ').pop()}</span>
+                <span className="outline-text-white">{product.name.split(' ').pop()}</span>
               </h1>
-              <div className="flex items-center gap-6">
-                <p className="text-3xl font-black text-white tracking-widest">{product.price}</p>
-                <div className="h-4 w-[1px] bg-white/10" />
-                <p className="text-[10px] text-muted font-bold uppercase tracking-widest">In Stock & Ready to Ship</p>
+              <div className="flex items-center gap-8">
+                <p className="text-4xl font-display text-white italic">${product.price}</p>
+                <div className="h-6 w-[1px] bg-white/10" />
+                <p className="text-[10px] text-soyuz font-black uppercase tracking-widest flex items-center gap-2">
+                  <Zap size={14} /> READY FOR DEPLOYMENT
+                </p>
               </div>
             </div>
 
-            <p className="text-muted text-sm leading-loose max-w-md font-medium">
+            <p className="text-[#888888] text-xs leading-relaxed uppercase font-bold tracking-widest max-w-md">
               {product.description}
             </p>
 
-            {/* Technical Selectors (Pure & Modern) */}
-            <div className="space-y-10">
-              {/* Hand Selector */}
+            {/* SELECTORS */}
+            <div className="space-y-12">
+              {/* Hand */}
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-white font-black uppercase tracking-widest text-[10px] italic">Access Hand</h4>
-                  <span className="text-soyuz text-[10px] font-black uppercase tracking-widest">{selectedHand}</span>
+                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                  <span className="text-[#444444]">HAND ORIENTATION</span>
+                  <span className="text-soyuz">{selectedHand}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {['Gauche', 'Droite'].map((h) => (
+                <div className="grid grid-cols-2 gap-4">
+                  {['LEFT', 'RIGHT'].map((h) => (
                     <button 
                       key={h}
                       onClick={() => setSelectedHand(h)}
-                      className={`relative py-4 group transition-all duration-500 overflow-hidden rounded-xl border ${selectedHand === h ? 'border-soyuz bg-soyuz/5' : 'border-white/5 hover:border-white/20 bg-white/2'}`}
+                      className={`py-4 border text-[10px] font-black tracking-[0.2em] transition-all ${selectedHand === h ? 'bg-white text-black border-white' : 'border-white/5 text-[#555555] hover:border-white/20'}`}
                     >
-                      <span className={`relative z-10 text-[10px] font-black uppercase tracking-[0.2em] ${selectedHand === h ? 'text-soyuz' : 'text-muted group-hover:text-white'}`}>
-                        {h}
-                      </span>
+                      {h}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Flex Visual Selector */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-white font-black uppercase tracking-widest text-[10px] italic">Flex Magnitude</h4>
-                  <span className="text-soyuz text-[10px] font-black uppercase tracking-widest">{selectedFlex} Flex</span>
+              {/* Flex */}
+              {product.tech?.flex && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-[#444444]">FLEX MAGNITUDE</span>
+                    <span className="text-soyuz">{selectedFlex} FLEX</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {product.tech.flex.map((f) => (
+                      <button 
+                        key={f}
+                        onClick={() => setSelectedFlex(f)}
+                        className={`py-4 border text-[11px] font-black transition-all ${selectedFlex === f ? 'bg-soyuz text-white border-soyuz' : 'border-white/5 text-[#555555] hover:border-white/20'}`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 gap-3">
-                  {product.tech.flex.map((f) => (
-                    <button 
-                      key={f}
-                      onClick={() => setSelectedFlex(f)}
-                      className={`py-4 rounded-xl border font-black text-[11px] transition-all duration-300 ${selectedFlex === f ? 'bg-white text-black border-white shadow-xl scale-105' : 'border-white/5 text-muted hover:border-white/30'}`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
 
-              {/* Curve Interactive Profiles */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-white font-black uppercase tracking-widest text-[10px] italic">Blade Geometry</h4>
-                  <span className="text-soyuz text-[10px] font-black uppercase tracking-widest">{selectedCurve} Profile</span>
+              {/* Curve */}
+              {product.tech?.curves && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-[#444444]">BLADE GEOMETRY</span>
+                    <span className="text-soyuz">{selectedCurve} PROFILE</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {product.tech.curves.map((c) => (
+                      <div key={c} onClick={() => setSelectedCurve(c)} className="cursor-pointer">
+                        <CurveProfile curveId={c} active={selectedCurve === c} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {product.tech.curves.map((c) => (
-                    <div key={c} onClick={() => setSelectedCurve(c)} className="cursor-pointer">
-                      <CurveProfile curveId={c} active={selectedCurve === c} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Actions */}
-            <div className="pt-10 flex gap-4">
-              <Button variant="primary" size="lg" className="flex-1 rounded-none py-8 text-black font-black uppercase tracking-[0.3em] shadow-[0_0_30px_rgba(0,229,255,0.2)]">
-                Acquire Now
-              </Button>
-              <button className="px-8 border border-white/5 bg-white/2 rounded-none text-white hover:text-soyuz hover:border-soyuz transition-all group">
-                <Heart size={20} className="group-hover:scale-110 transition-transform" />
+            {/* ACTION */}
+            <div className="pt-12 flex gap-4">
+              <button 
+                onClick={handleAddToCart}
+                disabled={product.stock_qty <= 0}
+                className="flex-1 bg-soyuz text-white py-6 text-xs font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed group relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  ACQUIRE ASSET <ShoppingBag size={18} />
+                </span>
+                <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+              </button>
+              <button className="px-8 border border-white/5 hover:border-soyuz hover:text-soyuz transition-all">
+                <Heart size={20} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* 3. High-End Technical Guide Section */}
-        <section className="mt-48">
-          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-20 border-b border-white/5 pb-10">
-            <div>
-              <h3 className="text-soyuz font-black uppercase tracking-[0.4em] text-[10px] mb-4">Engineering Data</h3>
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
-                Technical <span className="outline-text-cyan">Specifications</span>
-              </h2>
+        {/* TECHNICAL SPECS */}
+        {product.tech && (
+          <section className="mt-60">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-12 mb-24 border-b border-white/5 pb-10">
+              <div className="max-w-xl">
+                <span className="text-soyuz font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">ENGINEERING DATA</span>
+                <h2 className="text-5xl md:text-8xl font-display italic tracking-tighter text-white leading-none uppercase">
+                  TECHNICAL <br /><span className="outline-text-white">SPECS</span>
+                </h2>
+              </div>
+              <p className="text-[#444444] text-[10px] uppercase font-bold tracking-[0.2em] max-w-xs text-right leading-relaxed mb-4">
+                Laboratory tested parameters for professional-grade reliability in high-intensity environments.
+              </p>
             </div>
-            <p className="text-muted text-[10px] uppercase font-bold tracking-widest max-w-xs text-right opacity-40">
-              Advanced performance metrics and laboratory tested geometry for professional play.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            {/* Kick Point Visualizer */}
-            <div className="bg-carbon-surface border border-white/5 rounded-[40px] p-12 relative overflow-hidden group">
-              <div className="absolute inset-0 carbon-texture opacity-5" />
-              <div className="relative z-10 flex flex-col items-center">
-                <div className="mb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              {/* KICK POINT VISUALIZER */}
+              <div className="bg-[#0A0A0A] border border-white/5 p-16 flex flex-col items-center text-center group">
+                <div className="mb-16">
                   <AnimatedKickPoint type={product.tech.kickPoint} active={true} />
                 </div>
-                <div className="text-center">
-                  <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4 italic flex items-center justify-center gap-2">
-                    <Activity size={16} className="text-soyuz" /> Kick Point System
-                  </h4>
-                  <p className="text-muted text-[11px] uppercase tracking-widest leading-relaxed max-w-[200px] mx-auto opacity-70">
-                    Proprietary {product.tech.kickPoint}-kick geometry engineered for {product.tech.kickPoint === 'low' ? 'explosive release' : 'maximum loading power'}.
-                  </p>
-                </div>
+                <h4 className="text-white font-black uppercase tracking-widest text-xs mb-4 flex items-center gap-3 italic">
+                  <Activity size={18} className="text-soyuz" /> KICK POINT SYSTEM
+                </h4>
+                <p className="text-[#555555] text-[10px] uppercase tracking-widest leading-loose max-w-[220px]">
+                   Optimized {product.tech.kickPoint}-kick geometry for {product.tech.kickPoint === 'low' ? 'maximum speed' : 'unrivaled power'}.
+                </p>
+              </div>
+
+              {/* SPECS LIST */}
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                {[
+                  { label: 'GEOMETRY', value: 'DOUBLE-CONCAVE', icon: <Maximize2 size={24} /> },
+                  { label: 'CONSTRUCTION', value: product.tech.construction, icon: <Layers size={24} /> },
+                  { label: 'MASS WEIGHT', value: product.tech.weight, icon: <Zap size={24} /> },
+                  { label: 'STATUS', value: 'ELITE STANDARD', icon: <ShieldCheck size={24} /> },
+                ].map((spec, i) => (
+                  <div key={i} className="bg-[#0A0A0A] border border-white/5 p-10 flex items-start gap-8 hover:border-soyuz/30 transition-all group">
+                    <div className="p-4 bg-black border border-white/5 text-soyuz transition-transform group-hover:scale-110">
+                      {spec.icon}
+                    </div>
+                    <div>
+                      <h5 className="text-[#444444] text-[9px] uppercase tracking-[0.3em] font-black mb-3">{spec.label}</h5>
+                      <p className="text-white font-black uppercase tracking-tight italic text-xl group-hover:text-soyuz transition-colors">{spec.value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Specs Grid */}
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
-                { label: 'Shaft Geometry', value: 'Square Double-Concave', icon: <Maximize2 size={24} /> },
-                { label: 'Carbon Weave', value: product.tech.construction, icon: <Layers size={24} /> },
-                { label: 'Mass Weight', value: product.tech.weight, icon: <Zap size={24} /> },
-                { label: 'Blade Core', value: 'High-Density Aero Foam', icon: <Info size={24} /> },
-              ].map((spec, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-carbon-surface border border-white/5 p-10 rounded-[40px] flex items-start gap-8 group hover:border-soyuz/20 transition-all shadow-xl"
-                >
-                  <div className="p-4 bg-black rounded-2xl border border-white/5 text-soyuz transition-transform group-hover:scale-110">
-                    {spec.icon}
-                  </div>
-                  <div>
-                    <h5 className="text-muted text-[10px] uppercase tracking-[0.3em] font-black mb-2">{spec.label}</h5>
-                    <p className="text-white font-black uppercase tracking-tight italic text-lg">{spec.value}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 4. Comparison Section (Modern Grid) */}
-        <section className="mt-48 pb-24">
-          <div className="text-center mb-24">
-             <h3 className="text-soyuz font-black uppercase tracking-[0.4em] text-[10px] mb-4">Elite Comparison</h3>
-             <h4 className="text-4xl font-black uppercase tracking-tighter text-white italic">Alternative <span className="outline-text-cyan">Arsenal</span></h4>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {dummyProducts.filter(p => p.id !== product.id).map((alt) => (
-              <Link href={`/products/${alt.slug}`} key={alt.id} className="group">
-                <div className="bg-carbon-surface border border-white/5 p-8 rounded-[40px] transition-all duration-500 hover:border-soyuz/40 hover:shadow-2xl hover:shadow-soyuz/10">
-                  <div className="aspect-square rounded-3xl overflow-hidden mb-8 bg-black">
-                    <img src={alt.images[0]} alt={alt.name} className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" />
-                  </div>
-                  <p className="text-soyuz font-black uppercase tracking-widest text-[9px] mb-2">{alt.category}</p>
-                  <h5 className="text-xl font-black uppercase tracking-tighter text-white italic mb-4">{alt.name}</h5>
-                  <div className="flex justify-between items-center">
-                    <p className="text-white font-mono text-sm">{alt.price}</p>
-                    <ArrowRight size={16} className="text-soyuz transform -rotate-45 group-hover:rotate-0 transition-transform" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </div>
-  );
-}
-
-function ArrowRight({ size, className }: { size: number, className: string }) {
-  return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="3" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
   );
 }

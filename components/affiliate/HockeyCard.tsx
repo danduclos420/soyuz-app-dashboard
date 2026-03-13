@@ -148,7 +148,11 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-30deg]" />
                   <div className="flex flex-col relative z-10 w-full group">
                      <div className="flex justify-between items-end mb-1">
-                        <p className={`text-[10px] font-black italic tracking-[0.4em] uppercase ${theme.accent} opacity-80`}>YOUNG-NODES</p>
+                        <p className={`text-[10px] font-black italic tracking-[0.4em] uppercase ${theme.accent} opacity-80`}>
+                           {user.role === 'admin' ? 'SOYUZ AMBASSADOR' : 
+                            user.role === 'affiliate' ? 'SOYUZ AFFILIATE' : 
+                            'SOYUZ CUSTOMER'}
+                        </p>
                         <div className="flex flex-col items-end">
                            <span className="text-[12px] font-black italic text-white/40 leading-none">{rank.toUpperCase()}</span>
                            <div className="h-[1px] w-6 bg-white/20 mt-1" />
@@ -247,22 +251,28 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
       </div>
 
       {/* Action Hub */}
-      <div className="flex gap-4 relative z-50">
-        <button 
-          onClick={(e) => { e.stopPropagation(); onEditPhoto?.(); }} 
-          className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50"
-          disabled={isDownloading}
-        >
-          <Camera size={14} className="text-soyuz/50" /> PHOTO
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); handleInternalDownload(); }} 
-          className={`flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all ${isDownloading ? 'animate-pulse text-soyuz' : ''}`}
-          disabled={isDownloading}
-        >
-          <Download size={14} className={isDownloading ? 'animate-bounce' : 'text-soyuz/50'} /> 
-          {isDownloading ? 'EXPORT...' : 'SYNC'}
-        </button>
+      <div className="flex flex-col items-center gap-4">
+        <div className="flex gap-4 relative z-50">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEditPhoto?.(); }} 
+            className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50"
+            disabled={isDownloading}
+          >
+            <Camera size={14} className="text-soyuz/50" /> PHOTO
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleInternalDownload(); }} 
+            className={`flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all ${isDownloading ? 'animate-pulse text-soyuz' : ''}`}
+            disabled={isDownloading}
+          >
+            <Download size={14} className={isDownloading ? 'animate-bounce' : 'text-soyuz/50'} /> 
+            {isDownloading ? 'EXPORT...' : 'SYNC'}
+          </button>
+        </div>
+        
+        <p className="text-[8px] font-bold text-white/10 uppercase tracking-[0.2em] max-w-[280px] text-center italic">
+          <span className="text-soyuz/40">PRO-TIP:</span> UTILISEZ UNE PHOTO SANS FOND (PNG TRANSPARENT) POUR UN RÉSULTAT OPTIMAL.
+        </p>
       </div>
     </div>
   );

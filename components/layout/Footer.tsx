@@ -18,7 +18,7 @@ const FOOTER_LINKS = {
     { name: 'Contact Us', href: '/contact' },
     { name: 'Newsletter', href: '/newsletter' },
     { name: 'Become a Rep', href: '/rep/register' },
-    { name: 'B2B Portal', href: 'https://soyuz-hockey.erplain.app/b2b/login' },
+    { name: 'B2B NODE', href: 'https://soyuz-hockey.erplain.app/b2b/login' },
   ],
   account: [
     { name: 'My Account', href: '/account' },

@@ -300,10 +300,32 @@ input, textarea, select {
   width: 100%;
   transition: border-color 0.2s;
 }
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--soyuz-red);
+/* OUTLINE TEXT UTILITIES */
+.outline-text-white {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+  color: transparent;
 }
-input::placeholder {
-  color: var(--muted);
+
+.outline-text-cyan {
+  -webkit-text-stroke: 1px rgba(0, 229, 255, 0.3);
+  color: transparent;
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-inner {
+  display: inline-flex;
+  animation: ticker 30s linear infinite;
 }

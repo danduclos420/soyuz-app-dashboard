@@ -98,12 +98,12 @@ export default function Header() {
             </Link>
 
             {/* DESKTOP NAV */}
-            <nav className="hidden md:flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-10">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="text-[#888888] hover:text-white transition-colors duration-200 text-xs font-bold uppercase tracking-widest"
+                  className="text-[#888888] hover:text-white transition-colors duration-200 text-[10px] font-black uppercase tracking-[0.2em]"
                 >
                   {link.name}
                 </Link>
@@ -111,9 +111,9 @@ export default function Header() {
               <Link
                 href="https://soyuz-hockey.erplain.app/b2b/login"
                 target="_blank"
-                className="text-xs font-bold uppercase tracking-widest text-[#CC0000] hover:text-red-400 transition-colors"
+                className="text-[10px] font-black uppercase tracking-[0.3em] text-soyuz hover:text-white transition-colors border-l border-white/10 pl-10"
               >
-                B2B Portal
+                B2B NODE
               </Link>
             </nav>
 

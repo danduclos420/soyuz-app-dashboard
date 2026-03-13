@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Truck, ArrowLeft } from 'lucide-react';
+import { Truck } from 'lucide-react';
+import BackButton from '@/components/BackButton';
 
 export default function ShippingPage() {
   return (
@@ -13,12 +14,7 @@ export default function ShippingPage() {
       </div>
 
       <div className="max-w-3xl mx-auto relative z-10">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-[#444444] hover:text-white text-[9px] font-black uppercase tracking-[0.4em] mb-12 transition-colors group"
-        >
-          <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> BACK TO BASE
-        </Link>
+        <BackButton variant="relative" className="mb-12" />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

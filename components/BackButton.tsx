@@ -7,20 +7,31 @@ interface BackButtonProps {
   href?: string;
   label?: string;
   className?: string;
+  variant?: 'fixed' | 'relative';
 }
 
 export default function BackButton({ 
   href = '/', 
-  label = 'Back to Website',
-  className = ''
+  label = 'BACK TO BASE',
+  className = '',
+  variant = 'fixed'
 }: BackButtonProps) {
+  const baseStyles = "inline-flex items-center gap-2 text-[#444444] hover:text-white text-[9px] font-black uppercase tracking-[0.4em] transition-colors group";
+  
+  if (variant === 'relative') {
+    return (
+      <Link href={href} className={`${baseStyles} ${className}`}>
+        <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> {label}
+      </Link>
+    );
+  }
+
   return (
     <Link 
       href={href}
-      className={`fixed top-6 left-6 z-[60] flex items-center gap-2 text-white/50 hover:text-white transition-colors bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs uppercase tracking-widest sm:top-8 sm:left-8 ${className}`}
+      className={`${baseStyles} fixed top-8 left-8 z-[60] ${className}`}
     >
-      <ArrowLeft size={14} />
-      <span>{label}</span>
+      <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> {label}
     </Link>
   );
 }

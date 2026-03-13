@@ -51,7 +51,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
-        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-16 md:-mt-24">
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-24 md:-mt-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -84,7 +84,7 @@ export default function HomePage() {
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
         >
           <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold">Discover</span>
           <ChevronDown size={20} className="text-white/40" />

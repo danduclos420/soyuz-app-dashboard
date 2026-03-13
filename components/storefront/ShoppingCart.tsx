@@ -3,25 +3,50 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, ArrowRight, Ticket, Loader2 } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase-client';
+import { toast } from 'react-hot-toast';
 
 export default function ShoppingCart() {
-  const { 
-    items, 
-    isCartOpen, 
-    toggleCart, 
-    updateQuantity, 
-    removeItem, 
-    getSubtotal, 
-    getDiscountAmount, 
     getTotal 
   } = useCartStore();
+
+  const [repCodeInput, setRepCodeInput] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
 
   const subtotal = getSubtotal();
   const discountAmount = getDiscountAmount();
   const total = getTotal();
   const tax = total - (subtotal - discountAmount);
+
+  const handleApplyCode = async () => {
+    if (!repCodeInput) return;
+    setIsValidating(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('affiliate_code, status')
+        .eq('affiliate_code', repCodeInput.toUpperCase())
+        .eq('status', 'approved')
+        .single();
+
+      if (error || !data) {
+        toast.error('Code invalide ou inactif.');
+        useCartStore.getState().setRepCode(null, 0);
+        return;
+      }
+
+      useCartStore.getState().setRepCode(data.affiliate_code, 15);
+      toast.success('Code Rep appliqué: 15% de rabais!');
+      setRepCodeInput('');
+    } catch (err) {
+      toast.error('Erreur de validation.');
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -154,6 +179,42 @@ export default function ShoppingCart() {
             {items.length > 0 && (
               <div className="border-t border-white/10 p-8 space-y-6 bg-black/50 backdrop-blur-md">
                 <div className="space-y-3">
+                  {/* Rep Code Input */}
+                  {!useCartStore.getState().repCode ? (
+                    <div className="flex gap-2 mb-4">
+                      <div className="relative flex-1">
+                        <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={12} />
+                        <input 
+                          type="text" 
+                          placeholder="REP CODE" 
+                          value={repCodeInput}
+                          onChange={(e) => setRepCodeInput(e.target.value)}
+                          className="w-full bg-black border border-white/10 rounded-lg pl-9 pr-4 py-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-soyuz transition-colors"
+                        />
+                      </div>
+                      <button 
+                        onClick={handleApplyCode}
+                        disabled={isValidating || !repCodeInput}
+                        className="px-4 bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white hover:bg-soyuz transition-all disabled:opacity-20"
+                      >
+                        {isValidating ? <Loader2 className="animate-spin" size={14} /> : 'Apply'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-between items-center bg-soyuz/10 border border-soyuz/20 p-3 rounded-lg mb-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={12} className="text-soyuz" />
+                        <span className="text-[9px] font-black text-white uppercase tracking-widest">CODE: {useCartStore.getState().repCode}</span>
+                      </div>
+                      <button 
+                        onClick={() => useCartStore.getState().setRepCode(null, 0)}
+                        className="text-[9px] font-black text-soyuz hover:text-white uppercase tracking-widest"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-xs font-black uppercase tracking-widest text-muted">
                     <span>Subtotal</span>
                     <span className="text-white">${subtotal.toFixed(2)}</span>

@@ -100,18 +100,18 @@ export default function HomePage() {
       </section>
 
       {/* 2. INFINITE TICKER (RED) */}
-      <div id="collections-top" className="bg-soyuz py-2 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]">
-        <div className="ticker-wrap flex items-center h-14 md:h-16">
-          <div className="ticker-inner gap-24">
+      <div id="collections-top" className="bg-soyuz overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]">
+        <div className="ticker-wrap flex items-center h-12 md:h-14">
+          <div className="ticker-inner gap-16 md:gap-24">
             {[...Array(4)].map((_, i) => (
               <Fragment key={i}>
-                <span className="text-white font-black uppercase tracking-[0.1em] text-2xl md:text-3xl flex-shrink-0 leading-none">STRENGTH IN UNITY</span>
+                <span className="text-white font-black uppercase tracking-[0.05em] text-3xl md:text-4xl flex-shrink-0 leading-none">STRENGTH IN UNITY</span>
                 <img src="/assets/player-banner.webp" alt="" className="h-10 md:h-12 w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
-                <span className="text-white font-black uppercase tracking-[0.1em] text-2xl md:text-3xl flex-shrink-0 leading-none">POWER WITH SOYUZ</span>
+                <span className="text-white font-black uppercase tracking-[0.05em] text-3xl md:text-4xl flex-shrink-0 leading-none">POWER WITH SOYUZ</span>
                 <img src="/assets/logo-banner.png" alt="" className="h-8 md:h-10 w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
-                <span className="text-white font-black uppercase tracking-[0.1em] text-2xl md:text-3xl flex-shrink-0 leading-none">BREAK EVERY LIMIT</span>
+                <span className="text-white font-black uppercase tracking-[0.05em] text-3xl md:text-4xl flex-shrink-0 leading-none">BREAK EVERY LIMIT</span>
                 <img src="/assets/player-banner.webp" alt="" className="h-10 md:h-12 w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
-                <span className="text-white font-black uppercase tracking-[0.1em] text-2xl md:text-3xl flex-shrink-0 leading-none">SOYUZ NORTH AMERICA</span>
+                <span className="text-white font-black uppercase tracking-[0.05em] text-3xl md:text-4xl flex-shrink-0 leading-none">SOYUZ NORTH AMERICA</span>
                 <img src="/assets/logo-banner.png" alt="" className="h-8 md:h-10 w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
               </Fragment>
             ))}

@@ -95,13 +95,15 @@ export default function HomePage() {
       <div className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)]">
         <div className="ticker-wrap">
           <div className="ticker-inner">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center whitespace-nowrap gap-16 px-8 h-full">
                 <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">STRENGTH IN UNITY</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-3 w-auto brightness-0 invert opacity-80 block" />
-                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">POWER WITH SOYUZ</span>
                 <img src="/assets/player-banner.webp" alt="" className="h-4 w-auto grayscale brightness-150 block" />
+                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">POWER WITH SOYUZ</span>
+                <img src="/assets/logo-banner.png" alt="" className="h-3 w-auto brightness-0 invert opacity-80 block" />
                 <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">BREAK EVERY LIMIT</span>
+                <img src="/assets/player-banner.webp" alt="" className="h-4 w-auto grayscale brightness-150 block" />
+                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">SOYUZ NORTH AMERICA</span>
                 <img src="/assets/logo-banner.png" alt="" className="h-3 w-auto brightness-0 invert opacity-80 block" />
               </div>
             ))}

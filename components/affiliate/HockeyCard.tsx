@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
-import { Trophy, Star, Target, DollarSign, ShoppingBag, Calendar, Download, Crown, Camera, Zap, Check, X, RotateCcw, Maximize2 } from 'lucide-react';
+import { Trophy, Star, Target, DollarSign, ShoppingBag, Calendar, Download, Crown, Camera, Zap, Check, X, RotateCcw, Maximize2, TrendingUp } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
 interface PhotoSettings {
@@ -51,39 +51,41 @@ export default function HockeyCard({
   onCancelEdit
 }: HockeyCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [localEditMode, setLocalEditMode] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-
-  // Sync isFlipped if we enter edit mode
-  useEffect(() => {
-    if (editMode && isFlipped) {
-      setIsFlipped(false);
-    }
-  }, [editMode, isFlipped]);
   
   // Photo Edit State
   const [zoom, setZoom] = useState(1);
   const photoX = useMotionValue(0);
   const photoY = useMotionValue(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  // Mouse Tracking State
+
+  // Mouse Tracking for Tilt
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const mouseXSpring = useSpring(x);
-  const mouseYSpring = useSpring(y);
+  const mouseXSpring = useSpring(x, { stiffness: 100, damping: 20 });
+  const mouseYSpring = useSpring(y, { stiffness: 100, damping: 20 });
   
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [10, -10]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [-10, 10]);
-  
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isDownloading || editMode || isFlipped) {
+  // Tilt Transform
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [12, -12]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [-12, 12]);
+
+  // Holographic Shine Transform
+  const shineX = useTransform(mouseXSpring, [-0.5, 0.5], [0, 100]);
+  const shineY = useTransform(mouseYSpring, [-0.5, 0.5], [0, 100]);
+
+  // Reset tilt on exit or flip
+  useEffect(() => {
+    if (isFlipped || editMode) {
       x.set(0);
       y.set(0);
-      return;
     }
-    const rect = cardRef.current.getBoundingClientRect();
+  }, [isFlipped, editMode]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current || isFlipped || editMode || isDownloading) return;
+    const rect = containerRef.current.getBoundingClientRect();
     const xPct = (e.clientX - rect.left) / rect.width - 0.5;
     const yPct = (e.clientY - rect.top) / rect.height - 0.5;
     x.set(xPct);
@@ -91,44 +93,37 @@ export default function HockeyCard({
   };
 
   const handleInternalDownload = async () => {
-    if (!cardRef.current) return;
+    if (!photoRef.current) return;
     setIsDownloading(true);
-    x.set(0);
-    y.set(0);
-
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        pixelRatio: 2,
-        backgroundColor: 'transparent'
-      });
-      const link = document.createElement('a');
-      link.download = `SOYUZ-${isFlipped ? 'BACK' : 'FRONT'}-${user.full_name.toUpperCase()}.png`;
-      link.href = dataUrl;
-      link.click();
-      onDownload?.();
+      if (onDownload) {
+        onDownload();
+      } else {
+        const dataUrl = await toPng(photoRef.current, { cacheBust: true, pixelRatio: 2 });
+        const link = document.createElement('a');
+        link.download = `soyuz-card-${user.full_name.toLowerCase().replace(/\s+/g, '-')}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
     } catch (err) {
-      console.error('Download failed', err);
+      console.error('Download failed:', err);
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const firstName = (user.role === 'admin' || rank === 'mvp') ? 'Dany' : user.full_name.split(' ')[0];
-  const lastName = (user.role === 'admin' || rank === 'mvp') ? 'Lacoursière' : user.full_name.split(' ').slice(1).join(' ');
-
-  const getRankTheme = () => {
-    const isAdmin = user.role === 'admin' || rank === 'mvp';
-    if (isAdmin) return { accent: 'text-yellow-500' };
-    if (rank === 'legend') return { accent: 'text-red-500' };
-    if (rank === 'elite') return { accent: 'text-zinc-200' };
-    return { accent: 'text-white/40' };
+  const currentRankLabel = () => {
+    if (rank === 'mvp') return 'SOYUZ AMBASSADOR';
+    if (user.role === 'admin') return 'SOYUZ AMBASSADOR';
+    if (user.role === 'affiliate') return 'SOYUZ AFFILIATE';
+    return 'SOYUZ CUSTOMER';
   };
 
-  const theme = getRankTheme();
+  const firstName = user.full_name.split(' ')[0] || 'Dany';
+  const lastName = user.full_name.split(' ').slice(1).join(' ') || 'Lacoursière';
 
   return (
-    <div className={`flex flex-col items-center transition-all duration-700 ${editMode ? 'gap-24' : 'gap-12'}`}>
+    <div className={`relative flex flex-col items-center justify-center p-4 transition-all duration-700 ${editMode ? 'scale-110' : ''}`}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Great+Vibes&family=Playball&display=swap');
       `}</style>
@@ -140,255 +135,262 @@ export default function HockeyCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 backdrop-blur-md z-[80]"
+            className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[80]"
           />
         )}
       </AnimatePresence>
 
+      {/* PERSPECTIVE WRAPPER */}
       <div 
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => { x.set(0); y.set(0); }}
-        className={`relative w-[340px] h-[470px] perspective-2000 cursor-pointer group select-none transition-all duration-700 ${editMode ? 'z-[100] scale-[1.15]' : 'z-0'}`}
-        onClick={() => {
-          if (!isDownloading && !editMode) {
-            setIsFlipped(!isFlipped);
-          }
-        }}
+        style={{ perspective: '2000px' }}
+        className={`relative w-[340px] h-[470px] ${editMode ? 'z-[100]' : 'z-0'}`}
       >
+        {/* FLIP CONTAINER (Handles the 180-deg flip) */}
         <motion.div
+           animate={{ rotateY: isFlipped ? 180 : 0 }}
+           transition={{ type: "spring", stiffness: 100, damping: 20 }}
            className="w-full h-full relative"
-           initial={false}
-           animate={{ 
-             rotateY: isFlipped ? 180 : 0,
-             rotateX: 0 
-           }}
-           style={{ 
-              transformStyle: 'preserve-3d',
-              // Use x/y motion values directly for tilt if not flipping/editing
-              rotateX: (isFlipped || editMode) ? 0 : rotateX,
-              rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY)
-           }}
-           transition={{ type: "spring", stiffness: 60, damping: 20 }}
+           style={{ transformStyle: 'preserve-3d' }}
         >
-          {/* OPAQUE CORE */}
-          <div className="absolute inset-0 bg-black z-0 rounded-[4px]" style={{ transform: 'translateZ(-1px)' }} />
-
-          {/* FRONT SIDE (Recto - Soyuz Top Deck Custom Assets) */}
-          <div 
-            className="absolute inset-0 rounded-[4px] overflow-hidden bg-[#050505] flex flex-col"
-            style={{ backfaceVisibility: 'hidden', transform: 'translateZ(1px)' }}
+          {/* TILT CONTAINER (Handles the mouse hover tilt) */}
+          <motion.div
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => { x.set(0); y.set(0); }}
+            onClick={() => !editMode && !isDownloading && setIsFlipped(!isFlipped)}
+            style={{ 
+              transformStyle: 'preserve-3d',
+              rotateX: editMode ? 0 : rotateX,
+              rotateY: editMode ? 0 : rotateY
+            }}
+            className="w-full h-full relative"
           >
-            {/* LAYER 1: BOTTOM ASSET (Under Photo) */}
-            <img 
-               src="/assets/hockey-card/Bottom_underimage_soyuztopdeck.png" 
-               className="absolute inset-0 w-full h-full object-fill z-0" 
-               alt="Background"
-            />
+            {/* FRONT FACE (Recto) */}
+            <div 
+              style={{ backfaceVisibility: 'hidden', transform: 'translateZ(1px)' }}
+              className="absolute inset-0 w-full h-full rounded-[4px] shadow-2xl overflow-hidden bg-black"
+            >
+              {/* PHOTO BOX (Ref for download) */}
+              <div 
+                ref={photoRef}
+                className="absolute inset-0 w-full h-full overflow-hidden"
+              >
+                {/* BOTTOM LAYER */}
+                <img 
+                  src="/assets/hockey-card/Bottom_underimage_soyuztopdeck.png" 
+                  className="absolute inset-0 w-full h-full object-fill z-0" 
+                  alt="Bottom frame"
+                />
 
-            {/* LAYER 2: USER PHOTO (Draggable if editing) */}
-            <div className={`absolute inset-0 z-10 flex items-center justify-center ${editMode ? 'cursor-move' : 'pointer-events-none'}`}>
-               <motion.div
-                 ref={photoRef}
-                 drag={editMode}
-                 dragMomentum={false}
-                 style={{ 
-                    x: photoX, 
-                    y: photoY, 
-                    scale: zoom,
-                    touchAction: 'none'
-                 }}
-                 className="w-full h-full flex items-center justify-center"
-               >
-                  {tempPhotoUrl || user.avatar_url ? (
-                    <img 
-                       src={tempPhotoUrl || user.avatar_url} 
-                       className="w-full h-full object-cover contrast-[1.1] brightness-[1.1]" 
-                       draggable={false}
-                    />
+                {/* USER IMAGE */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
+                  {(tempPhotoUrl || user.avatar_url) ? (
+                    <motion.div
+                      drag={editMode}
+                      dragMomentum={false}
+                      style={{ 
+                         x: photoX, 
+                         y: photoY, 
+                         scale: zoom,
+                      }}
+                      className="w-full h-full flex items-center justify-center"
+                    >
+                      <img 
+                        src={tempPhotoUrl || user.avatar_url} 
+                        className="w-full h-full object-cover p-2" 
+                        draggable={false}
+                      />
+                    </motion.div>
                   ) : (
-                    <Star size={120} className="text-white/5" />
+                    <div className="opacity-10 grayscale">
+                      <Star size={160} className="text-white" />
+                    </div>
                   )}
-               </motion.div>
+                </div>
+
+                {/* TOP LAYER (Frame with hole) */}
+                <img 
+                  src="/assets/hockey-card/Top_overimage_soyuztopdeck.png" 
+                  className="absolute inset-0 w-full h-full object-fill z-20 pointer-events-none" 
+                  alt="Top frame"
+                />
+
+                {/* TEXT CONTENT */}
+                <div className="absolute inset-0 z-30 flex flex-col justify-end p-8 pointer-events-none pb-12">
+                   <div className="flex flex-col drop-shadow-[0_4px_10px_rgba(0,0,0,1)]">
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="text-[10px] font-black italic tracking-[0.4em] text-soyuz uppercase italic">
+                           {currentRankLabel()}
+                        </p>
+                        <p className="text-[10px] font-black italic text-white/40">MVP</p>
+                      </div>
+                      <div className="flex items-baseline gap-2 translate-y-[-5px]">
+                         <span className="text-3xl text-white font-bold" style={{ fontFamily: '"Dancing Script", cursive' }}>
+                            {firstName}
+                         </span>
+                         <h2 className="text-4xl text-white leading-none tracking-tighter" style={{ fontFamily: '"Playball", cursive' }}>
+                            {lastName}
+                         </h2>
+                      </div>
+                   </div>
+                </div>
+
+                {/* HOLOGRAPHIC GLITTER VFX */}
+                <motion.div 
+                   className="absolute inset-0 z-40 pointer-events-none opacity-30 mix-blend-color-dodge transition-opacity duration-500"
+                   style={{
+                     background: useTransform(
+                       [shineX, shineY],
+                       ([sx, sy]) => `radial-gradient(circle at ${sx}% ${sy}%, rgba(255,255,255,0.6) 0%, transparent 50%), 
+                                   linear-gradient(${sx}deg, transparent 20%, rgba(255,255,255,0.2) 50%, transparent 80%)`
+                     )
+                   }}
+                />
+                <div className="absolute inset-0 z-41 pointer-events-none opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay" />
+              </div>
+
+              {/* EDIT MODE TOOLS (Z-100) */}
+              <AnimatePresence>
+                {editMode && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="absolute inset-x-0 -top-24 z-[100] bg-[#0A0A0A] border border-soyuz/20 p-8 flex flex-col items-center gap-6 rounded-2xl shadow-[0_30px_100px_rgba(255,0,0,0.2)]"
+                    style={{ transform: 'translateZ(100px)' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                       <div className="flex items-center gap-2">
+                          <Camera size={16} className="text-soyuz" />
+                          <p className="text-[12px] font-black italic text-white tracking-[0.4em] uppercase">OPTIMISATION LOOK</p>
+                       </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 w-full px-2">
+                       <Maximize2 size={12} className="text-white/20" />
+                       <input 
+                          type="range" 
+                          min="0.5" 
+                          max="3" 
+                          step="0.01" 
+                          value={zoom} 
+                          onChange={(e) => setZoom(parseFloat(e.target.value))}
+                          className="flex-1 accent-soyuz h-1"
+                       />
+                    </div>
+
+                    <div className="flex gap-4 w-full">
+                       <button 
+                          onClick={(e) => { e.stopPropagation(); onCancelEdit?.(); }}
+                          className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all underline underline-offset-4"
+                       >
+                          ANNULER
+                       </button>
+                       <button 
+                          onClick={(e) => { 
+                             e.stopPropagation(); 
+                             onSaveEdit?.({ x: photoX.get(), y: photoY.get(), scale: zoom }); 
+                          }}
+                          className="flex-3 flex items-center justify-center gap-3 px-10 py-4 bg-soyuz text-black rounded-full text-[10px] font-black uppercase tracking-[0.4em] hover:bg-white transition-all shadow-[0_0_40px_rgba(255,0,0,0.4)]"
+                       >
+                          <Check size={16} /> CONFIRMER
+                       </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* LAYER 3: TOP ASSET (Over Photo) */}
-            <img 
-               src="/assets/hockey-card/Top_overimage_soyuztopdeck.png" 
-               className="absolute inset-0 w-full h-full object-fill z-20 pointer-events-none" 
-               alt="Overlay"
-            />
-
-            {/* EDIT TOOLS OVERLAY */}
-            {editMode && (
-               <div 
-                className="absolute inset-x-0 -top-20 z-[110] bg-[#0A0A0A] border border-white/10 p-8 flex flex-col items-center gap-6 rounded-2xl shadow-[0_0_100px_rgba(255,0,0,0.15)]"
-                style={{ transform: 'translateZ(100px)' }}
-               >
-                  <div className="flex flex-col items-center gap-2 mb-2">
-                     <div className="flex items-center gap-2">
-                        <Camera size={16} className="text-soyuz animate-pulse" />
-                        <p className="text-[12px] font-black italic text-white tracking-[0.5em] uppercase">AJUSTEMENT PHOTO</p>
+            {/* BACK FACE (Verso) */}
+            <div 
+              style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}
+              className="absolute inset-0 w-full h-full rounded-[4px] bg-[#0A0A0A] border border-white/5 shadow-2xl overflow-hidden flex flex-col p-6 text-white"
+            >
+               <div className="flex justify-between items-start mb-10">
+                  <div className="flex items-center gap-3">
+                     <div className="w-10 h-10 bg-soyuz/10 border border-soyuz/20 rounded-full flex items-center justify-center p-2">
+                        <img src="/logo.png" className="w-full h-full object-contain invert opacity-60" />
                      </div>
-                     <p className="text-[9px] text-white/30 uppercase tracking-[0.2em]">FAITES GLISSER POUR CADRER • UTILISEZ LE ZOOM</p>
+                     <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.4em] leading-tight text-white">SOYUZ CARD</p>
+                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-[0.2em]">ANALYTICS COMMANDER</p>
+                     </div>
                   </div>
-                  <div className="flex items-center gap-4 w-full px-4">
-                     <Maximize2 size={12} className="text-white/40" />
-                     <input 
-                        type="range" 
-                        min="0.5" 
-                        max="3" 
-                        step="0.01" 
-                        value={zoom}
-                        onChange={(e) => setZoom(parseFloat(e.target.value))}
-                        className="flex-1 accent-soyuz h-1"
-                     />
-                  </div>
-                  <div className="flex gap-4">
-                     <button 
-                        onClick={(e) => { e.stopPropagation(); onCancelEdit?.(); }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full text-[8px] font-bold uppercase tracking-widest text-white/60 hover:text-white transition-all"
-                     >
-                        <X size={12} /> ANNULER
-                     </button>
-                     <button 
-                        onClick={(e) => { 
-                           e.stopPropagation(); 
-                           onSaveEdit?.({ x: photoX.get(), y: photoY.get(), scale: zoom }); 
-                        }}
-                        className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-soyuz text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white transition-all shadow-[0_0_50px_rgba(255,0,0,0.4)] group/save"
-                     >
-                        <Check size={16} className="group-hover/save:scale-125 transition-transform" /> ENREGISTRER MON LOOK
-                     </button>
+                  <div className="px-3 py-1 bg-soyuz/10 border border-soyuz/20 rounded-full text-[8px] font-mono text-soyuz">
+                     ID: {user.affiliate_code || 'UNSYNCED'}
                   </div>
                </div>
-            )}
 
-            {/* LAYER 4: DYNAMIC TEXT Overlays */}
-            <div className="absolute inset-x-0 bottom-0 z-30 h-32 flex flex-col justify-end px-8 pb-6">
-                <div className="flex flex-col w-full">
-                     {/* Role & Rank */}
-                     <div className="flex justify-between items-end mb-1">
-                        <p className={`text-[10px] font-black italic tracking-[0.4em] uppercase ${theme.accent} opacity-90 drop-shadow-md`}>
-                           {user.role === 'admin' ? 'SOYUZ AMBASSADOR' : 
-                            user.role === 'affiliate' ? 'SOYUZ AFFILIATE' : 
-                            'SOYUZ CUSTOMER'}
-                        </p>
-                        <div className="flex flex-col items-end">
-                           <span className="text-[12px] font-black italic text-white/60 leading-none drop-shadow-md">{rank.toUpperCase()}</span>
-                        </div>
+               <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="p-4 bg-white/5 border border-white/5 rounded-lg flex flex-col justify-center">
+                        <p className="text-[8px] font-black text-white/30 tracking-widest uppercase mb-1">VENTES</p>
+                        <p className="text-xl font-display italic font-black">${(stats.total_sales || 0).toLocaleString()}</p>
                      </div>
-                     
-                     {/* Name Script */}
-                     <div className="flex items-baseline gap-2 overflow-hidden drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
-                        <span className="text-2xl text-white font-bold" style={{ fontFamily: '"Dancing Script", cursive' }}>
-                           {firstName}
-                        </span>
-                        <h2 className="text-4xl text-white leading-none tracking-tighter" 
-                            style={{ fontFamily: '"Playball", cursive' }}>
-                           {lastName}
-                        </h2>
+                     <div className="p-4 bg-white/5 border border-white/5 rounded-lg flex flex-col justify-center">
+                        <p className="text-[8px] font-black text-white/30 tracking-widest uppercase mb-1">POINTS</p>
+                        <p className="text-xl font-display italic font-black text-soyuz">{stats.points || 0}</p>
                      </div>
-                </div>
+                  </div>
+
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-lg">
+                     <div className="flex justify-between items-center mb-2">
+                        <p className="text-[8px] font-black text-white/30 tracking-widest uppercase">NODE SYNC PROGRESS</p>
+                        <span className="text-[8px] text-soyuz font-black">LEGENDARY TIER</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-black/50 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: '75%' }}
+                          className="h-full bg-soyuz shadow-[0_0_15px_rgba(255,0,0,0.5)]"
+                        />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="mt-auto border-t border-white/10 pt-6 flex justify-between items-center">
+                  <div>
+                     <p className="text-[8px] font-black text-white/20 tracking-[0.4em] uppercase mb-1">ENCRYPTED DATA 2026</p>
+                     <p className="text-[12px] font-mono text-white/40">{lastName.toUpperCase()} // NODE-01</p>
+                  </div>
+                  <div className="flex gap-2">
+                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center opacity-40"><Target size={14} /></div>
+                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center opacity-40 text-soyuz"><Trophy size={14} /></div>
+                  </div>
+               </div>
             </div>
-
-            {/* Holographic Layer (Conditional) */}
-            {rank !== 'agent' && (
-              <div className="absolute inset-0 pointer-events-none z-40 mix-blend-color-dodge opacity-20 overflow-hidden">
-                <motion.div 
-                  className="absolute inset-[-150%] bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.4)_50%,transparent_55%)]"
-                  animate={{ x: ['-100%', '100%'], y: ['-100%', '100%'] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* BACK SIDE (Advanced Nodal Report) */}
-          <div 
-            className="absolute inset-0 rounded-[4px] overflow-hidden border-[1px] border-white/5 bg-[#080808] rotate-y-180 flex flex-col shadow-2xl"
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg) translateZ(1px)' }}
-          >
-             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/subtle-carbon.png')] pointer-events-none" />
-             
-             <div className="h-full flex flex-col p-5 text-white relative z-10">
-                <div className="flex justify-between items-start mb-4 border-b border-white/10 pb-3 uppercase overflow-hidden">
-                   <div className="flex items-center gap-3">
-                      <p className="text-xl font-black text-soyuz italic tracking-tighter">#001</p>
-                      <div className="h-6 w-[1px] bg-white/10" />
-                      <div className="max-w-[120px]">
-                         <p className="text-[7px] font-black tracking-[0.4em] text-white/40 mb-0.5">NODE-ID</p>
-                         <p className="text-[9px] font-mono text-white/80 truncate">{user.affiliate_code || 'UNASSIGNED'}</p>
-                      </div>
-                   </div>
-                   <img src="/assets/logo-short.png" alt="SOX" className="h-4 opacity-30 invert shrink-0" />
-                </div>
-
-                <div className="flex gap-4 items-center mb-4">
-                   <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/5 shadow-xl shrink-0">
-                      <img src={user.avatar_url || '/assets/logo-short.png'} className="w-full h-full object-cover grayscale-[0.5]" />
-                   </div>
-                   <div className="flex flex-col gap-0.5 min-w-0">
-                      <h3 className="text-xl font-display italic font-black uppercase text-white leading-none truncate">{firstName} {lastName}</h3>
-                      <p className="text-[8px] font-bold text-soyuz tracking-widest uppercase italic opacity-80">SOYUZ ANALYTICS COMMANDER</p>
-                      <div className="mt-1 flex gap-1">
-                         {[...Array(5)].map((_, i) => <div key={i} className="w-1 h-1 bg-soyuz/60 rounded-full" />)}
-                      </div>
-                   </div>
-                </div>
-
-                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-                   <div className="text-[8px] font-black text-white/10 tracking-[0.4em] mb-2 shrink-0">MATRICE PERFORMANCE DATA</div>
-                   <div className="grid grid-cols-2 gap-2 mb-3 shrink-0">
-                      <StatBlock label="LIQUIDITÉ" value={`$${(stats.network_revenue || stats.total_sales || 0).toLocaleString()}`} icon={<DollarSign size={8} />} />
-                      <StatBlock label="NODES" value={stats.active_affiliates || stats.points || 0} icon={<Zap size={8} />} />
-                      <StatBlock label="SCORE" value={rank.toUpperCase()} icon={<Crown size={8} />} />
-                      <StatBlock label="SYNC" value={`${new Date(user.created_at).getFullYear()}-PR`} icon={<Target size={8} />} />
-                   </div>
-                   <div className="p-3 bg-white/[0.02] rounded-lg border border-white/5 italic text-[9px] leading-relaxed text-zinc-500 text-justify overflow-hidden line-clamp-3">
-                      Nodal activation recorded {new Date(user.created_at).toLocaleDateString()}. {lastName} has maintained peak flow efficiency across all Series 2 parameters. Matrice sync confirmed at 99.8%.
-                   </div>
-                </div>
-
-                <div className="mt-auto pt-4 flex justify-between items-center border-t border-white/10 shrink-0">
-                   <div className="flex flex-col gap-0.5">
-                      <p className="text-[6px] font-bold text-white/5 tracking-widest uppercase italic">ENCRYPTED 2026 // NODE DATA SECURE</p>
-                      <img src="/assets/logo-short.png" alt="SOX" className="h-2.5 opacity-5 invert grayscale" />
-                   </div>
-                   <div className="w-6 h-6 rounded bg-soyuz/5 border border-white/5 flex items-center justify-center">
-                      <Trophy size={12} className="text-soyuz opacity-30" />
-                   </div>
-                </div>
-             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
 
-      <div className="flex flex-col items-center gap-4">
-        <div className="flex gap-4 relative z-50">
+      {/* FOOTER CONTROLS */}
+      <div className="flex flex-col items-center gap-4 relative z-[50]">
+        <div className="flex gap-4">
           <button 
             onClick={(e) => { 
               e.stopPropagation(); 
               fileInputRef.current?.click();
             }} 
-            className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50 cursor-pointer group/photo"
+            className="flex items-center gap-3 px-8 py-5 bg-white/[0.02] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz/60 transition-all group"
             disabled={isDownloading}
           >
-            <Camera size={14} className="text-soyuz/50 group-hover/photo:text-soyuz transition-colors" /> PHOTO
+            <Camera size={18} className="text-soyuz/40 group-hover:text-soyuz transition-colors" /> PHOTO
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); handleInternalDownload(); }} 
-            className={`flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all ${isDownloading ? 'animate-pulse text-soyuz' : ''}`}
+            className={`flex items-center gap-3 px-8 py-5 bg-white/[0.02] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz/60 transition-all ${isDownloading ? 'animate-pulse text-soyuz' : ''}`}
             disabled={isDownloading}
           >
-            <Download size={14} className={isDownloading ? 'animate-bounce' : 'text-soyuz/50'} /> 
+            <Download size={18} className={isDownloading ? 'animate-bounce' : 'text-soyuz/40'} /> 
             {isDownloading ? 'EXPORTATION...' : 'TÉLÉCHARGER'}
           </button>
         </div>
-        <p className="text-[8px] font-bold text-white/10 uppercase tracking-[0.2em] max-w-[280px] text-center italic">
-          <span className="text-soyuz/40">PRO-TIP:</span> UTILISEZ UNE PHOTO SANS FOND (PNG TRANSPARENT) POUR UN RÉSULTAT OPTIMAL.
+        <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em] italic text-center max-w-[320px]">
+          <span className="text-soyuz/40">PRO-TIP:</span> UTILISEZ UN PNG TRANSPARENT POUR LE MEILLEUR RENDU.
         </p>
 
+        {/* HIDDEN FILE INPUT */}
         <input
           type="file"
           ref={fileInputRef}
@@ -404,8 +406,7 @@ export default function HockeyCard({
                 }
               };
               reader.readAsDataURL(file);
-              // Clear for next time
-              e.target.value = '';
+              e.target.value = ''; // Reset for same file selection
             }
           }}
         />

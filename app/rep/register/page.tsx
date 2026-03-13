@@ -19,7 +19,6 @@ export default function RepRegisterPage() {
     password: '',
     social: '',
     motivation: '',
-    motivation: '',
     repCode: '',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -225,6 +224,18 @@ export default function RepRegisterPage() {
               <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
               
               <div className="space-y-4">
+                <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">
+                  MISSION STATEMENT / BACKGROUND
+                </label>
+                <textarea 
+                  name="motivation"
+                  value={formData.motivation}
+                  onChange={handleChange}
+                  className="w-full bg-black border border-white/5 rounded-none px-6 py-5 text-xs text-white uppercase font-bold focus:outline-none focus:border-soyuz min-h-[160px] placeholder:text-white/10 transition-all"
+                  placeholder="EXPLAIN YOUR NETWORK AND EXPERIENCE..."
+                  required
+                />
+              </div>
               
               <div className="pt-8 space-y-8">
                 <button 

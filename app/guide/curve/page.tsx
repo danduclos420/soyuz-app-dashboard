@@ -1,8 +1,6 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Info, Table, CheckCircle2, Target, Eye } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BackButton from '@/components/BackButton';
 
 const CURVE_DATA = [
@@ -48,6 +46,13 @@ const CURVE_DATA = [
 
 export default function CurveGuide() {
   const [activeCurve, setActiveCurve] = useState(CURVE_DATA[0]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="bg-background min-h-screen pt-32 pb-24" />;
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white">
@@ -145,6 +150,7 @@ export default function CurveGuide() {
 
                 {/* Animated Path */}
                 <motion.path 
+                  initial={{ d: activeCurve.path, stroke: activeCurve.color }}
                   d={activeCurve.path}
                   fill="none"
                   stroke={activeCurve.color}
@@ -156,10 +162,11 @@ export default function CurveGuide() {
                 />
                 
                 {/* Visual Points */}
+                <circle cx="50" cy="300" r="4" fill="white" fillOpacity="0.4" />
                 <motion.circle 
-                  cx="50" cy="300" r="4" fill="white" fillOpacity="0.4"
-                />
-                <motion.circle 
+                  initial={{ cx: 360, cy: 220 }}
+                  cx={activeCurve.id === 's28' ? 380 : 360}
+                  cy={activeCurve.id === 's28' ? 180 : 220}
                   animate={{ 
                     cx: activeCurve.id === 's28' ? 380 : 360, 
                     cy: activeCurve.id === 's28' ? 180 : 220,

@@ -1,19 +1,24 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ruler, Info, CheckCircle2, User, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BackButton from '@/components/BackButton';
 
 export default function HeightGuide() {
   const [onIce, setOnIce] = useState(true);
   const [activeZone, setActiveZone] = useState('chin'); // nose, lip, chin
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const ZONES = {
     nose: { label: 'NOSE', desc: 'Maximum length. Best for reach.', y: 150 },
     lip: { label: 'LIP', desc: 'The standard pro choice.', y: 180 },
     chin: { label: 'CHIN', desc: 'Short for better handling.', y: 210 }
   };
+
+  if (!mounted) return <div className="bg-background min-h-screen pt-32 pb-24" />;
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white">
@@ -127,6 +132,7 @@ export default function HeightGuide() {
 
                   {/* THE STICK */}
                   <motion.rect 
+                    initial={{ y: 210, height: 390 }}
                     animate={{ 
                       y: onIce ? ZONES[activeZone as keyof typeof ZONES].y : ZONES[activeZone as keyof typeof ZONES].y - 30,
                       height: onIce ? 600 - ZONES[activeZone as keyof typeof ZONES].y : 630 - ZONES[activeZone as keyof typeof ZONES].y
@@ -138,6 +144,7 @@ export default function HeightGuide() {
                   
                   {/* Indicator Line */}
                   <motion.line 
+                    initial={{ y1: 210, y2: 210 }}
                     animate={{ 
                       y1: onIce ? ZONES[activeZone as keyof typeof ZONES].y : ZONES[activeZone as keyof typeof ZONES].y - 30,
                       y2: onIce ? ZONES[activeZone as keyof typeof ZONES].y - 0 : ZONES[activeZone as keyof typeof ZONES].y - 30
@@ -148,6 +155,7 @@ export default function HeightGuide() {
 
                   {/* Target Point */}
                   <motion.circle 
+                    initial={{ cy: 210 }}
                     animate={{ 
                       cy: onIce ? ZONES[activeZone as keyof typeof ZONES].y : ZONES[activeZone as keyof typeof ZONES].y - 30
                     }}

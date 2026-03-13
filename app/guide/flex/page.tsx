@@ -1,8 +1,6 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, Info, CheckCircle2, Zap, Target } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BackButton from '@/components/BackButton';
 
 const FLEX_DATA = [
@@ -15,6 +13,13 @@ const FLEX_DATA = [
 export default function FlexGuide() {
   const [activeFlex, setActiveFlex] = useState(FLEX_DATA[1]);
   const [testActive, setTestActive] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="bg-background min-h-screen pt-32 pb-24" />;
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white">
@@ -114,6 +119,7 @@ export default function FlexGuide() {
 
                      {/* The Stick Under Load */}
                      <motion.path 
+                        initial={{ d: `M 100 100 Q 100 300 100 500` }}
                         animate={{ 
                           d: testActive 
                              ? `M 100 100 Q ${100 + activeFlex.deflection} 300 100 500` 
@@ -123,6 +129,7 @@ export default function FlexGuide() {
                         fill="none" stroke="#222" strokeWidth="14" strokeLinecap="round"
                      />
                      <motion.path 
+                        initial={{ d: `M 100 100 Q 100 300 100 500` }}
                         animate={{ 
                           d: testActive 
                              ? `M 100 100 Q ${100 + activeFlex.deflection} 300 100 500` 
@@ -137,7 +144,7 @@ export default function FlexGuide() {
                      <AnimatePresence>
                         {testActive && (
                           <motion.circle 
-                            initial={{ opacity: 0, scale: 0 }}
+                            initial={{ opacity: 0, scale: 0, cx: 100 + activeFlex.deflection }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0 }}
                             cx={100 + activeFlex.deflection} cy="300" r="10" fill="#CC0000" className="blur-[8px]"

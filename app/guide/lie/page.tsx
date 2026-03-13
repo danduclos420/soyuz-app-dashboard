@@ -1,8 +1,6 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, Info, CheckCircle2, ChevronDown, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BackButton from '@/components/BackButton';
 
 const LIE_OPTIONS = [
@@ -34,6 +32,13 @@ const LIE_OPTIONS = [
 
 export default function LieGuide() {
   const [activeLie, setActiveLie] = useState(LIE_OPTIONS[1]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="bg-background min-h-screen pt-32 pb-24" />;
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white">
@@ -126,6 +131,7 @@ export default function LieGuide() {
                   
                   {/* THE BLADE & SHAFT */}
                   <motion.g 
+                    initial={{ rotate: 0 }}
                     animate={{ rotate: 45 - activeLie.angle }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     style={{ originX: '200px', originY: '350px' }}
@@ -137,6 +143,7 @@ export default function LieGuide() {
                      
                      {/* Tape Glow Indicator */}
                      <motion.circle 
+                        initial={{ cx: 260, opacity: 0.2 }}
                         animate={{ 
                           opacity: [0.2, 0.6, 0.2],
                           cx: activeLie.indicator === 'heel' ? 210 : activeLie.indicator === 'center' ? 260 : 310

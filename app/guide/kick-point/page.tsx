@@ -1,8 +1,6 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Info, Shield, CheckCircle2, Target } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BackButton from '@/components/BackButton';
 
 const KICK_POINTS = [
@@ -47,6 +45,11 @@ const KICK_POINTS = [
 export default function KickPointGuide() {
   const [activeKP, setActiveKP] = useState(KICK_POINTS[0]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // SVG Path generation for the flex simulation
   // We'll use a quadratic bezier: M x1 y1 Q cx cy x2 y2
@@ -56,6 +59,8 @@ export default function KickPointGuide() {
   const getPath = (deflection: number, bendY: number) => {
     return `M 200 50 Q ${200 + deflection} ${bendY} 200 450`;
   };
+
+  if (!mounted) return <div className="bg-background min-h-screen pt-32 pb-24" />;
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white overflow-x-hidden">
@@ -168,14 +173,15 @@ export default function KickPointGuide() {
                     />
 
                     {/* The Stick Shaft */}
-                    <motion.path 
-                      d={getPath(isLoaded ? 60 : 0, activeKP.bendY)}
+                    <path 
+                      d={getPath(0, activeKP.bendY)}
                       fill="none"
                       stroke="#111"
                       strokeWidth="12"
                       strokeLinecap="round"
                     />
                     <motion.path 
+                      initial={{ d: getPath(0, activeKP.bendY) }}
                       d={getPath(isLoaded ? 60 : 0, activeKP.bendY)}
                       fill="none"
                       stroke="url(#stickGradient)"
@@ -194,7 +200,7 @@ export default function KickPointGuide() {
                           initial={{ opacity: 0, r: 0 }}
                           animate={{ opacity: 1, r: 8 }}
                           exit={{ opacity: 0, r: 0 }}
-                          cx={200 + 40} 
+                          cx={240} 
                           cy={activeKP.bendY} 
                           fill="#CC0000"
                           className="blur-[4px]"

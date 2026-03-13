@@ -1,12 +1,17 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Info, CheckCircle2, Target, Zap, Hand } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BackButton from '@/components/BackButton';
 
 export default function PlayerSideGuide() {
   const [side, setSide] = useState<'left' | 'right'>('left');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="bg-background min-h-screen pt-32 pb-24" />;
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white">
@@ -87,6 +92,7 @@ export default function PlayerSideGuide() {
 
                   {/* Top Hand (Control) */}
                   <motion.g
+                    initial={{ x: -20 }}
                     animate={{ x: side === 'left' ? -20 : 20 }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                   >
@@ -97,6 +103,7 @@ export default function PlayerSideGuide() {
 
                   {/* Bottom Hand (Power) */}
                   <motion.g
+                    initial={{ x: -20, y: 200 }}
                     animate={{ 
                       x: side === 'left' ? -20 : 20,
                       y: 200
@@ -110,6 +117,7 @@ export default function PlayerSideGuide() {
 
                   {/* Blade (Perspective shift) */}
                   <motion.path 
+                    initial={{ d: "M 195 550 L 150 580" }}
                     animate={{ d: side === 'left' ? "M 195 550 L 150 580" : "M 205 550 L 250 580" }}
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     stroke="#CC0000" strokeWidth="12" strokeLinecap="round"

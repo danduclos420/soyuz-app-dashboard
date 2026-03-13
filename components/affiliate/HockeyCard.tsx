@@ -127,17 +127,22 @@ export default function HockeyCard({
         onMouseLeave={() => { x.set(0); y.set(0); }}
         className="relative w-[340px] h-[470px] perspective-2000 cursor-pointer group select-none shadow-2xl"
         onClick={() => {
-          if (!isDownloading && !editMode) {
+          if (!isDownloading) {
             setIsFlipped(!isFlipped);
           }
         }}
       >
         <motion.div
            className="w-full h-full relative"
+           initial={false}
+           animate={{ 
+             rotateY: isFlipped ? 180 : 0,
+             rotateX: 0 // Resetting tilt on flip or handling it separately
+           }}
            style={{ 
               transformStyle: 'preserve-3d',
-              rotateY: isFlipped ? 180 : rotateY,
-              rotateX: isFlipped ? 0 : rotateX
+              rotateX: isFlipped ? 0 : rotateX,
+              rotateY: isFlipped ? 180 : rotateY
            }}
            transition={{ type: "spring", stiffness: 100, damping: 20 }}
         >

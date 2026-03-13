@@ -102,20 +102,20 @@ export default function HomePage() {
       {/* 2. INFINITE TICKER (RED) */}
       <div id="collections-top" className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]">
         <div className="ticker-wrap">
-          <div className="ticker-inner">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="flex items-center whitespace-nowrap gap-16 px-8 h-full">
-                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">STRENGTH IN UNITY</span>
-                <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150 block object-contain" />
-                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">POWER WITH SOYUZ</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80 block object-contain" />
-                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">BREAK EVERY LIMIT</span>
-                <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150 block object-contain" />
-                <span className="text-white font-black uppercase tracking-[0.25em] text-[10px]">SOYUZ NORTH AMERICA</span>
-                <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80 block object-contain" />
-              </div>
-            ))}
-          </div>
+            <div className="ticker-inner gap-16">
+              {[...Array(2)].map((_, setIdx) => (
+                <div key={setIdx} className="flex items-center gap-16">
+                  <span className="text-white font-black uppercase tracking-[0.25em] text-[10px] flex-shrink-0">STRENGTH IN UNITY</span>
+                  <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.25em] text-[10px] flex-shrink-0">POWER WITH SOYUZ</span>
+                  <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.25em] text-[10px] flex-shrink-0">BREAK EVERY LIMIT</span>
+                  <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.25em] text-[10px] flex-shrink-0">SOYUZ NORTH AMERICA</span>
+                  <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80 block object-contain flex-shrink-0" />
+                </div>
+              ))}
+            </div>
         </div>
       </div>
 

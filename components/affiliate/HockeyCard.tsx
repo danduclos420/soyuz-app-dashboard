@@ -167,12 +167,12 @@ export default function HockeyCard({
         className={`relative w-[340px] h-[470px] ${editMode ? 'z-[100]' : 'z-10'}`}
         style={{ perspective: '2500px' }}
       >
-        {/* FLIP ELEMENT - Handles the 180 (standard) or 360 (cinematic transition) */}
+        {/* FLIP ELEMENT - Handles the 180 (standard) */}
         <motion.div
            animate={{ 
-             rotateY: isFlipped ? 180 : (editMode ? [0, 180, 0] : 0),
+             rotateY: isFlipped ? 180 : 0,
            }}
-           transition={editMode ? { duration: 0.8, ease: "easeInOut" } : { type: "spring", stiffness: 80, damping: 18 }}
+           transition={{ type: "spring", stiffness: 80, damping: 18 }}
            className="w-full h-full relative"
            style={{ transformStyle: 'preserve-3d' }}
         >
@@ -392,24 +392,24 @@ export default function HockeyCard({
 
       {/* FOOTER DASHBOARD CONTROLS */}
       <div className={`flex flex-col items-center gap-4 relative z-50 transition-opacity duration-500 ${editMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        <div className="flex gap-6">
+        <div className="flex gap-4">
           <button 
             onClick={(e) => { 
               e.stopPropagation(); 
               fileInputRef.current?.click();
             }} 
-            className="flex items-center gap-3 px-10 py-6 bg-white/[0.01] border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz/60 transition-all group"
+            className="flex items-center gap-3 px-8 py-5 bg-white/[0.01] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz/60 transition-all group"
             disabled={isDownloading}
           >
-            <Camera size={20} className="text-soyuz group-hover:scale-110 transition-transform" /> PHOTO
+            <Camera size={18} className="text-soyuz group-hover:scale-110 transition-transform" /> PHOTO
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); handleInternalDownload(); }} 
-            className={`flex items-center gap-3 px-10 py-6 bg-white/[0.01] border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz/60 transition-all ${isDownloading ? 'animate-pulse text-soyuz' : ''}`}
+            className={`flex items-center gap-3 px-8 py-5 bg-white/[0.01] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz/60 transition-all ${isDownloading ? 'animate-pulse text-soyuz' : ''}`}
             disabled={isDownloading}
           >
-            <Download size={20} className={isDownloading ? 'animate-bounce' : 'text-soyuz'} /> 
-            {isDownloading ? 'PROCESSING...' : 'TÉLÉCHARGER'}
+            <Download size={18} className={isDownloading ? 'animate-bounce' : 'text-soyuz'} /> 
+            {isDownloading ? 'EXPORTATION...' : 'TÉLÉCHARGER'}
           </button>
         </div>
         <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em] italic text-center max-w-[320px]">

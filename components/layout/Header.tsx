@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import { useState, useEffect, useRef, Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ShoppingBag, User, ChevronDown, Globe, Search, LogOut } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, ChevronDown, Globe, Search, LogOut, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import ShoppingCart from '../storefront/ShoppingCart';
 import { supabase } from '@/lib/supabase-client';

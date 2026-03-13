@@ -88,7 +88,7 @@ export default function Header() {
             {/* LOGO */}
             <Link href="/" className="flex-shrink-0 flex items-center">
               <Image
-                src="/assets/SOYUZ_Logo_Long.png"
+                src="/assets/logo-long.png"
                 alt="SOYUZ BC"
                 width={140}
                 height={40}

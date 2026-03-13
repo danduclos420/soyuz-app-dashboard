@@ -76,7 +76,7 @@ export default function Footer() {
           {/* BRAND COLUMN */}
           <div className="lg:col-span-2">
             <Image
-              src="/assets/SOYUZ_Logo_Long.png"
+              src="/assets/logo-long.png"
               alt="SOYUZ BC"
               width={160}
               height={45}

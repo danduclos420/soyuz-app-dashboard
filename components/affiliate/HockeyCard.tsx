@@ -160,15 +160,16 @@ export default function HockeyCard({
            className="w-full h-full relative"
            initial={false}
            animate={{ 
-             rotateY: isFlipped ? 180 : (editMode ? 0 : 0), // Base for spring
-             rotateX: 0
+             rotateY: isFlipped ? 180 : 0,
+             rotateX: 0 
            }}
            style={{ 
               transformStyle: 'preserve-3d',
-              rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY),
-              rotateX: isFlipped ? 0 : (editMode ? 0 : rotateX)
+              // Use x/y motion values directly for tilt if not flipping/editing
+              rotateX: (isFlipped || editMode) ? 0 : rotateX,
+              rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY)
            }}
-           transition={{ type: "spring", stiffness: 100, damping: 20 }}
+           transition={{ type: "spring", stiffness: 60, damping: 20 }}
         >
           {/* OPAQUE CORE */}
           <div className="absolute inset-0 bg-black z-0 rounded-[4px]" style={{ transform: 'translateZ(-1px)' }} />

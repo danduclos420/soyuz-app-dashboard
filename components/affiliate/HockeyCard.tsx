@@ -45,15 +45,21 @@ export default function HockeyCard({
   rank = 'agent', 
   editMode = false,
   tempPhotoUrl,
-  onDownload, 
-  onPhotoSelected,
   onSaveEdit,
   onCancelEdit
 }: HockeyCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [localEditMode, setLocalEditMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Sync isFlipped if we enter edit mode
+  useEffect(() => {
+    if (editMode && isFlipped) {
+      setIsFlipped(false);
+    }
+  }, [editMode, isFlipped]);
   
   // Photo Edit State
   const [zoom, setZoom] = useState(1);
@@ -70,7 +76,11 @@ export default function HockeyCard({
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [-10, 10]);
   
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isDownloading) return;
+    if (!cardRef.current || isDownloading || editMode || isFlipped) {
+      x.set(0);
+      y.set(0);
+      return;
+    }
     const rect = cardRef.current.getBoundingClientRect();
     const xPct = (e.clientX - rect.left) / rect.width - 0.5;
     const yPct = (e.clientY - rect.top) / rect.height - 0.5;
@@ -136,13 +146,11 @@ export default function HockeyCard({
            className="w-full h-full relative"
            initial={false}
            animate={{ 
-             rotateY: isFlipped ? 180 : 0,
-             rotateX: 0 // Resetting tilt on flip or handling it separately
+             rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY.get()),
+             rotateX: isFlipped ? 0 : (editMode ? 0 : rotateX.get())
            }}
            style={{ 
-              transformStyle: 'preserve-3d',
-              rotateX: isFlipped ? 0 : rotateX,
-              rotateY: isFlipped ? 180 : rotateY
+              transformStyle: 'preserve-3d'
            }}
            transition={{ type: "spring", stiffness: 100, damping: 20 }}
         >

@@ -159,8 +159,12 @@ export default function RegisterPage() {
               required
               className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors text-xs appearance-none"
             >
-              <option value="en">English (Default)</option>
-              <option value="fr">Français</option>
+              <option value="en">US - ENGLISH</option>
+              <option value="fr">FR - FRANÇAIS</option>
+              <option value="es">ES - ESPAÑOL</option>
+              <option value="zh">CN - 中文</option>
+              <option value="de">DE - DEUTSCH</option>
+              <option value="ru">RU - РУССКИЙ</option>
             </select>
           </div>
 

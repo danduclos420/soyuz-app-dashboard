@@ -34,7 +34,7 @@ interface HockeyCardProps {
   editMode?: boolean;
   tempPhotoUrl?: string | null;
   onDownload?: () => void;
-  onEditPhoto?: () => void;
+  onEditPhoto?: (file: File) => void;
   onSaveEdit?: (settings: PhotoSettings) => void;
   onCancelEdit?: () => void;
 }
@@ -322,13 +322,9 @@ export default function HockeyCard({
           <button 
             onClick={(e) => { 
               e.stopPropagation(); 
-              if (onEditPhoto) {
-                onEditPhoto();
-              } else {
-                fileInputRef.current?.click();
-              }
+              fileInputRef.current?.click();
             }} 
-            className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50 cursor-pointer"
             disabled={isDownloading}
           >
             <Camera size={14} className="text-soyuz/50" /> PHOTO
@@ -353,13 +349,8 @@ export default function HockeyCard({
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                // Since this might be used standalone, we need to handle it
-                // But typically onEditPhoto will override the button click
-              };
-              reader.readAsDataURL(file);
+            if (file && onEditPhoto) {
+              onEditPhoto(file);
             }
           }}
         />

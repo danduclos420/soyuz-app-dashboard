@@ -250,22 +250,13 @@ export default function AffiliateDashboard() {
                    await handlePhotoUpload(tempImage);
                 }
               }}
-              onEditPhoto={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = (e: any) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setTempImage(reader.result as string);
-                      setIsCropping(true);
-                    };
-                    reader.readAsDataURL(file);
-                  }
+              onEditPhoto={(file: File) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  setTempImage(reader.result as string);
+                  setIsCropping(true);
                 };
-                input.click();
+                reader.readAsDataURL(file);
               }}
               onDownload={() => {}}
             />

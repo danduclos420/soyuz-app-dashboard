@@ -11,6 +11,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'soyuzhockey.com' },
       { protocol: 'https', hostname: 'cdn.shopify.com' },
     ],
+    unoptimized: true,
   },
   async headers() {
     return [

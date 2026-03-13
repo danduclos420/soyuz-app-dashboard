@@ -332,7 +332,7 @@ export default function HockeyCard({
                <div className="flex justify-between items-start mb-8">
                   <div className="flex items-center gap-3">
                      <div className="w-10 h-10 bg-soyuz/10 border border-soyuz/20 rounded-full flex items-center justify-center p-2">
-                        <img src="/logo.png" className="w-full h-full object-contain invert opacity-60" />
+                        <img src="/assets/logo-short.png" className="w-full h-full object-contain invert opacity-60" />
                      </div>
                      <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.4em] leading-tight text-white">SOYUZ</p>

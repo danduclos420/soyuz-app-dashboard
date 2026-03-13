@@ -59,6 +59,9 @@ export default function HockeyCard({
   const [zoom, setZoom] = useState(1);
   const photoX = useMotionValue(0);
   const photoY = useMotionValue(0);
+  // Mouse Tracking State
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
   const mouseXSpring = useSpring(x);
   const mouseYSpring = useSpring(y);
   

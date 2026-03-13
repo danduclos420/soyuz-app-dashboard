@@ -3,12 +3,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { User, Package, Settings, LogOut } from 'lucide-react';
+import { User, Package, Settings, LogOut, X } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import HockeyCard from '@/components/affiliate/HockeyCard';
 import { toPng } from 'html-to-image';
-import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function AccountPage() {

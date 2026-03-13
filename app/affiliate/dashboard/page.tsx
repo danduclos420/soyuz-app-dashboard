@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase-client';
+import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
 import { 
   TrendingUp, 
   Users, 
@@ -21,7 +24,6 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import HockeyCard from '@/components/affiliate/HockeyCard';
 import { toPng } from 'html-to-image';
 import { Camera, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 export default function AffiliateDashboard() {
   const [profile, setProfile] = useState<any>(null);

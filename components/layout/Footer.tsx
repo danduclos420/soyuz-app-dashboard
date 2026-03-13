@@ -103,13 +103,13 @@ export default function Footer() {
             </div>
             {/* CONTACT INFO */}
             <div className="space-y-2">
-              <a href="mailto:info@soyuzhockey.com" className="flex items-center gap-2 text-[#888888] hover:text-white transition-colors text-xs">
+              <a href="mailto:info@protosmultisports.ca" className="flex items-center gap-2 text-[#888888] hover:text-white transition-colors text-xs">
                 <Mail size={12} />
-                <span>info@soyuzhockey.com</span>
+                <span>info@protosmultisports.ca</span>
               </a>
               <div className="flex items-center gap-2 text-[#888888] text-xs">
                 <MapPin size={12} />
-                <span>BC, North America</span>
+                <span>Québec, CA - North America</span>
               </div>
             </div>
           </div>

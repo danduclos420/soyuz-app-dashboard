@@ -76,7 +76,7 @@ export default function LoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors"
-              placeholder="adminprotos"
+              placeholder="Username"
             />
           </div>
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors"
-              placeholder="••••••••"
+              placeholder="Password"
             />
           </div>
 

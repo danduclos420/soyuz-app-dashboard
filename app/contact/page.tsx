@@ -92,7 +92,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Email Support</h4>
-                  <p className="text-white font-bold text-sm tracking-tight">info@soyuzhockey.com</p>
+                  <p className="text-white font-bold text-sm tracking-tight">info@protosmultisports.ca</p>
                 </div>
               </div>
 
@@ -102,7 +102,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">HQ Location</h4>
-                  <p className="text-white font-bold text-sm tracking-tight italic">Vancouver, BC - North America</p>
+                  <p className="text-white font-bold text-sm tracking-tight italic">Québec, CA - North America</p>
                 </div>
               </div>
 

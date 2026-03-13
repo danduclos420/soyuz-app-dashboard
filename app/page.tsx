@@ -31,6 +31,13 @@ export default function HomePage() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
+  const scrollToCollections = () => {
+    const nextSection = document.getElementById('collections-top');
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
       {/* 1. HERO SECTION (RESET) */}
@@ -51,7 +58,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
-        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-24 md:-mt-32">
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-32 md:-mt-40">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -81,18 +88,19 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        <motion.div
+        <motion.button
+          onClick={scrollToCollections}
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 group cursor-pointer"
         >
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold">Discover</span>
-          <ChevronDown size={20} className="text-white/40" />
-        </motion.div>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
+          <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
+        </motion.button>
       </section>
 
       {/* 2. INFINITE TICKER (RED) */}
-      <div className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)]">
+      <div id="collections-top" className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[80px]">
         <div className="ticker-wrap">
           <div className="ticker-inner">
             {[...Array(8)].map((_, i) => (

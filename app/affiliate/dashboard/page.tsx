@@ -250,13 +250,9 @@ export default function AffiliateDashboard() {
                    await handlePhotoUpload(tempImage);
                 }
               }}
-              onEditPhoto={(file: File) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  setTempImage(reader.result as string);
-                  setIsCropping(true);
-                };
-                reader.readAsDataURL(file);
+              onPhotoSelected={(dataUrl: string) => {
+                setTempImage(dataUrl);
+                setIsCropping(true);
               }}
               onDownload={() => {}}
             />

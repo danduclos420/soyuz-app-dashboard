@@ -34,7 +34,7 @@ interface HockeyCardProps {
   editMode?: boolean;
   tempPhotoUrl?: string | null;
   onDownload?: () => void;
-  onEditPhoto?: (file: File) => void;
+  onPhotoSelected?: (dataUrl: string) => void;
   onSaveEdit?: (settings: PhotoSettings) => void;
   onCancelEdit?: () => void;
 }
@@ -46,7 +46,7 @@ export default function HockeyCard({
   editMode = false,
   tempPhotoUrl,
   onDownload, 
-  onEditPhoto,
+  onPhotoSelected,
   onSaveEdit,
   onCancelEdit
 }: HockeyCardProps) {
@@ -126,13 +126,20 @@ export default function HockeyCard({
         onMouseMove={handleMouseMove}
         onMouseLeave={() => { x.set(0); y.set(0); }}
         className="relative w-[340px] h-[470px] perspective-2000 cursor-pointer group select-none shadow-2xl"
-        onClick={() => !isDownloading && setIsFlipped(!isFlipped)}
+        onClick={() => {
+          if (!isDownloading && !editMode) {
+            setIsFlipped(!isFlipped);
+          }
+        }}
       >
         <motion.div
            className="w-full h-full relative"
-           animate={{ rotateY: isFlipped ? 180 : rotateY.get(), rotateX: isFlipped ? 0 : rotateX.get() }}
+           style={{ 
+              transformStyle: 'preserve-3d',
+              rotateY: isFlipped ? 180 : rotateY,
+              rotateX: isFlipped ? 0 : rotateX
+           }}
            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-           style={{ transformStyle: 'preserve-3d' }}
         >
           {/* OPAQUE CORE */}
           <div className="absolute inset-0 bg-black z-0 rounded-[4px]" style={{ transform: 'translateZ(-1px)' }} />
@@ -184,8 +191,11 @@ export default function HockeyCard({
 
             {/* EDIT TOOLS OVERLAY */}
             {editMode && (
-               <div className="absolute inset-x-0 top-0 z-50 bg-black/60 backdrop-blur-md p-4 flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-4 w-full px-4">
+               <div 
+                className="absolute inset-x-0 top-0 z-50 bg-black/80 backdrop-blur-xl p-6 flex flex-col items-center gap-4 rounded-t-[4px] border-b border-white/10"
+                style={{ transform: 'translateZ(50px)' }}
+               >
+                  <div className="flex items-center gap-4 w-full px-2">
                      <Maximize2 size={12} className="text-white/40" />
                      <input 
                         type="range" 
@@ -324,10 +334,10 @@ export default function HockeyCard({
               e.stopPropagation(); 
               fileInputRef.current?.click();
             }} 
-            className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50 cursor-pointer group/photo"
             disabled={isDownloading}
           >
-            <Camera size={14} className="text-soyuz/50" /> PHOTO
+            <Camera size={14} className="text-soyuz/50 group-hover/photo:text-soyuz transition-colors" /> PHOTO
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); handleInternalDownload(); }} 
@@ -349,8 +359,16 @@ export default function HockeyCard({
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file && onEditPhoto) {
-              onEditPhoto(file);
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (onPhotoSelected) {
+                  onPhotoSelected(reader.result as string);
+                }
+              };
+              reader.readAsDataURL(file);
+              // Clear for next time
+              e.target.value = '';
             }
           }}
         />

@@ -152,13 +152,9 @@ export default function AccountPage() {
                 total_spent: orders.reduce((sum, o) => sum + (o.total || 0), 0),
                 favorite_product: '---' // To be implemented with product counts
               }}
-              onEditPhoto={(file: File) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  setTempImage(reader.result as string);
-                  setIsCropping(true);
-                };
-                reader.readAsDataURL(file);
+              onPhotoSelected={(dataUrl: string) => {
+                setTempImage(dataUrl);
+                setIsCropping(true);
               }}
               onDownload={() => {}}
             />

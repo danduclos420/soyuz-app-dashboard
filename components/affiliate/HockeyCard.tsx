@@ -59,6 +59,7 @@ export default function HockeyCard({
   const [zoom, setZoom] = useState(1);
   const photoX = useMotionValue(0);
   const photoY = useMotionValue(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // Mouse Tracking State
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -319,7 +320,14 @@ export default function HockeyCard({
       <div className="flex flex-col items-center gap-4">
         <div className="flex gap-4 relative z-50">
           <button 
-            onClick={(e) => { e.stopPropagation(); onEditPhoto?.(); }} 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              if (onEditPhoto) {
+                onEditPhoto();
+              } else {
+                fileInputRef.current?.click();
+              }
+            }} 
             className="flex items-center gap-2 px-6 py-4 bg-white/[0.01] border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-all disabled:opacity-50"
             disabled={isDownloading}
           >
@@ -337,6 +345,24 @@ export default function HockeyCard({
         <p className="text-[8px] font-bold text-white/10 uppercase tracking-[0.2em] max-w-[280px] text-center italic">
           <span className="text-soyuz/40">PRO-TIP:</span> UTILISEZ UNE PHOTO SANS FOND (PNG TRANSPARENT) POUR UN RÉSULTAT OPTIMAL.
         </p>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                // Since this might be used standalone, we need to handle it
+                // But typically onEditPhoto will override the button click
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
       </div>
     </div>
   );

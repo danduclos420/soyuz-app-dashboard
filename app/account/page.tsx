@@ -110,6 +110,7 @@ export default function AccountPage() {
                 total_spent: orders.reduce((sum, o) => sum + (o.total || 0), 0),
                 favorite_product: '---' // To be implemented with product counts
               }}
+              onEditPhoto={() => alert('Modification photo client...')}
               onDownload={() => {
                 const el = document.querySelector('.perspective-1000');
                 if (el) toPng(el as HTMLElement).then(dataUrl => {

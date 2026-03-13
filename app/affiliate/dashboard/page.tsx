@@ -192,6 +192,21 @@ export default function AffiliateDashboard() {
                 commissions: totalCommissions
               }}
               rank={currentRank}
+              onEditPhoto={() => {
+                // Trigger the file input or cropper update
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = async (e: any) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    // We'll need to properly integrate this with the existing ImageCropper
+                    // For now, let's at least trigger the alert or a simple upload logic
+                    alert('Ouverture du sélecteur de photo...');
+                  }
+                };
+                input.click();
+              }}
               onDownload={() => {
                 const el = document.querySelector('.perspective-1000');
                 if (el) toPng(el as HTMLElement).then(dataUrl => {

@@ -287,6 +287,8 @@ export default function AdminDashboard() {
                     active_affiliates: affiliates.filter(a => a.status === 'approved').length,
                     total_sales: stats.orders,
                   }}
+                  rank="mvp"
+                  onEditPhoto={() => alert('Édition de la photo MVP...')}
                   onDownload={() => {
                     const el = document.querySelector('.perspective-1000');
                     if (el) toPng(el as HTMLElement).then(dataUrl => {

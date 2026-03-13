@@ -10,10 +10,17 @@ export default function InventorySync() {
   const [lastSync, setLastSync] = useState<any>(null);
   const [syncing, setSyncing] = useState(false);
   const [config, setConfig] = useState<any>(null);
+  const [logs, setLogs] = useState<{ id: string; msg: string; type: 'info' | 'error' | 'success' }[]>([]);
 
   useEffect(() => {
     fetchSyncInfo();
+    addLog('INITIALISATION DU MODULE QB...', 'info');
   }, []);
+
+  function addLog(msg: string, type: 'info' | 'error' | 'success' = 'info') {
+    const time = new Date().toLocaleTimeString();
+    setLogs(prev => [{ id: Math.random().toString(), msg: `[${time}] ${msg}`, type }, ...prev].slice(0, 50));
+  }
 
   async function fetchSyncInfo() {
     const { data: cfg } = await supabase
@@ -26,26 +33,36 @@ export default function InventorySync() {
     
     if (cfg && cfg.updated_at) {
       setLastSync(new Date(cfg.updated_at));
+      addLog('TOKEN VÉRIFIÉ & VALIDE.', 'success');
+    } else {
+      addLog('AUCUNE CONNEXION QUICKBOOKS DÉTECTÉE.', 'error');
     }
   }
 
   const triggerSync = async () => {
     setSyncing(true);
+    addLog('DÉMARRAGE DE LA SYNCHRONISATION...', 'info');
+    
     try {
+      addLog('APPEL DE L\'API DE SYNCHRONISATION (Vercel Production)...', 'info');
       const res = await fetch('/api/sync/quickbooks', { method: 'POST' });
       const data = await res.json();
       
       if (data.success) {
+        addLog(`SYNCHRONISATION RÉUSSIE : ${data.count} PRODUITS TRAITÉS.`, 'success');
         toast.success(`Synchronisation terminée : ${data.count} items mis à jour.`);
         await fetchSyncInfo();
       } else {
+        addLog(`ERREUR API : ${data.error || 'Erreur inconnue'}`, 'error');
         throw new Error(data.error || 'Erreur inconnue');
       }
     } catch (err: any) {
       console.error('Sync Error:', err);
+      addLog(`ÉCHEC CRITIQUE : ${err.message}`, 'error');
       toast.error(`Erreur de synchro : ${err.message}`);
     } finally {
       setSyncing(false);
+      addLog('MODULE EN ATTENTE.', 'info');
     }
   };
 
@@ -108,15 +125,33 @@ export default function InventorySync() {
             <Clock className="text-white/10" size={32} />
          </div>
 
-         <div className="bg-white/[0.02] border border-white/5 p-10 space-y-6">
-            <h4 className="text-[10px] text-white font-black uppercase tracking-widest flex items-center gap-3">
-               <div className="w-1.5 h-1.5 rounded-full bg-soyuz shadow-[0_0_10px_rgba(204,0,0,0.5)]" /> 
-               LOGS DE FLUX EN DIRECT
-            </h4>
-            <div className="space-y-3 font-mono text-[8px] text-[#444444] uppercase tracking-widest">
-               <p>[{new Date().toLocaleTimeString()}] INITIALISATION DU MODULE QB...</p>
-               {config && <p>[{new Date().toLocaleTimeString()}] TOKEN VÉRIFIÉ & VALIDE.</p>}
-               <p>[{new Date().toLocaleTimeString()}] PRÊT POUR RÉCEPTION DONNÉES.</p>
+         <div className="bg-white/[0.02] border border-white/5 p-10 space-y-6 flex flex-col h-[400px]">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] text-white font-black uppercase tracking-widest flex items-center gap-3">
+                 <div className="w-1.5 h-1.5 rounded-full bg-soyuz shadow-[0_0_10px_rgba(204,0,0,0.5)]" /> 
+                 LOGS DE FLUX EN DIRECT
+              </h4>
+              <button 
+                onClick={() => setLogs([])}
+                className="text-[8px] text-white/20 hover:text-white uppercase font-black"
+              >
+                EFFACER
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto space-y-3 font-mono text-[8px] uppercase tracking-widest pr-4 scrollbar-hide">
+               {logs.length === 0 ? (
+                 <p className="text-white/10">EN ATTENTE D'ÉVÉNEMENTS...</p>
+               ) : (
+                 logs.map(log => (
+                   <p key={log.id} className={
+                     log.type === 'error' ? 'text-soyuz' : 
+                     log.type === 'success' ? 'text-green-500' : 
+                     'text-[#444444]'
+                   }>
+                     {log.msg}
+                   </p>
+                 ))
+               )}
             </div>
          </div>
       </div>

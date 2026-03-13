@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, Target, DollarSign, ShoppingBag, Calendar, Download, Crown, Camera, Zap, Check, X, RotateCcw, Maximize2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
@@ -149,9 +149,9 @@ export default function HockeyCard({
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => { x.set(0); y.set(0); }}
-        className="relative w-[340px] h-[470px] perspective-2000 cursor-pointer group select-none shadow-2xl"
+        className={`relative w-[340px] h-[470px] perspective-2000 cursor-pointer group select-none transition-all duration-700 ${editMode ? 'z-[100] scale-[1.15]' : 'z-0'}`}
         onClick={() => {
-          if (!isDownloading) {
+          if (!isDownloading && !editMode) {
             setIsFlipped(!isFlipped);
           }
         }}
@@ -160,8 +160,8 @@ export default function HockeyCard({
            className="w-full h-full relative"
            initial={false}
            animate={{ 
-             rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY.get()),
-             rotateX: isFlipped ? 0 : (editMode ? 0 : rotateX.get())
+             rotateY: isFlipped ? 180 : rotateY.get(),
+             rotateX: isFlipped ? 0 : rotateX.get()
            }}
            style={{ 
               transformStyle: 'preserve-3d'

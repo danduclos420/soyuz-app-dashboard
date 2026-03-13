@@ -52,6 +52,14 @@ export default function LoginPage() {
         .eq('id', user.id)
         .single();
 
+      // SECURITY: Explicitly disable dev mode for non-devtool sessions
+      const { useDevStore } = await import('@/lib/store/dev');
+      if (profile?.role !== 'devtool') {
+        useDevStore.getState().setDevMode(false);
+      } else {
+        useDevStore.getState().setDevMode(true);
+      }
+
       if (profile?.role === 'admin') {
         router.push('/admin');
       } else if (profile?.role === 'affiliate') {

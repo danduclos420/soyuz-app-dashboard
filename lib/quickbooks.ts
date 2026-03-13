@@ -151,24 +151,87 @@ export async function syncQuickBooksInventory() {
     console.log(`Fetched ${qbItems.length} items from QBO.`);
 
     // 4. Update Supabase
+    let updatedCount = 0;
     for (const item of qbItems) {
       if (!item.Sku) continue;
 
-      const { error: updateError } = await (supabase
+      // Check if variant exists
+      const { data: variant, error: variantError } = await (supabase
         .from('product_variants') as any)
-        .update({
-          stock_qty: Math.max(0, item.QtyOnHand || 0),
-          price_retail: item.UnitPrice || 0,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('sku', item.Sku);
+        .select('id, product_id')
+        .eq('sku', item.Sku)
+        .maybeSingle();
 
-      if (updateError) {
-        console.error(`Error updating SKU ${item.Sku}:`, updateError);
+      if (variantError) {
+        console.error(`Error checking SKU ${item.Sku}:`, variantError);
+        continue;
       }
+
+      let variantId = variant?.id;
+      let productId = variant?.product_id;
+
+      // If variant doesn't exist, create product and variant
+      if (!variantId) {
+        console.log(`SKU ${item.Sku} not found. Creating new product and variant...`);
+        
+        // Create Product
+        const { data: newProduct, error: productError } = await (supabase
+          .from('products') as any)
+          .insert({
+            name: item.Name || item.Sku,
+            slug: (item.Name || item.Sku).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+            description: item.Description || '',
+            category: 'QuickBooks Import',
+            base_price: item.UnitPrice || 0,
+            is_active: true
+          })
+          .select('id')
+          .single();
+
+        if (productError) {
+          console.error(`Error creating product for SKU ${item.Sku}:`, productError);
+          continue;
+        }
+
+        productId = newProduct.id;
+
+        // Create Variant
+        const { data: newVariant, error: newVariantError } = await (supabase
+          .from('product_variants') as any)
+          .insert({
+            product_id: productId,
+            sku: item.Sku,
+            stock_qty: Math.max(0, item.QtyOnHand || 0),
+            price_retail: item.UnitPrice || 0,
+            updated_at: new Date().toISOString()
+          })
+          .select('id')
+          .single();
+
+        if (newVariantError) {
+          console.error(`Error creating variant for SKU ${item.Sku}:`, newVariantError);
+          continue;
+        }
+        variantId = newVariant.id;
+      } else {
+        // Update existing variant
+        const { error: updateError } = await (supabase
+          .from('product_variants') as any)
+          .update({
+            stock_qty: Math.max(0, item.QtyOnHand || 0),
+            price_retail: item.UnitPrice || 0,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('sku', item.Sku);
+
+        if (updateError) {
+          console.error(`Error updating SKU ${item.Sku}:`, updateError);
+        }
+      }
+      updatedCount++;
     }
 
-    return { success: true, count: qbItems.length };
+    return { success: true, count: updatedCount };
   } catch (error: any) {
     console.error('syncQuickBooksInventory exception:', error);
     return { success: false, error: error.message || String(error) };

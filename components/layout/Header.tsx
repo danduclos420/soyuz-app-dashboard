@@ -107,11 +107,6 @@ export default function Header() {
   return (
     <>
       {/* TOP ANNOUNCEMENT BAR */}
-      <div className="bg-[#CC0000] text-white text-center py-1.5 text-[10px] font-bold tracking-widest uppercase z-50">
-        WELCOME TO SOYUZ STORE — FREE SHIPPING ON ORDERS $150+
-      </div>
-
-      {/* MAIN HEADER */}
       <header
         className={`sticky top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
@@ -270,6 +265,11 @@ export default function Header() {
               </button>
             </div>
           </div>
+        </div>
+        
+        {/* TOP ANNOUNCEMENT BAR - MOVED BELOW NAV AND INSIDE STICKY */}
+        <div className="bg-[#CC0000] text-white text-center py-1.5 text-[10px] font-bold tracking-widest uppercase">
+          WELCOME TO SOYUZ STORE — FREE SHIPPING ON ORDERS $150+
         </div>
       </header>
 

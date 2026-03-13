@@ -58,7 +58,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
-        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-32 md:-mt-40">
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-16 md:-mt-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,9 +90,9 @@ export default function HomePage() {
 
         <motion.button
           onClick={scrollToCollections}
-          animate={{ y: [0, 10, 0] }}
+          animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 group cursor-pointer"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 group cursor-pointer"
         >
           <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
           <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
@@ -100,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. INFINITE TICKER (RED) */}
-      <div id="collections-top" className="bg-soyuz overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]">
+      <div id="collections-top" className="bg-soyuz overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[88px]">
         <div className="ticker-wrap flex items-center h-12 md:h-14">
           <div className="ticker-inner gap-16 md:gap-24 items-center">
             {[...Array(4)].map((_, i) => (

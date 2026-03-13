@@ -56,7 +56,13 @@ export default function InventorySync() {
       const data = await res.json();
       
       if (data.success) {
-        addLog(`SYNCHRONISATION RÉUSSIE : ${data.count} PRODUITS TRAITÉS.`, 'success');
+        if (data.audit) {
+          addLog(`QB AUDIT: ${data.audit.total} ITEMS TOTAL DANS LE COMPTE.`, 'info');
+          const types = Object.entries(data.audit.types || {}).map(([t, c]) => `${t}: ${c}`).join(' | ');
+          addLog(`RÉPARTITION TYPES: ${types}`, 'info');
+          addLog(`${data.audit.valid} ITEMS FILTRÉS AVEC SKU ET TYPE VALIDE.`, 'info');
+        }
+        addLog(`SYNCHRONISATION TERMINÉE : ${data.count} PRODUITS INSERTÉS/MIS À JOUR.`, 'success');
         toast.success(`Synchronisation terminée : ${data.count} items mis à jour.`);
         await fetchSyncInfo();
       } else {

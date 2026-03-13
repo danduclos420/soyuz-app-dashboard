@@ -137,7 +137,14 @@ export async function getQBInventoryItems(token: QBToken) {
   );
 
   console.log(`[QB Audit] Filtered down to ${validItems.length} valid items with SKUs.`);
-  return validItems;
+  return {
+    items: validItems,
+    audit: {
+      total: allItems.length,
+      types: typeCounts,
+      valid: validItems.length
+    }
+  };
 }
 
 export async function syncQuickBooksInventory() {
@@ -171,7 +178,8 @@ export async function syncQuickBooksInventory() {
     }
 
     // 3. Fetch Items
-    const qbItems = await getQBInventoryItems(token);
+    const qbRes = await getQBInventoryItems(token);
+    const qbItems = qbRes.items;
     console.log(`Fetched ${qbItems.length} items from QBO.`);
 
     // 4. Update Supabase
@@ -255,7 +263,11 @@ export async function syncQuickBooksInventory() {
       updatedCount++;
     }
 
-    return { success: true, count: updatedCount };
+    return { 
+      success: true, 
+      count: updatedCount,
+      audit: qbRes.audit
+    };
   } catch (error: any) {
     console.error('syncQuickBooksInventory exception:', error);
     return { success: false, error: error.message || String(error) };

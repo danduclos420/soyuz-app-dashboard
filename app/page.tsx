@@ -57,7 +57,7 @@ export default function HomePage() {
         </div>
 
         {/* HERO CONTENT */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-24 md:-mt-32 px-[2%] w-full">
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-32 md:-mt-48 px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -89,16 +89,18 @@ export default function HomePage() {
         </div>
 
         {/* DISCOVER BUTTON (Just above ticker) */}
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[18%] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 group cursor-pointer"
-        >
-          <button onClick={scrollToCollections} className="flex flex-col items-center gap-2">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
-            <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
-          </button>
-        </motion.div>
+        <div className="absolute bottom-[20%] left-0 right-0 z-10 flex justify-center">
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-2 group cursor-pointer"
+          >
+            <button onClick={scrollToCollections} className="flex flex-col items-center gap-2">
+              <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
+              <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
+            </button>
+          </motion.div>
+        </div>
 
         {/* 2. INFINITE TICKER (INSIDE HERO AT BOTTOM) */}
         <div className="absolute bottom-0 left-0 right-0 z-20 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)]">

@@ -43,7 +43,7 @@ export default function HomePage() {
       {/* 1. HERO SECTION */}
       <section 
         ref={heroRef}
-        className="relative h-dvh flex flex-col items-center justify-center overflow-hidden carbon-bg"
+        className="relative h-dvh flex flex-col items-center overflow-hidden carbon-bg"
       >
         <div className="absolute inset-0 z-0">
           <motion.div 
@@ -56,15 +56,15 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* HERO CONTENT */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-32 md:-mt-48 px-[2%] w-full">
+        {/* HERO CONTENT - Positioned higher with pt and no justify-center */}
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[15dvh] sm:pt-[20dvh] px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="w-full flex flex-col items-center"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-12 md:mb-16 backdrop-blur-md">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-10 md:mb-14 backdrop-blur-md">
               DESIGNED FOR ELITE ATHLETES
             </span>
             
@@ -88,12 +88,12 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* DISCOVER BUTTON (Just above ticker) */}
-        <div className="absolute bottom-[20%] left-0 right-0 z-10 flex justify-center">
+        {/* DISCOVER BUTTON (Wrapper flex for perfect horizontal centering) */}
+        <div className="absolute bottom-[20%] left-0 right-0 z-20 flex justify-center pointer-events-none">
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
+            className="flex flex-col items-center gap-2 group cursor-pointer pointer-events-auto"
           >
             <button onClick={scrollToCollections} className="flex flex-col items-center gap-2">
               <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
@@ -102,20 +102,23 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* 2. INFINITE TICKER (INSIDE HERO AT BOTTOM) */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)]">
+        {/* 2. INFINITE TICKER (FORCED ABSOLUTE BOTTOM) */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 z-30 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)]"
+          style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
+        >
           <div className="ticker-wrap flex items-center h-12 md:h-14">
             <div className="ticker-inner gap-16 md:gap-24 items-center">
               {[...Array(4)].map((_, i) => (
                 <Fragment key={i}>
-                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">STRENGTH IN UNITY</span>
-                  <img src="/assets/player-banner.webp" alt="" className="h-[38px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
-                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">POWER WITH SOYUZ</span>
-                  <img src="/assets/logo-banner.png" alt="" className="h-[30px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
-                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">BREAK EVERY LIMIT</span>
-                  <img src="/assets/player-banner.webp" alt="" className="h-[38px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
-                  <span className="text-white font-black uppercase tracking-[0.05em] text-[28px] md:text-[36px] flex-shrink-0 leading-[1]">SOYUZ NORTH AMERICA</span>
-                  <img src="/assets/logo-banner.png" alt="" className="h-[30px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[20px] md:text-[36px] flex-shrink-0 leading-[1]">STRENGTH IN UNITY</span>
+                  <img src="/assets/player-banner.webp" alt="" className="h-[30px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[20px] md:text-[36px] flex-shrink-0 leading-[1]">POWER WITH SOYUZ</span>
+                  <img src="/assets/logo-banner.png" alt="" className="h-[24px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[20px] md:text-[36px] flex-shrink-0 leading-[1]">BREAK EVERY LIMIT</span>
+                  <img src="/assets/player-banner.webp" alt="" className="h-[30px] md:h-[44px] w-auto grayscale brightness-150 block object-contain flex-shrink-0" />
+                  <span className="text-white font-black uppercase tracking-[0.05em] text-[20px] md:text-[36px] flex-shrink-0 leading-[1]">SOYUZ NORTH AMERICA</span>
+                  <img src="/assets/logo-banner.png" alt="" className="h-[24px] md:h-[36px] w-auto brightness-0 invert opacity-100 block object-contain flex-shrink-0" />
                 </Fragment>
               ))}
             </div>

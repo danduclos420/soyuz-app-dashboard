@@ -239,7 +239,17 @@ export default function AffiliateDashboard() {
                 commissions: totalCommissions
               }}
               rank={currentRank}
-              rank={currentRank}
+              editMode={isCropping}
+              tempPhotoUrl={tempImage}
+              onCancelEdit={() => {
+                setIsCropping(false);
+                setTempImage(null);
+              }}
+              onSaveEdit={async () => {
+                if (tempImage) {
+                   await handlePhotoUpload(tempImage);
+                }
+              }}
               onEditPhoto={() => {
                 const input = document.createElement('input');
                 input.type = 'file';

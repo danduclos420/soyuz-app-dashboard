@@ -32,7 +32,7 @@ export default function HomePage() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const scrollToCollections = () => {
-    const nextSection = document.getElementById('collections');
+    const nextSection = document.getElementById('ticker-target');
     if (nextSection) {
       nextSection.scrollIntoView({ behavior: 'smooth' });
     }
@@ -43,7 +43,7 @@ export default function HomePage() {
       {/* 1. HERO SECTION */}
       <section 
         ref={heroRef}
-        className="relative h-dvh flex flex-col items-center overflow-hidden carbon-bg"
+        className="relative h-dvh min-h-dvh flex flex-col items-center overflow-hidden carbon-bg"
       >
         <div className="absolute inset-0 z-0">
           <motion.div 
@@ -56,28 +56,28 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* HERO CONTENT - Positioned higher with pt and no justify-center */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[15dvh] sm:pt-[20dvh] px-[2%] w-full">
+        {/* HERO CONTENT - Pulled higher with pt and tight gap to header */}
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[12dvh] sm:pt-[15dvh] px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="w-full flex flex-col items-center"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-10 md:mb-14 backdrop-blur-md">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-8 md:mb-12 backdrop-blur-md">
               DESIGNED FOR ELITE ATHLETES
             </span>
             
-            <h1 className="font-display text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-12 md:mb-16 leading-[0.85] tracking-tighter italic w-full">
+            <h1 className="font-display text-5xl sm:text-6xl md:text-8xl lg:text-9xl mb-10 md:mb-14 leading-[0.85] tracking-tighter italic w-full">
               ENGINEERED <br />
               <span className="outline-text-white block mt-2">FOR POWER</span>
             </h1>
 
-            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-12 md:mb-16 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-2">
+            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-10 md:mb-14 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-2">
               SOYUZ BC North America — The standard in <br className="hidden md:block" /> professional performance hockey.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 mt-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 mt-6 md:mt-10">
               <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black whitespace-nowrap">
                 SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
@@ -88,8 +88,8 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* DISCOVER BUTTON (Wrapper flex for perfect horizontal centering) */}
-        <div className="absolute bottom-[20%] left-0 right-0 z-20 flex justify-center pointer-events-none">
+        {/* DISCOVER BUTTON (Perfect horizontal centering) */}
+        <div className="absolute bottom-[18%] left-0 right-0 z-20 flex justify-center pointer-events-none">
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -102,10 +102,10 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* 2. INFINITE TICKER (FORCED ABSOLUTE BOTTOM) */}
+        {/* 2. INFINITE TICKER (Stuck to the bottom of the viewport) */}
         <div 
-          className="absolute bottom-0 left-0 right-0 z-30 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)]"
-          style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
+          id="ticker-target"
+          className="absolute bottom-0 left-0 right-0 z-30 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[36px] sm:scroll-mt-[40px]"
         >
           <div className="ticker-wrap flex items-center h-12 md:h-14">
             <div className="ticker-inner gap-16 md:gap-24 items-center">

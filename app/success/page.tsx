@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import { CheckCircle2, ShoppingBag, ArrowRight, Package, Truck, ShieldCheck } fr
 import { useCartStore } from '@/lib/store/cart';
 import { Button } from '@/components/ui/Button';
 
-export default function SuccessPage() {
+function SuccessContent() {
   const { clearCart } = useCartStore();
   const searchParams = useSearchParams();
   const sessionId = searchParams?.get('session_id');
@@ -114,5 +114,19 @@ export default function SuccessPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
+        <div className="text-soyuz animate-pulse uppercase tracking-[0.4em] text-[10px] font-black">
+          Authenticating Transaction...
+        </div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

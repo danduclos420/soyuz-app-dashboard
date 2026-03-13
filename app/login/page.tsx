@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import BackButton from '@/components/BackButton';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');

@@ -25,7 +25,7 @@ export default function AccountPage() {
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
       
       if (profile?.role === 'admin') {
         router.push('/admin');

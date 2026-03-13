@@ -84,7 +84,7 @@ export default function Header() {
       .from('profiles')
       .select('role')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     setUserProfile(data);
   };
 

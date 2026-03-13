@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronDown, Zap, Shield, Trophy, Target } from 'lucide-react';
-import { useRef, Fragment } from "react";
+import SoyuzButton from '@/components/ui/SoyuzButton';
+import { useRef, Fragment, useState, useEffect } from "react";
 
 // COLLECTIONS
 const COLLECTIONS = [
@@ -31,6 +32,19 @@ export default function HomePage() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
+  const [isMobileView, setIsMobileView] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 768); // Tailwind's 'md' breakpoint is 768px
+    };
+
+    checkMobile(); // Set initial state
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const scrollToCollections = () => {
     const nextSection = document.getElementById('ticker-target');
     if (nextSection) {
@@ -39,7 +53,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
+    <div className="relative flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
       {/* 1. HERO SECTION 
           - h-[calc(100dvh-88px)] ensures the ticker stays at the bottom of the initial screen.
       */}
@@ -80,12 +94,23 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 mt-4 md:mt-8">
-              <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black whitespace-nowrap">
-                SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link href="/affiliate/register" className="btn-outline h-14 flex items-center justify-center w-full sm:w-[240px] text-sm font-black bg-white/5 backdrop-blur-sm whitespace-nowrap">
+              <SoyuzButton 
+                href="/products" 
+                variant="primary" 
+                size="lg" 
+                icon={ArrowRight}
+                className="w-full sm:w-[240px]"
+              >
+                SHOP COLLECTION
+              </SoyuzButton>
+              <SoyuzButton 
+                href="/affiliate/register" 
+                variant="glass" 
+                size="lg" 
+                className="w-full sm:w-[240px]"
+              >
                 JOIN THE TEAM
-              </Link>
+              </SoyuzButton>
             </div>
           </motion.div>
         </div>
@@ -225,12 +250,23 @@ export default function HomePage() {
               Join the official SOYUZ North America rep network. Access exclusive B2B portals and dominate your local market.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-              <Link href="/affiliate/register" className="btn-primary h-16 px-12 text-sm">
-                JOIN THE AFFILIATES <Zap size={16} fill="white" />
-              </Link>
-              <a href="https://soyuz-hockey.erplain.app/b2b/login" target="_blank" className="btn-outline h-16 px-12 text-sm border-white/20">
+              <SoyuzButton 
+                href="/affiliate/register" 
+                variant="primary" 
+                size="lg" 
+                icon={Zap}
+                className="px-12"
+              >
+                JOIN THE AFFILIATES
+              </SoyuzButton>
+              <SoyuzButton 
+                href="https://soyuz-hockey.erplain.app/b2b/login" 
+                variant="outline" 
+                size="lg" 
+                className="px-12 border-white/20"
+              >
                 B2B LOGIN
-              </a>
+              </SoyuzButton>
             </div>
           </motion.div>
         </div>

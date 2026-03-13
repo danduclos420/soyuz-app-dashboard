@@ -52,6 +52,11 @@ export default function AdminDashboard() {
   });
   const [editingObjective, setEditingObjective] = useState<any>(null);
   const [isSavingObjective, setIsSavingObjective] = useState(false);
+  
+  // Hockey Card Personalization State
+  const [hockeyEditMode, setHockeyEditMode] = useState(false);
+  const [hockeyPhotoUrl, setHockeyPhotoUrl] = useState<string | null>(null);
+  const [hockeySettings, setHockeySettings] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
@@ -280,7 +285,8 @@ export default function AdminDashboard() {
                     full_name: "DANY SOYUZ",
                     role: 'admin',
                     created_at: new Date().toISOString(),
-                    avatar_url: "/assets/logo-short.png" // Temporary or fallback
+                    avatar_url: "/assets/logo-short.png",
+                    hockey_card_settings: hockeySettings
                   }}
                   stats={{
                     network_revenue: stats.revenue,
@@ -288,11 +294,18 @@ export default function AdminDashboard() {
                     total_sales: stats.orders,
                   }}
                   rank="mvp"
-                  onPhotoSelected={(url) => console.log('Photo selected:', url)}
-                  onDownload={() => {
-                    // Logic already handled in internal download if no prop provided,
-                    // but keeping this for custom behavior if needed.
+                  editMode={hockeyEditMode}
+                  tempPhotoUrl={hockeyPhotoUrl}
+                  onPhotoSelected={(url) => {
+                    setHockeyPhotoUrl(url);
+                    setHockeyEditMode(true);
                   }}
+                  onSaveEdit={(settings) => {
+                    setHockeySettings(settings);
+                    setHockeyEditMode(false);
+                    // To be persisted to DB in next step
+                  }}
+                  onCancelEdit={() => setHockeyEditMode(false)}
                 />
               </div>
             </div>

@@ -8,7 +8,7 @@ import { toPng } from 'html-to-image';
 import CardFront from './hockey-card/CardFront';
 import CardBack from './hockey-card/CardBack';
 import HolographicOverlay from './hockey-card/HolographicOverlay';
-import PhotoEditorOverlay from './hockey-card/PhotoEditorOverlay';
+import CardFactoryOverlay from './hockey-card/CardFactoryOverlay';
 import CardActions from './hockey-card/CardActions';
 
 import { TrendingUp } from 'lucide-react';
@@ -176,12 +176,26 @@ export default function HockeyCard({
         )}
       </AnimatePresence>
 
-      {/* 2. MASTER STAGE (Scale & z-index orchestration) */}
+      {/* 2. MASTER STAGE (Fixed Centering in Edit Mode) */}
       <motion.div 
         ref={containerRef}
-        animate={editMode ? { scale: 1.4, z: 100 } : { scale: 1, z: 0 }}
+        animate={editMode ? { 
+          scale: 1.4, 
+          x: "-50%", 
+          y: "-50%",
+          left: "50%",
+          top: "50%",
+          position: "fixed" 
+        } : { 
+          scale: 1, 
+          x: 0, 
+          y: 0,
+          left: "auto",
+          top: "auto",
+          position: "relative" 
+        }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className={`relative w-[340px] h-[470px] ${editMode ? 'z-[100]' : 'z-10'}`}
+        className={`w-[340px] h-[470px] ${editMode ? 'z-[100]' : 'z-10'}`}
         style={{ perspective: '2500px' }}
       >
         {/* 3. FLIP LAYER */}
@@ -215,6 +229,7 @@ export default function HockeyCard({
                  photoY={photoY}
                  zoom={zoom}
                  editMode={editMode}
+                 role={user.role}
                >
                  <HolographicOverlay 
                    shineOpacity={shineOpacity}
@@ -223,10 +238,10 @@ export default function HockeyCard({
                  />
                </CardFront>
 
-               {/* RECTO-ONLY OVERLAYS (Editor) */}
+               {/* RECTO-ONLY OVERLAYS (Factory) */}
                <AnimatePresence>
                  {editMode && (
-                   <PhotoEditorOverlay 
+                   <CardFactoryOverlay 
                      zoom={zoom} 
                      setZoom={setZoom}
                      onCancel={() => onCancelEdit?.()}

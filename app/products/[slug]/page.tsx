@@ -17,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SoyuzButton from '@/components/ui/SoyuzButton';
 import { useCartStore } from '@/lib/store/cart';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -125,9 +126,13 @@ export default function ProductDetailPage() {
     return (
       <div className="bg-black min-h-screen pt-40 flex flex-col items-center justify-center space-y-8">
         <p className="text-white font-display italic text-4xl">404: ASSET NOT FOUND</p>
-        <Link href="/products" className="btn-primary py-3 px-8 text-xs font-black uppercase tracking-widest">
+        <SoyuzButton 
+          href="/products" 
+          variant="primary" 
+          size="md"
+        >
           RETURN TO CATALOG
-        </Link>
+        </SoyuzButton>
       </div>
     );
   }
@@ -270,16 +275,16 @@ export default function ProductDetailPage() {
 
             {/* ACTION */}
             <div className="pt-12 flex gap-4">
-              <button 
+              <SoyuzButton 
                 onClick={handleAddToCart}
                 disabled={product.stock_qty <= 0}
-                className="flex-1 bg-soyuz text-white py-6 text-xs font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed group relative overflow-hidden"
+                variant="primary"
+                size="lg"
+                icon={ShoppingBag}
+                className="flex-1"
               >
-                <span className="relative z-10 flex items-center justify-center gap-3">
-                  ACQUIRE ASSET <ShoppingBag size={18} />
-                </span>
-                <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-              </button>
+                ACQUIRE ASSET
+              </SoyuzButton>
               <button className="px-8 border border-white/5 hover:border-soyuz hover:text-soyuz transition-all">
                 <Heart size={20} />
               </button>

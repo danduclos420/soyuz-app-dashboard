@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/store/cart';
+import SoyuzButton from '@/components/ui/SoyuzButton';
 
 // TYPES
 interface Product {
@@ -183,9 +184,14 @@ export default function ProductsPage() {
                           </div>
                         )}
                         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-8 p-4">
-                          <span className="btn-primary py-2 px-6 text-[10px] font-black h-10 w-full flex items-center justify-center gap-2">
-                            VIEW DETAILS <ArrowRight size={14} />
-                          </span>
+                          <SoyuzButton 
+                            variant="primary" 
+                            size="sm" 
+                            icon={ArrowRight}
+                            className="w-full h-10"
+                          >
+                            VIEW DETAILS
+                          </SoyuzButton>
                         </div>
                         {product.stock_qty <= 0 && (
                           <div className="absolute top-4 right-4 bg-soyuz text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1">

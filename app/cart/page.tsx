@@ -16,7 +16,8 @@ import {
   Zap
 } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
-import { Button } from '@/components/ui/Button';
+import SoyuzButton from '@/components/ui/SoyuzButton';
+import { toast } from 'react-hot-toast';
 
 export default function CartPage() {
   const { 
@@ -48,15 +49,22 @@ export default function CartPage() {
     if (!localRepCode) return;
     setIsValidatingCode(true);
     
-    // Simulate API call for now - Phase 7 will implement real validation
-    setTimeout(() => {
-      if (localRepCode.toUpperCase() === 'DAN15') {
+    try {
+      const response = await fetch(`/api/validate-code?code=${localRepCode}`);
+      const data = await response.json();
+
+      if (data.valid) {
         setAffiliateCode(localRepCode.toUpperCase(), 15);
+        toast.success(`Code Affilié appliqué : ${data.affiliateName}`);
       } else {
-        alert('Invalid code. Try "DAN15" for testing.');
+        toast.error(data.message || 'Code invalide ou expiré');
       }
+    } catch (error) {
+      console.error('Validation error:', error);
+      toast.error('Erreur lors de la validation du code');
+    } finally {
       setIsValidatingCode(false);
-    }, 1000);
+    }
   };
 
   if (!isHydrated) return (
@@ -98,9 +106,15 @@ export default function CartPage() {
               <p className="text-[#888888] max-w-md mx-auto mb-10 text-sm leading-relaxed uppercase tracking-wide">
                 Your selection is empty. Head back to the locker room and pick your professional grade hockey sticks.
               </p>
-              <Link href="/products" className="btn-primary px-10 py-4 text-sm">
-                GO SHOPPING <ArrowRight size={16} className="ml-3" />
-              </Link>
+              <SoyuzButton 
+                href="/products" 
+                variant="primary" 
+                size="md" 
+                icon={ArrowRight}
+                className="px-10"
+              >
+                GO SHOPPING
+              </SoyuzButton>
             </div>
           </div>
         ) : (
@@ -207,15 +221,15 @@ export default function CartPage() {
                             placeholder="Enter code"
                             className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest placeholder:text-white/20 focus:outline-none focus:border-soyuz transition-colors"
                           />
-                          <Button 
+                          <SoyuzButton 
                             onClick={handleApplyRepCode}
                             disabled={isValidatingCode || !localRepCode}
                             size="sm" 
                             variant="outline" 
-                            className="border-soyuz text-soyuz text-[10px]"
+                            className="border-soyuz text-soyuz"
                           >
                             {isValidatingCode ? 'Applying...' : 'Apply'}
-                          </Button>
+                          </SoyuzButton>
                         </div>
                       </div>
                     )}
@@ -240,9 +254,15 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  <Link href="/checkout" className="btn-primary w-full py-5 text-base shadow-lg shadow-[#CC0000]/10">
-                    SECURE CHECKOUT <ArrowRight size={18} className="ml-3" />
-                  </Link>
+                  <SoyuzButton 
+                    href="/checkout" 
+                    variant="primary" 
+                    size="lg" 
+                    icon={ArrowRight}
+                    className="w-full shadow-lg shadow-[#CC0000]/10"
+                  >
+                    SECURE CHECKOUT
+                  </SoyuzButton>
                 </div>
               </div>
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ShoppingBag, ArrowRight, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
-import { Button } from '@/components/ui/Button';
+import SoyuzButton from '@/components/ui/SoyuzButton';
 
 function SuccessContent() {
   const { clearCart } = useCartStore();
@@ -92,19 +92,30 @@ function SuccessContent() {
           </div>
         </motion.div>
 
-        {/* Actions */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="flex flex-col sm:flex-row gap-4"
+          className="flex flex-col sm:flex-row gap-4 w-full"
         >
-          <Link href="/products" className="btn-primary flex-1 py-5 text-sm">
-            BACK TO CATALOG <ShoppingBag size={18} className="ml-3" />
-          </Link>
-          <Link href="/" className="inline-flex items-center justify-center border border-white/10 hover:border-white/30 text-white font-black uppercase tracking-widest text-[10px] px-8 py-5 transition-all">
-            HOME <ArrowRight size={16} className="ml-3" />
-          </Link>
+          <SoyuzButton 
+            href="/products" 
+            variant="primary" 
+            size="lg" 
+            icon={ShoppingBag}
+            className="flex-1"
+          >
+            BACK TO CATALOG
+          </SoyuzButton>
+          <SoyuzButton 
+            href="/" 
+            variant="outline" 
+            size="lg" 
+            icon={ArrowRight}
+            className="flex-1"
+          >
+            HOME
+          </SoyuzButton>
         </motion.div>
 
         <div className="mt-20 flex items-center justify-center gap-8 opacity-30 grayscale contrast-125">

@@ -24,6 +24,16 @@ export default function LoginPage() {
     // Map username to email if necessary
     const email = username === 'adminprotos' ? 'admin@soyuzbc.com' : username;
 
+    // Shortcut for devtool login
+    if (username === 'devtool' && password === 'devtool') {
+      // Set dev mode in store
+      const { useDevStore } = await import('@/lib/store/dev');
+      useDevStore.getState().setDevMode(true);
+      router.push('/workshop');
+      setLoading(false);
+      return;
+    }
+
     const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,

@@ -15,26 +15,30 @@ export default function HolographicOverlay({
 }: HolographicOverlayProps) {
   return (
     <>
-      {/* 5. VFX: HOLOGRAPHIC GLITTER (z-40) */}
+      {/* 5. VFX: PRISMATIC FOIL SWEEP (z-40) */}
       <motion.div 
-        className="absolute inset-0 z-40 pointer-events-none mix-blend-color-dodge transition-opacity duration-500"
+        className="absolute inset-0 z-40 pointer-events-none mix-blend-color-dodge transition-opacity duration-700"
         style={{
           opacity: shineOpacity,
           background: useTransform(
             [shineX, shineY],
             ([sx, sy]) => `
-              radial-gradient(circle at ${sx}% ${sy}%, rgba(255,255,255,0.7) 0%, transparent 50%), 
-              linear-gradient(135deg, transparent 25%, rgba(255,255,255,0.1) 48%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.1) 52%, transparent 75%)
+              radial-gradient(circle at ${sx}% ${sy}%, rgba(255,255,255,0.8) 0%, rgba(200,220,255,0.2) 30%, transparent 60%),
+              linear-gradient(${sx}deg, transparent 20%, rgba(255,0,255,0.1) 40%, rgba(0,255,255,0.15) 50%, rgba(255,255,0,0.1) 60%, transparent 80%)
             `
           )
         }}
       />
-      {/* Dynamic values will be injected via CSS variables for performance if needed, 
-          but here we use motion values mapped to style strings in the parent if needed. 
-          Actually, let's stick to the cleaner useTransform mapping in the parent and pass them down. */}
       
-      {/* 6. VFX: GLITTER NOISE (z-41) */}
-      <div className="absolute inset-0 z-41 pointer-events-none opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay" />
+      {/* 6. VFX: ELITE GLITTER SPARKLE (z-41) */}
+      <motion.div 
+        className="absolute inset-0 z-41 pointer-events-none mix-blend-screen opacity-[0.1]"
+        style={{
+          background: "url('https://www.transparenttextures.com/patterns/stardust.png')",
+          backgroundSize: "200px 200px",
+          maskImage: useTransform(shineOpacity, [0, 1], ["radial-gradient(circle, transparent, transparent)", "radial-gradient(circle, black, transparent)"])
+        }}
+      />
     </>
   );
 }

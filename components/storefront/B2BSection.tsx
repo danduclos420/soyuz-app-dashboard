@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/Button';
+import SoyuzButton from '@/components/ui/SoyuzButton';
 import { ShieldCheck, Truck, RefreshCw, BarChart3 } from 'lucide-react';
 
 export default function B2BSection() {
@@ -49,14 +49,22 @@ export default function B2BSection() {
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button variant="primary" size="lg" className="min-w-[280px] rounded-none py-4" asChild>
-                <a href="https://soyuz-hockey.erplain.app/b2b/login" target="_blank" rel="noopener noreferrer">
-                  Accéder au Portail
-                </a>
-              </Button>
-              <Button variant="outline" size="lg" className="min-w-[280px] rounded-none py-4 border-white/20 text-white" asChild>
-                <a href="/affiliate/register">Devenir Partenaire</a>
-              </Button>
+              <SoyuzButton 
+                href="https://soyuz-hockey.erplain.app/b2b/login"
+                variant="primary" 
+                size="lg" 
+                className="min-w-[280px]"
+              >
+                Accéder au Portail
+              </SoyuzButton>
+              <SoyuzButton 
+                href="/affiliate/register"
+                variant="outline" 
+                size="lg" 
+                className="min-w-[280px] border-white/20 text-white"
+              >
+                Devenir Partenaire
+              </SoyuzButton>
             </div>
           </div>
 

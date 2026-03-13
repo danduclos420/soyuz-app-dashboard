@@ -16,7 +16,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
-import { Button } from '@/components/ui/Button';
+import SoyuzButton from '@/components/ui/SoyuzButton';
 import { toast } from 'react-hot-toast';
 
 export default function CheckoutPage() {
@@ -226,14 +226,16 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <Button 
+                <SoyuzButton 
                   onClick={handleCheckout}
                   disabled={isProcessing}
-                  className="btn-primary w-full py-6 text-base"
+                  variant="primary"
+                  size="lg"
+                  icon={CreditCard}
+                  className="w-full"
                 >
-                  {isProcessing ? 'Redirecting...' : 'Proceed to Payment'} 
-                  {!isProcessing && <CreditCard size={18} className="ml-3" />}
-                </Button>
+                  {isProcessing ? 'Redirecting...' : 'Proceed to Payment'}
+                </SoyuzButton>
                 
                 <p className="text-[9px] text-[#888888] font-black uppercase tracking-widest text-center mt-6 flex items-center justify-center gap-2">
                   <ShieldCheck size={12} className="text-soyuz" /> Encrypted by Stripe

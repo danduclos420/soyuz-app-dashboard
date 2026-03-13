@@ -32,14 +32,14 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
   const [isFlipped, setIsFlipped] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // Interactive mouse tracking for holographic depth
+  // Interactive mouse tracking
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const mouseXSpring = useSpring(x);
   const mouseYSpring = useSpring(y);
   
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [15, -15]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [-15, 15]);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [10, -10]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [-10, 10]);
   
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -50,192 +50,163 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
     y.set(yPct);
   };
 
-  // Hardcode Dany's name for admin/mvp as requested
   const displayName = (user.role === 'admin' || rank === 'mvp') ? 'Dany Lacoursière' : user.full_name;
 
-  const theme = {
-    isAdmin: user.role === 'admin' || rank === 'mvp',
-    border: rank === 'legend' ? 'border-red-600' : (rank === 'elite' ? 'border-zinc-300' : (user.role === 'admin' ? 'border-yellow-500' : 'border-zinc-800')),
-    glow: rank === 'legend' ? 'shadow-red-500/30' : (rank === 'elite' ? 'shadow-white/30' : (user.role === 'admin' ? 'shadow-yellow-500/40' : '')),
-    holographic: rank !== 'agent',
-    banner: rank === 'mvp' || user.role === 'admin' ? 'bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600' : (rank === 'legend' ? 'bg-gradient-to-r from-red-600 via-red-500 to-red-600' : (rank === 'elite' ? 'bg-gradient-to-r from-zinc-200 via-white to-zinc-200' : 'bg-zinc-800')),
-    label: rank === 'mvp' ? 'MVP SPECIAL EDITION' : (rank === 'legend' ? 'LEGEND SERIES' : (rank === 'elite' ? 'ELITE STATUS' : 'YOUNG NODES')),
-    textColor: rank === 'elite' ? 'text-black' : 'text-white'
+  const getRankTheme = () => {
+    const isAdmin = user.role === 'admin' || rank === 'mvp';
+    if (isAdmin) return { border: 'border-yellow-500/50', accent: 'text-yellow-500', label: 'MVP EDITION' };
+    if (rank === 'legend') return { border: 'border-red-600/50', accent: 'text-red-500', label: 'LEGEND' };
+    if (rank === 'elite') return { border: 'border-zinc-300/50', accent: 'text-zinc-200', label: 'ELITE' };
+    return { border: 'border-white/10', accent: 'text-white/40', label: 'AGENT' };
   };
 
+  const theme = getRankTheme();
+
   return (
-    <div className="flex flex-col items-center gap-10">
+    <div className="flex flex-col items-center gap-12">
       <div 
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => { x.set(0); y.set(0); }}
-        className="relative w-[340px] h-[500px] perspective-2000 cursor-pointer group select-none shadow-2xl rounded-2xl"
+        className="relative w-[340px] h-[480px] perspective-2000 cursor-pointer group select-none"
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <motion.div
            className="w-full h-full relative"
-           initial={false}
            animate={{ rotateY: isFlipped ? 180 : rotateY.get(), rotateX: isFlipped ? 0 : rotateX.get() }}
            transition={{ type: "spring", stiffness: 100, damping: 20 }}
            style={{ transformStyle: 'preserve-3d' }}
         >
-          {/* OPAQUE CENTER CORE - The "Sandwich" middle layer */}
-          <div 
-            className="absolute inset-[1px] bg-black z-10 rounded-2xl border border-white/5" 
-            style={{ transform: 'translateZ(-1px)' }}
-          />
+          {/* OPAQUE CORE SANDWICH */}
+          <div className="absolute inset-0 bg-black z-0 rounded-[4px]" style={{ transform: 'translateZ(-1px)' }} />
 
-          {/* FRONT SIDE (Young Guns Inspired) */}
+          {/* FRONT SIDE (Recto - Young Guns Edition) */}
           <div 
-            className={`absolute inset-0 rounded-2xl overflow-hidden border-[6px] ${theme.border} bg-[#050505] flex flex-col ${theme.glow}`}
+            className={`absolute inset-0 rounded-[4px] overflow-hidden border-[1px] ${theme.border} bg-[#050505] flex flex-col shadow-2xl`}
             style={{ backfaceVisibility: 'hidden', transform: 'translateZ(1px)' }}
           >
-            {/* Header: Logo & Node Class */}
+            {/* 1. Large Header Branding */}
             <div className="relative z-30 p-8 flex justify-between items-start">
-               <div className="flex flex-col gap-0.5">
-                  <img src="/assets/logo-short.png" alt="SOX" className="h-7 invert drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
-                  <div className="h-[2px] w-full bg-white animate-pulse" />
-               </div>
-               <div className="text-right">
-                  <p className="text-[10px] font-black italic tracking-tighter text-soyuz">NODE GRADE //</p>
-                  <p className={`text-[12px] font-black uppercase tracking-widest ${theme.isAdmin ? 'text-yellow-500' : 'text-white'}`}>{rank}</p>
+               <div className="flex flex-col gap-1 items-start">
+                  <img src="/assets/logo-short.png" alt="SOX" className="h-10 invert brightness-150 drop-shadow-[0_0_15px_rgba(255,215,0,0.3)]" />
+                  <p className="text-[10px] font-black italic tracking-[0.2em] text-white/40 border-t border-white/20 pt-1">SERIES 2 // SOYUZ-NODES</p>
                </div>
             </div>
 
-            {/* Main Player Interaction Area (Photo) */}
+            {/* 2. Main Subject Photo */}
             <div className="absolute inset-0 z-10">
                {user.avatar_url ? (
-                 <img src={user.avatar_url} className="w-full h-full object-cover contrast-[1.1] grayscale-[0.05]" />
+                 <img src={user.avatar_url} className="w-full h-full object-cover contrast-[1.1] brightness-[1.1]" />
                ) : (
-                 <div className="w-full h-full bg-neutral-900 flex items-center justify-center"><Star size={100} className="text-white/5" /></div>
+                 <div className="w-full h-full bg-neutral-900 flex items-center justify-center"><Star size={120} className="text-white/5" /></div>
                )}
-               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20" />
-               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
+               {/* Vignette Shadow */}
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
+               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
             </div>
 
-            {/* Footer Nameplate (Young Guns Style) */}
-            <div className="absolute inset-x-0 bottom-0 z-40 p-4">
-               <div className={`w-full ${theme.banner} h-24 rounded-3xl flex flex-col justify-center px-8 relative overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.5)] skew-x-[-2deg]`}>
-                  {/* Banner Decoration */}
-                  <div className="absolute -right-4 -top-8 w-32 h-32 bg-black/10 rotate-45" />
-                  <div className="flex flex-col relative z-10">
-                     <p className={`text-[11px] font-black italic tracking-[0.2em] mb-1 ${theme.textColor} opacity-60`}>{theme.label}</p>
-                     <h2 className={`text-4xl font-display italic uppercase leading-none tracking-tighter ${theme.textColor} drop-shadow-md`}>
+            {/* 3. Metallic Footer (The "Young Guns" Blade) */}
+            <div className="absolute inset-x-0 bottom-0 z-40 h-32 flex flex-col justify-end">
+               {/* Separator Line */}
+               <div className="w-full h-[1px] bg-white opacity-40 blur-[0.5px] mb-[-2px]" />
+               
+               {/* Metallic Nameplate */}
+               <div className="w-full h-24 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')] bg-neutral-900 flex items-center px-10 relative shadow-[0_-15px_30px_rgba(0,0,0,0.8)] overflow-hidden">
+                  {/* Metal Sheen Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-30deg]" />
+                  
+                  {/* Info Section */}
+                  <div className="flex flex-col relative z-10 w-full">
+                     <div className="flex justify-between items-end mb-1">
+                        <p className={`text-[11px] font-black italic tracking-[0.3em] uppercase ${theme.accent}`}>YOUNG-NODES</p>
+                        {/* Position Slot "C" */}
+                        <div className="flex flex-col items-end">
+                           <span className="text-[14px] font-black italic text-white/50 leading-none">{rank.toUpperCase()}</span>
+                           <div className="h-[1px] w-8 bg-white/20 mt-1" />
+                        </div>
+                     </div>
+                     
+                     {/* Script Baseball Typography */}
+                     <h2 className="text-5xl font-serif italic font-black text-white leading-none tracking-tighter drop-shadow-[0_2px_10px_rgba(0,0,0,1)] -skew-x-3 pr-4" style={{ fontFamily: 'serif', letterSpacing: '-0.05em' }}>
                         {displayName}
                      </h2>
-                     <div className="h-1 w-12 bg-black/10 mt-2" />
                   </div>
                </div>
             </div>
 
-            {/* Holographic "WOW" Finishing */}
-            {theme.holographic && (
-              <div className="absolute inset-0 pointer-events-none z-50 mix-blend-color-dodge opacity-60 overflow-hidden">
+            {/* 4. Holographic Foil Layers */}
+            {rank !== 'agent' && (
+              <div className="absolute inset-0 pointer-events-none z-50 mix-blend-color-dodge opacity-40">
                 <motion.div 
-                   className="absolute inset-[-150%] bg-[linear-gradient(135deg,transparent_20%,rgba(255,255,255,0.4)_50%,transparent_80%)]"
-                   animate={{ 
-                      x: ['-50%', '50%'],
-                      y: ['-50%', '50%']
-                   }}
-                   transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-[-150%] bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.6)_50%,transparent_60%)]"
+                  animate={{ x: ['-100%', '100%'], y: ['-100%', '100%'] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 />
-                {/* Random Sparkles for High Ranks */}
-                {(rank === 'legend' || theme.isAdmin) && (
-                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_var(--x,50%)_var(--y,50%),rgba(255,255,255,0.8)_0%,transparent_40%)]"
-                        style={{ 
-                          '--x': `${(mouseXSpring.get() + 0.5) * 100}%`,
-                          '--y': `${(mouseYSpring.get() + 0.5) * 100}%`
-                        } as any} />
-                )}
               </div>
             )}
-            
-            {/* Glossy Overlay */}
-            <div className="absolute inset-0 z-50 pointer-events-none opacity-20 bg-gradient-to-br from-white/20 via-transparent to-black/20" />
           </div>
 
-          {/* BACK SIDE (Pettersson Accurate Layout) */}
+          {/* BACK SIDE (Verso - Advanced Nodal Report) */}
           <div 
-            className="absolute inset-0 rounded-2xl overflow-hidden border-[6px] border-white/10 bg-white flex flex-col shadow-2xl"
+            className="absolute inset-0 rounded-[4px] overflow-hidden border-[1px] border-white/5 bg-[#080808] rotate-y-180 flex flex-col shadow-2xl"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg) translateZ(1px)' }}
           >
-             <div className="h-full flex flex-col p-8 text-black relative z-10">
-                {/* Pettersson Header */}
-                <div className="flex justify-between items-start mb-6">
-                   <p className="text-xl font-black tracking-tighter text-black/10 font-mono italic">#{user.affiliate_code?.slice(-3) || '001'}</p>
-                   <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-black/5 shadow-inner bg-zinc-50 relative group">
-                      <img src={user.avatar_url || '/assets/logo-short.png'} className="w-full h-full object-cover grayscale-[0.3]" />
-                      <div className="absolute inset-0 border border-black/10 rounded-2xl" />
-                   </div>
-                   <div className="flex flex-col items-end gap-1">
-                      <img src="/assets/logo-short.png" alt="SOX" className="h-7 grayscale contrast-200" />
-                      <div className="h-1 w-10 bg-black/20" />
-                   </div>
-                </div>
-
-                {/* Pettersson Middle Nameplate */}
-                <div className="bg-black text-white py-3 px-8 flex justify-between items-center skew-x-[-12deg] mb-8 shadow-lg">
-                   <h3 className="text-2xl font-black italic uppercase tracking-tighter skew-x-[12deg]">{displayName}</h3>
-                   <span className="text-xs font-bold opacity-40 skew-x-[12deg] tracking-widest">{user.role.toUpperCase()}</span>
-                </div>
-
-                {/* Bio Grid (MLB/NHL Style) */}
-                <div className="grid grid-cols-2 gap-y-2 gap-x-8 mb-8 text-[10px] font-black uppercase text-zinc-400 border-b border-zinc-100 pb-6">
-                  <div className="flex justify-between border-b border-zinc-50 pb-1"><span>YEAR JOINED:</span><span className="text-black">{new Date(user.created_at).getFullYear()}</span></div>
-                  <div className="flex justify-between border-b border-zinc-50 pb-1"><span>NODE CLASS:</span><span className="text-black">{rank.toUpperCase()}</span></div>
-                  <div className="flex justify-between border-b border-zinc-50 pb-1"><span>ID CODE:</span><span className="text-black font-mono">{user.affiliate_code || '---'}</span></div>
-                  <div className="flex justify-between border-b border-zinc-50 pb-1"><span>SOURCE:</span><span className="text-black">SOYUZ NODES</span></div>
-                </div>
-
-                {/* Stat Table (Accurate Pettersson Stats Grid) */}
-                <div className="flex-1">
-                   <div className="overflow-hidden border border-black/5 rounded-lg bg-zinc-50/50">
-                      <table className="w-full text-[10px] border-collapse">
-                         <thead>
-                            <tr className="bg-zinc-100/80 border-b border-black/10 font-black italic text-zinc-500">
-                               <th className="text-left p-3">YEAR</th>
-                               <th className="text-center p-3">NODE</th>
-                               <th className="text-center p-3">SALES</th>
-                               <th className="text-center p-3">POINTS</th>
-                               <th className="text-center p-3">COMM.</th>
-                            </tr>
-                         </thead>
-                         <tbody className="font-bold">
-                            <tr className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
-                               <td className="p-3">2023-24</td>
-                               <td className="text-center p-3">SOX-D</td>
-                               <td className="text-center p-3 text-soyuz">${(stats.total_sales || 0).toLocaleString()}</td>
-                               <td className="text-center p-3">{stats.points || 0}</td>
-                               <td className="text-center p-3">${(stats.commissions || 0).toLocaleString()}</td>
-                            </tr>
-                            <tr className="bg-zinc-200/50 font-black italic text-black">
-                               <td className="p-3 uppercase">TOTALS</td>
-                               <td className="text-center p-3">---</td>
-                               <td className="text-center p-3">${(stats.total_sales || 0).toLocaleString()}</td>
-                               <td className="text-center p-3">{stats.points || 0}</td>
-                               <td className="text-center p-3">${(stats.commissions || 0).toLocaleString()}</td>
-                            </tr>
-                         </tbody>
-                      </table>
-                   </div>
-
-                   {/* Bio Narrative Section (Pettersson Style) */}
-                   <div className="mt-8 text-[11px] leading-relaxed italic text-zinc-500 font-medium text-justify">
-                      On {new Date(user.created_at).toLocaleDateString()}, {displayName.split(' ')[0]} officially integrated the SOYUZ ecosystem. Since activation, the node has shown remarkable resilience as a {rank.toUpperCase()}, consistently delivering high-volume output within the Series 2 nodal framework. Lacoursière continues to set benchmarks for future node generations.
-                   </div>
-                </div>
-
-                {/* Footer Branding Area */}
-                <div className="mt-auto pt-6 flex justify-between items-end border-t-2 border-zinc-100">
+             {/* Tech Background */}
+             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+             
+             <div className="h-full flex flex-col p-8 text-white relative z-10">
+                {/* Header: ID & Logo */}
+                <div className="flex justify-between items-start mb-10 border-b border-white/10 pb-6 uppercase">
                    <div className="flex items-center gap-4">
-                      <img src="/assets/logo-short.png" className="h-5 grayscale contrast-150" />
-                      <div className="text-[7px] text-zinc-300 font-black uppercase leading-tight tracking-widest">
-                         ©2026 SOYUZ ANALYTICS.<br />PRINTED IN THE MATRICE.
+                      <p className="text-3xl font-black text-soyuz italic tracking-tighter">#001</p>
+                      <div className="h-10 w-[1px] bg-white/10" />
+                      <div>
+                         <p className="text-[10px] font-black tracking-[0.5em] text-white/40">NODE-ID</p>
+                         <p className="text-xs font-mono text-white/80">{user.affiliate_code || 'UNASSIGNED'}</p>
                       </div>
                    </div>
-                   <div className="flex gap-1 group">
-                      <Zap size={18} className="text-soyuz opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all" />
-                      <Trophy size={18} className="text-zinc-200" />
+                   <img src="/assets/logo-short.png" alt="SOX" className="h-6 opacity-30 invert" />
+                </div>
+
+                {/* Identity Strip */}
+                <div className="flex gap-8 items-center mb-10">
+                   <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-white/5 shadow-2xl ring-4 ring-white/5">
+                      <img src={user.avatar_url || '/assets/logo-short.png'} className="w-full h-full object-cover grayscale-[0.5]" />
+                   </div>
+                   <div className="flex flex-col gap-1">
+                      <h3 className="text-3xl font-display italic font-black uppercase text-white drop-shadow-lg">{displayName}</h3>
+                      <p className="text-[11px] font-bold text-soyuz tracking-widest uppercase italic">SOYUZ ANALYTICS COMMANDER</p>
+                      <div className="mt-2 flex gap-1">
+                         {[...Array(5)].map((_, i) => <div key={i} className="w-1.5 h-1.5 bg-soyuz/60 rounded-full" />)}
+                      </div>
+                   </div>
+                </div>
+
+                {/* Advanced Stats Grid */}
+                <div className="flex-1 grid grid-cols-1 gap-4">
+                   <div className="text-[11px] font-black text-white/20 tracking-[0.6em] mb-2">NETWORK PERFORMANCE DATA</div>
+                   
+                   <div className="grid grid-cols-2 gap-4">
+                      <StatBlock label="LIQUIDITÉ RÉSEAU" value={`$${(stats.network_revenue || stats.total_sales || 0).toLocaleString()}`} icon={<DollarSign size={14} />} />
+                      <StatBlock label="NODES ACTIFS" value={stats.active_affiliates || stats.points || 0} icon={<Zap size={14} />} />
+                      <StatBlock label="SCORE D'AUTORITÉ" value={rank.toUpperCase()} icon={<Crown size={14} />} />
+                      <StatBlock label="NODAL SYNC" value={`${new Date(user.created_at).getFullYear()}-PRO`} icon={<Target size={14} />} />
+                   </div>
+
+                   {/* Bio Narrative (MLB Style) */}
+                   <div className="mt-8 p-6 bg-white/[0.03] rounded-xl border border-white/5 italic text-[12px] leading-relaxed text-zinc-400 text-justify">
+                      Node activated on {new Date(user.created_at).toLocaleDateString()}. Lacoursière has consistently broken nodal capacity thresholds, establishing a legend-grade precedent for the entire soyuz network. Series 2 deployment confirmed.
+                   </div>
+                </div>
+
+                {/* Footer Security */}
+                <div className="mt-auto pt-8 flex justify-between items-center border-t border-white/10">
+                   <div className="flex flex-col gap-1">
+                      <p className="text-[8px] font-bold text-white/10 tracking-widest uppercase">ENCRYPTED SOYUZ REPORT // 2026</p>
+                      <img src="/assets/logo-short.png" alt="SOX" className="h-4 opacity-5 grayscale invert" />
+                   </div>
+                   <div className="w-10 h-10 rounded-lg bg-soyuz/10 border border-soyuz/20 flex items-center justify-center">
+                      <Trophy size={20} className="text-soyuz opacity-50" />
                    </div>
                 </div>
              </div>
@@ -243,24 +214,27 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
         </motion.div>
       </div>
 
-      {/* Action Hub (External) */}
-      <div className="flex flex-wrap justify-center gap-4 relative z-50">
-        <button 
-          onClick={(e) => { e.stopPropagation(); onEditPhoto?.(); }}
-          className="flex items-center gap-3 px-8 py-5 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white hover:border-soyuz hover:bg-soyuz/10 transition-all active:scale-95 group shadow-2xl"
-        >
-          <Camera size={16} className="text-soyuz group-hover:scale-110 transition-transform" /> 
-          PHOTO COMMAND
+      {/* Action Hub */}
+      <div className="flex gap-6 relative z-50">
+        <button onClick={(e) => { e.stopPropagation(); onEditPhoto?.(); }} className="flex items-center gap-3 px-10 py-6 bg-white/[0.02] border border-white/10 rounded-xl text-[11px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz hover:bg-soyuz/5 transition-all">
+          <Camera size={16} className="text-soyuz" /> PHOTO-EDIT
         </button>
-        
-        <button 
-          onClick={(e) => { e.stopPropagation(); onDownload?.(); }}
-          className="flex items-center gap-3 px-8 py-5 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white hover:border-soyuz hover:bg-soyuz/10 transition-all active:scale-95 group shadow-2xl"
-        >
-          <Download size={16} className="text-soyuz group-hover:translate-y-0.5 transition-transform" /> 
-          EXTRACT DATA
+        <button onClick={(e) => { e.stopPropagation(); onDownload?.(); }} className="flex items-center gap-3 px-10 py-6 bg-white/[0.02] border border-white/10 rounded-xl text-[11px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white hover:border-soyuz hover:bg-soyuz/5 transition-all">
+          <Download size={16} className="text-soyuz" /> SYNC-DATA
         </button>
       </div>
+    </div>
+  );
+}
+
+function StatBlock({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) {
+  return (
+    <div className="bg-white/[0.04] p-5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-all group">
+       <div className="flex items-center gap-2 mb-2 text-soyuz/50 group-hover:text-soyuz transition-colors">
+          {icon}
+          <span className="text-[9px] font-black tracking-widest uppercase opacity-40">{label}</span>
+       </div>
+       <div className="text-2xl font-display italic font-black text-white">{value}</div>
     </div>
   );
 }

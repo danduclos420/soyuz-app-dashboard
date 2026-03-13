@@ -11,6 +11,8 @@ import HolographicOverlay from './hockey-card/HolographicOverlay';
 import PhotoEditorOverlay from './hockey-card/PhotoEditorOverlay';
 import CardActions from './hockey-card/CardActions';
 
+import { TrendingUp } from 'lucide-react';
+
 interface PhotoSettings {
   x: number;
   y: number;
@@ -216,8 +218,8 @@ export default function HockeyCard({
                >
                  <HolographicOverlay 
                    shineOpacity={shineOpacity}
-                   shineX={useTransform(shineX, (v) => `${v}%`)}
-                   shineY={useTransform(shineY, (v) => `${v}%`)}
+                   shineX={shineX}
+                   shineY={shineY}
                  />
                </CardFront>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useTransform } from 'framer-motion';
 
 interface HolographicOverlayProps {
   shineOpacity: any;
@@ -20,10 +20,13 @@ export default function HolographicOverlay({
         className="absolute inset-0 z-40 pointer-events-none mix-blend-color-dodge transition-opacity duration-500"
         style={{
           opacity: shineOpacity,
-          background: `
-            radial-gradient(circle at var(--shine-x) var(--shine-y), rgba(255,255,255,0.7) 0%, transparent 50%), 
-            linear-gradient(var(--shine-deg), transparent 25%, rgba(255,255,255,0.1) 48%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.1) 52%, transparent 75%)
-          ` as any
+          background: useTransform(
+            [shineX, shineY],
+            ([sx, sy]) => `
+              radial-gradient(circle at ${sx}% ${sy}%, rgba(255,255,255,0.7) 0%, transparent 50%), 
+              linear-gradient(135deg, transparent 25%, rgba(255,255,255,0.1) 48%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.1) 52%, transparent 75%)
+            `
+          )
         }}
       />
       {/* Dynamic values will be injected via CSS variables for performance if needed, 

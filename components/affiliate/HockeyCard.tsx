@@ -140,7 +140,7 @@ export default function HockeyCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[90] pointer-events-none"
+            className="fixed inset-0 bg-black/95 backdrop-blur-md z-[80]"
           />
         )}
       </AnimatePresence>
@@ -160,11 +160,13 @@ export default function HockeyCard({
            className="w-full h-full relative"
            initial={false}
            animate={{ 
-             rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY.get()),
-             rotateX: isFlipped ? 0 : (editMode ? 0 : rotateX.get())
+             rotateY: isFlipped ? 180 : (editMode ? 0 : 0), // Base for spring
+             rotateX: 0
            }}
            style={{ 
-              transformStyle: 'preserve-3d'
+              transformStyle: 'preserve-3d',
+              rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY),
+              rotateX: isFlipped ? 0 : (editMode ? 0 : rotateX)
            }}
            transition={{ type: "spring", stiffness: 100, damping: 20 }}
         >
@@ -219,14 +221,17 @@ export default function HockeyCard({
             {/* EDIT TOOLS OVERLAY */}
             {editMode && (
                <div 
-                className="absolute inset-x-0 top-0 z-50 bg-black/95 backdrop-blur-2xl p-6 flex flex-col items-center gap-5 rounded-t-[4px] border-b border-soyuz/20"
-                style={{ transform: 'translateZ(60px)' }}
+                className="absolute inset-x-0 -top-20 z-[110] bg-[#0A0A0A] border border-white/10 p-8 flex flex-col items-center gap-6 rounded-2xl shadow-[0_0_100px_rgba(255,0,0,0.15)]"
+                style={{ transform: 'translateZ(100px)' }}
                >
                   <div className="flex flex-col items-center gap-2 mb-2">
-                     <p className="text-[10px] font-black italic text-soyuz tracking-[0.4em] uppercase">MODE AJUSTEMENT</p>
-                     <p className="text-[8px] text-white/40 uppercase tracking-widest whitespace-nowrap">DÉPLACEZ ET ZOOMEZ VOTRE PHOTO</p>
+                     <div className="flex items-center gap-2">
+                        <Camera size={16} className="text-soyuz animate-pulse" />
+                        <p className="text-[12px] font-black italic text-white tracking-[0.5em] uppercase">AJUSTEMENT PHOTO</p>
+                     </div>
+                     <p className="text-[9px] text-white/30 uppercase tracking-[0.2em]">FAITES GLISSER POUR CADRER • UTILISEZ LE ZOOM</p>
                   </div>
-                  <div className="flex items-center gap-4 w-full px-2">
+                  <div className="flex items-center gap-4 w-full px-4">
                      <Maximize2 size={12} className="text-white/40" />
                      <input 
                         type="range" 
@@ -250,9 +255,9 @@ export default function HockeyCard({
                            e.stopPropagation(); 
                            onSaveEdit?.({ x: photoX.get(), y: photoY.get(), scale: zoom }); 
                         }}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-soyuz border border-soyuz text-black rounded-full text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white hover:border-white transition-all shadow-[0_0_30px_rgba(255,0,0,0.3)]"
+                        className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-soyuz text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white transition-all shadow-[0_0_50px_rgba(255,0,0,0.4)] group/save"
                      >
-                        <Check size={14} /> ENREGISTRER
+                        <Check size={16} className="group-hover/save:scale-125 transition-transform" /> ENREGISTRER MON LOOK
                      </button>
                   </div>
                </div>

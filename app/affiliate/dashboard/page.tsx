@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase-client';
-import { Button } from '@/components/ui/Button';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   TrendingUp, 
   Users, 
@@ -18,101 +17,96 @@ import {
   Zap,
   Share2,
   Trophy,
-  Target
+  Target,
+  Mail,
+  Home,
+  Star
 } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import HockeyCard from '@/components/affiliate/HockeyCard';
-import { toPng } from 'html-to-image';
-import { Camera, X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import SoyuzButton from '@/components/ui/SoyuzButton';
 
 export default function AffiliateDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [commissions, setCommissions] = useState<any[]>([]);
   const [objectives, setObjectives] = useState<any[]>([]);
-  const [pointsConfig, setPointsConfig] = useState({ dollars_per_point: 1000 });
-  const [rankThresholds, setRankThresholds] = useState({
-    agent: 0,
-    pro: 5000,
-    elite: 15000,
-    legend: 50000
-  });
+  const [messages, setMessages] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'home' | 'objectives' | 'messages' | 'leaderboard'>('home');
   const [copied, setCopied] = useState(false);
   const [isCropping, setIsCropping] = useState(false);
   const [tempImage, setTempImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const router = useRouter();
+
+  // Settings / Config (Defaults as per Master Plan)
+  const ptsRatio = 1000;
+  const rankThresholds = {
+    agent: 0,
+    pro: 5000,
+    elite: 15000,
+    legend: 50000
+  };
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Fetch Profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setProfile(profileData);
-
-        // Fetch Commissions & total sales calculation
-        const { data: comms } = await supabase
-          .from('commissions')
-          .select('*, orders(total)')
-          .eq('affiliate_id', user.id)
-          .order('created_at', { ascending: false });
-        setCommissions(comms || []);
-
-        const { data: sData } = await supabase
-           .from('app_settings')
-           .select('*');
-        
-        if (sData) {
-          const ptCfg = sData.find(s => s.key === 'points_config')?.value;
-          if (ptCfg) setPointsConfig(ptCfg);
-          
-          const rCfg = sData.find(s => s.key === 'rank_thresholds')?.value;
-          if (rCfg) setRankThresholds(rCfg);
-        }
-
-        // Fetch Targeted Objectives
-        const { data: objData } = await supabase
-           .from('affiliate_objectives')
-           .select('*')
-           .or(`is_global.eq.true,id.in.(${
-             // This is a bit complex for a single query if objective_assignments is large
-             // but we'll use a subquery or join if Supabase client allows easily.
-             // For now, let's fetch global + those where user is assigned.
-             'SELECT objective_id FROM objective_assignments WHERE affiliate_id = \'' + user.id + '\''
-           })`);
-        
-        // Simpler approach if subquery fails:
-        const { data: directObjs } = await supabase
-           .from('affiliate_objectives')
-           .select('*, objective_assignments!inner(affiliate_id)')
-           .eq('objective_assignments.affiliate_id', user.id);
-        
-        const { data: globalObjs } = await supabase
-           .from('affiliate_objectives')
-           .select('*')
-           .eq('is_global', true);
-
-        const merged = [...(globalObjs || [])];
-        directObjs?.forEach(dobj => {
-           if (!merged.find(m => m.id === dobj.id)) merged.push(dobj);
-        });
-        
-        setObjectives(merged.sort((a, b) => a.target_amount - b.target_amount));
+      if (!user) {
+        router.push('/login');
+        return;
       }
+
+      // 1. Profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileData?.role !== 'affiliate' && profileData?.role !== 'admin') {
+        router.push('/account');
+        return;
+      }
+      setProfile(profileData);
+
+      // 2. Commissions
+      const { data: comms } = await supabase
+        .from('commissions')
+        .select('*, orders(total)')
+        .eq('affiliate_id', profileData.id) // Using profile ID if it matches affiliate table ID
+        .order('created_at', { ascending: false });
+      setCommissions(comms || []);
+
+      // 3. Messages (Step 38)
+      const { data: msgData } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`recipient_id.eq.${user.id},is_broadcast.eq.true`)
+        .order('created_at', { ascending: false });
+      setMessages(msgData || []);
+
+      // 4. Leaderboard (Step 34)
+      const { data: leaderData } = await supabase
+        .from('affiliates')
+        .select('total_sales, profiles(full_name, avatar_url, role)')
+        .eq('status', 'approved')
+        .order('total_sales', { ascending: false })
+        .limit(10);
+      setLeaderboard(leaderData || []);
+
       setLoading(false);
     }
     fetchData();
-  }, []);
+  }, [router]);
 
   const copyRefLink = () => {
     const link = `${window.location.host}?ref=${profile?.affiliate_code || 'PROMO'}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
+    toast.success('Lien copié dans le presse-papier !');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -122,26 +116,21 @@ export default function AffiliateDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // 1. Convert base64 to Blob
       const res = await fetch(base64);
       const blob = await res.blob();
-      
-      const fileName = `${user.id}-${Math.random()}.jpg`;
+      const fileName = `${user.id}-${Date.now()}.jpg`;
       const filePath = `avatars/${fileName}`;
 
-      // 2. Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, blob, { contentType: 'image/jpeg', upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // 3. Get Public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // 4. Update Profile
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
@@ -149,306 +138,412 @@ export default function AffiliateDashboard() {
 
       if (updateError) throw updateError;
 
-      setProfile({ ...profile, avatar_url: publicUrl });
+      setProfile((prev: any) => ({ ...prev, avatar_url: publicUrl }));
       setIsCropping(false);
+      toast.success('Profil mis à jour !');
     } catch (err) {
       console.error('Error uploading photo:', err);
-      alert('Erreur lors de l\'upload de la photo');
+      toast.error("Échec de l'upload");
     } finally {
       setUploading(false);
     }
   };
 
-  const totalSales = commissions.reduce((sum, c) => sum + (c.orders?.total || 0), 0);
+  const totalSales = profile?.total_sales || 0;
   const totalCommissions = commissions.reduce((sum, c) => sum + (c.amount || 0), 0);
-  const pendingCommissions = commissions.filter(c => c.status === 'pending').reduce((sum, c) => sum + (c.amount || 0), 0);
-
-  // Points Logic
-  const ptsRatio = pointsConfig.dollars_per_point || 1000;
   const currentPoints = Math.floor(totalSales / ptsRatio);
   const nextPointProgress = ((totalSales % ptsRatio) / ptsRatio) * 100;
 
-  // Rank Logic
-  const calculateRank = (): 'agent' | 'pro' | 'elite' | 'legend' => {
+  const currentRank = (): 'agent' | 'pro' | 'elite' | 'legend' => {
      if (totalSales >= rankThresholds.legend) return 'legend';
      if (totalSales >= rankThresholds.elite) return 'elite';
      if (totalSales >= rankThresholds.pro) return 'pro';
      return 'agent';
   };
 
-  const currentRank = calculateRank();
-
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-8">
       <div className="w-12 h-12 border-2 border-soyuz border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(255,0,0,0.2)]" />
-      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">INITIALISATION DU CENTRE DE CONTRÔLE...</p>
+      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">SYSTÈME D'AMBASSADEUR ACTIVÉ...</p>
     </div>
   );
 
   return (
     <PageLayout
-      title="CONTRÔLE MISSION"
-      subtitle="PORTAIL AFFILIÉ ACTIF"
+      title="CENTRE DE CONTRÔLE"
+      subtitle={`AFFILIÉ : ${profile?.affiliate_code || 'PROMO'}`}
       actions={
-        <>
-          <button 
-            onClick={copyRefLink}
-            className="px-8 py-5 bg-soyuz text-black text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all flex items-center gap-3 shadow-[0_0_40px_rgba(255,0,0,0.2)]"
-          >
-            {copied ? <CheckCircle2 size={16} /> : <Share2 size={16} />} 
-            {copied ? 'LIEN COPIÉ' : 'PARTAGER LIEN AFFILIÉ'}
-          </button>
-          <button className="px-8 py-5 bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white hover:border-soyuz hover:text-soyuz transition-all flex items-center gap-3">
-            <Calendar size={16} /> RAPPORTS
-          </button>
-        </>
+        <div className="flex gap-4">
+          <SoyuzButton onClick={copyRefLink} variant="primary" icon={Share2} size="md">
+            {copied ? 'COPIÉ' : 'PARTAGER MON LIEN'}
+          </SoyuzButton>
+        </div>
       }
     >
-      {/* 2. IDENTITY SECTION (HOT HERO) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-20 items-center">
-         <div className="lg:col-span-2 space-y-8">
-            <h2 className="text-6xl font-display italic text-white uppercase leading-tight">
-              VOTRE AGENT <span className="outline-text-white">EN ACTION</span>
-            </h2>
-            <p className="text-[#888888] text-lg uppercase font-bold tracking-widest max-w-xl">
-              VOUS ÊTES ACTUELLEMENT RANG <span className="text-soyuz">{currentRank.toUpperCase()}</span>. CONTINUEZ À DÉPLOYER VOTRE RÉSEAU POUR ATTEINDRE LE NIVEAU LÉGENDE.
-            </p>
-            <div className="flex flex-wrap gap-4 pt-4">
-               <div className="px-6 py-4 bg-white/5 border border-white/10 rounded-2xl">
-                  <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest mb-1">CODE D'ACTIVATION</p>
-                  <p className="text-xl font-mono text-white tracking-[0.2em]">{profile?.affiliate_code}</p>
-               </div>
-               <div className="px-6 py-4 bg-white/5 border border-white/10 rounded-2xl">
-                  <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest mb-1">POINTS TOTALS</p>
-                  <p className="text-xl font-display italic text-soyuz">{currentPoints} PTS</p>
-               </div>
-            </div>
-         </div>
-         <div className="flex justify-center">
-            <HockeyCard 
-              user={{
-                full_name: profile?.full_name || 'INITIALIZING...',
-                avatar_url: profile?.avatar_url,
-                role: 'affiliate',
-                affiliate_code: profile?.affiliate_code,
-                created_at: profile?.created_at || new Date().toISOString()
-              }}
-              stats={{
-                total_sales: totalSales,
-                points: currentPoints,
-                commissions: totalCommissions
-              }}
-              rank={currentRank}
-              editMode={isCropping}
-              tempPhotoUrl={tempImage}
-              onCancelEdit={() => {
-                setIsCropping(false);
-                setTempImage(null);
-              }}
-              onSaveEdit={async () => {
-                if (tempImage) {
-                   await handlePhotoUpload(tempImage);
-                }
-              }}
-              onPhotoSelected={(dataUrl: string) => {
-                setTempImage(dataUrl);
-                setIsCropping(true);
-              }}
-              onDownload={() => {}}
-            />
-         </div>
-      </div>
-
-      {/* 2. STATS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-20">
+      {/* TABS NAVIGATION */}
+      <div className="flex border-b border-white/5 mb-16 overflow-x-auto no-scrollbar scroll-smooth">
         {[
-          { label: 'VENTES TOTALES', value: `$${totalSales.toFixed(2)}`, icon: <TrendingUp size={20} />, sub: 'Volume généré' },
-          { label: 'REVENUS TOTAUX', value: `$${totalCommissions.toFixed(2)}`, icon: <DollarSign size={20} />, sub: 'Commissions gagnées' },
-          { label: 'POINTS DASHBOARD', value: currentPoints, icon: <Award size={20} />, sub: `${ptsRatio}$ = 1pt` },
-          { label: 'STATUT ÉLITE', value: 'TIER PRO', icon: <Trophy size={20} />, sub: 'Top 5% performance' },
-        ].map((stat, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-[#0A0A0A] border border-white/5 p-10 group hover:border-soyuz/20 transition-all relative overflow-hidden"
+          { id: 'home', label: 'ACCUEIL', icon: Home },
+          { id: 'objectives', label: 'OBJECTIFS', icon: Target },
+          { id: 'messages', label: 'MESSAGES', icon: Mail, count: messages.filter(m => !m.is_read).length },
+          { id: 'leaderboard', label: 'CLASSEMENT', icon: Trophy }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-3 px-10 py-6 text-[10px] font-black tracking-[0.2em] transition-all whitespace-nowrap border-b-2 relative ${
+              activeTab === tab.id 
+              ? 'border-soyuz text-white bg-white/[0.02]' 
+              : 'border-transparent text-white/20 hover:text-white hover:bg-white/[0.01]'
+            }`}
           >
-            <div className="absolute top-0 right-0 p-4 text-white/5 group-hover:text-soyuz/10 transition-colors">
-              {stat.icon}
-            </div>
-            <div className="space-y-4">
-              <div>
-                <p className="text-[9px] text-[#444444] font-black uppercase tracking-widest mb-1">{stat.label}</p>
-                <p className="text-3xl font-display italic text-white leading-none">{stat.value}</p>
-              </div>
-              <p className="text-[9px] text-[#222222] font-black uppercase tracking-widest group-hover:text-soyuz/40 transition-colors">{stat.sub}</p>
-            </div>
-          </motion.div>
+            <tab.icon size={14} className={activeTab === tab.id ? 'text-soyuz' : ''} />
+            {tab.label}
+            {tab.count ? (
+              <span className="absolute top-4 right-4 w-4 h-4 bg-soyuz rounded-full text-[8px] flex items-center justify-center text-black">
+                {tab.count}
+              </span>
+            ) : null}
+          </button>
         ))}
       </div>
 
-      {/* 3. OBJECTIVES SECTION */}
-      <div className="mb-20 bg-[#0A0A0A] border border-white/5 p-12">
-        <div className="flex justify-between items-end mb-12">
-          <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">OBJECTIFS DE <span className="outline-text-white">VENTE</span></h3>
-          <p className="text-[9px] text-soyuz font-black uppercase tracking-[0.3em]">CADEAUX & RÉCOMPENSES</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Accumulation Bar */}
-          <div className="space-y-6">
-            <div className="flex justify-between items-end">
-              <div className="space-y-1">
-                <p className="text-[10px] text-white font-black uppercase tracking-widest">PROCHAIN POINT DASHBOARD</p>
-                <p className="text-[9px] text-[#444444] font-bold italic">RÈGLE : 1 POINT PAR CHAQUE {ptsRatio}$ VENDU</p>
-              </div>
-              <p className="text-lg font-display italic text-soyuz">{nextPointProgress.toFixed(0)}%</p>
-            </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${nextPointProgress}%` }}
-                className="h-full bg-gradient-to-r from-soyuz/40 to-soyuz shadow-[0_0_20px_rgba(255,0,0,0.3)]"
-              />
-            </div>
-            <div className="flex justify-between text-[8px] font-black text-[#262626] uppercase tracking-widest">
-              <span>0$</span>
-              <span className="text-white/20">PROGRESSION : ${(totalSales % ptsRatio).toFixed(2)} / {ptsRatio}$</span>
-              <span>{ptsRatio}$</span>
-            </div>
-          </div>
-
-          {/* Dynamic Gift Bars */}
-          <div className="grid grid-cols-1 gap-12">
-            {objectives.map((obj) => {
-               const progress = Math.min(100, (totalSales / obj.target_amount) * 100);
-               return (
-                 <div key={obj.id} className="space-y-4 group">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                          <p className="text-xs font-black text-white uppercase tracking-tight group-hover:text-soyuz transition-colors">{obj.title}</p>
-                          {obj.is_global && (
-                             <span className="text-[7px] border border-white/10 px-1.5 py-0.5 text-[#444444]">PASS GLOBAL</span>
-                          )}
-                        </div>
-                        <p className="text-[9px] text-[#666666] italic leading-none">{obj.description}</p>
-                      </div>
-                      <p className="text-sm font-display italic text-white">${obj.target_amount}</p>
+      <AnimatePresence mode="wait">
+        {activeTab === 'home' && (
+          <motion.div
+            key="home"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-20"
+          >
+            {/* HERO SECTION */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+               <div className="lg:col-span-2 space-y-8">
+                  <h2 className="text-7xl font-display italic text-white uppercase leading-tight">
+                    MAITRISEZ LE <span className="outline-text-white">MARCHÉ</span>
+                  </h2>
+                  <p className="text-[#888888] text-lg uppercase font-bold tracking-[0.1em] max-w-xl">
+                    STATUT ACTUEL : <span className="text-soyuz">{currentRank().toUpperCase()}</span>. 
+                    VOTRE RÉSEAU A GÉNÉRÉ <span className="text-white">${totalSales.toLocaleString()}</span> DE CHIFFRE D'AFFAIRES.
+                  </p>
+                  <div className="flex gap-4 pt-4">
+                    <div className="px-8 py-5 bg-white/5 border border-white/10 rounded-3xl">
+                       <p className="text-[10px] text-white/20 font-black uppercase mb-1">REVENUS GÉNÉRÉS</p>
+                       <p className="text-3xl font-display italic text-white">${totalCommissions.toFixed(2)}</p>
                     </div>
-                    <div className="h-1 bg-white/5 overflow-hidden">
-                       <motion.div 
-                         initial={{ width: 0 }}
-                         animate={{ width: `${progress}%` }}
-                         className={`h-full ${progress >= 100 ? 'bg-green-500' : 'bg-white/20'}`}
-                       />
-                    </div>
-                    <div className="flex justify-between text-[8px] font-black uppercase tracking-widest">
-                       <p className={progress >= 100 ? 'text-green-500' : 'text-[#222222]'}>
-                         {progress >= 100 ? 'COMPLÉTÉ' : 'EN COURS'}
-                       </p>
-                       <p className="text-white/10">{progress.toFixed(1)}%</p>
-                    </div>
-                 </div>
-               );
-            })}
-            {objectives.length === 0 && (
-              <p className="text-[10px] text-[#222222] font-black uppercase italic tracking-widest py-8 border border-dashed border-white/5 text-center">
-                AUCUN OBJECTIF SPÉCIFIQUE ACTIF
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Recent Sales / Activity */}
-        <div className="lg:col-span-2 space-y-12">
-          <div className="bg-[#0A0A0A] border border-white/5 p-12">
-            <div className="flex justify-between items-end mb-12">
-              <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">FLUX DE <span className="outline-text-white">RÉFÉRENCEMENT</span></h3>
-              <p className="text-[9px] text-[#444444] font-black uppercase tracking-[0.3em]">DONNÉES RÉSEAU EN DIRECT</p>
-            </div>
-            
-            <div className="space-y-4">
-              {commissions.length > 0 ? commissions.map((comm, i) => (
-                <div key={comm.id} className="p-8 bg-black border border-white/5 flex items-center justify-between group hover:border-soyuz/20 transition-all">
-                  <div className="flex items-center gap-6">
-                    <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-soyuz">
-                      <ShoppingBag size={20} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-black text-white uppercase tracking-tight">COMMANDE #{(comm.order_id || '').slice(-6).toUpperCase()}</p>
-                      <p className="text-[9px] text-[#444444] font-black uppercase tracking-widest">
-                        {new Date(comm.created_at).toLocaleDateString()}
-                      </p>
+                    <div className="px-8 py-5 bg-soyuz/5 border border-soyuz/20 rounded-3xl">
+                       <p className="text-[10px] text-soyuz/40 font-black uppercase mb-1">POINTS DASHBOARD</p>
+                       <p className="text-3xl font-display italic text-soyuz">{currentPoints} PTS</p>
                     </div>
                   </div>
-                  <div className="text-right space-y-1">
-                    <p className="text-lg font-display italic text-white leading-none">+${comm.amount.toFixed(2)}</p>
-                    <p className={`text-[8px] font-black uppercase tracking-widest ${comm.status === 'paid' ? 'text-green-500' : 'text-soyuz'}`}>
-                      {comm.status === 'paid' ? 'PAYÉ' : 'EN ATTENTE'}
-                    </p>
-                  </div>
-                </div>
-              )) : (
-                <div className="py-20 text-center border border-dashed border-white/5">
-                  <p className="text-[10px] font-black text-[#222222] uppercase tracking-[0.4em]">AUCUNE TRANSMISSION DÉTECTÉE</p>
-                </div>
-              )}
+               </div>
+               <div className="flex justify-center">
+                  <HockeyCard 
+                    user={{
+                      full_name: profile?.full_name || 'PLAYER',
+                      avatar_url: profile?.avatar_url,
+                      role: 'affiliate',
+                      affiliate_code: profile?.affiliate_code,
+                      created_at: profile?.created_at || new Date().toISOString()
+                    }}
+                    stats={{
+                      total_sales: totalSales,
+                      points: currentPoints,
+                      commissions: totalCommissions
+                    }}
+                    rank={currentRank()}
+                    editMode={isCropping}
+                    tempPhotoUrl={tempImage}
+                    onPhotoSelected={(dataUrl) => {
+                      setTempImage(dataUrl);
+                      setIsCropping(true);
+                    }}
+                    onCancelEdit={() => setIsCropping(false)}
+                    onSaveEdit={() => handlePhotoUpload(tempImage!)}
+                  />
+               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Leaderboard / Ranking */}
-        <div className="space-y-12">
-          <div className="bg-[#0A0A0A] border border-white/5 p-12 relative overflow-hidden h-full">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-soyuz/5 blur-3xl pointer-events-none" />
-            <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12 flex items-center gap-4">
-              <BarChart3 size={24} className="text-soyuz" /> TOP <span className="outline-text-white">NODES</span>
-            </h3>
+            {/* PERFORMANCE BAR */}
+            <div className="bg-[#0A0A0A] border border-white/5 p-12">
+               <div className="flex justify-between items-end mb-8">
+                  <div className="space-y-1">
+                     <p className="text-[10px] text-white font-black uppercase tracking-widest">PROGRESSION PROCHAIN PALIER</p>
+                     <p className="text-[9px] text-white/20 uppercase font-black tracking-widest">OBJECTIF : {ptsRatio}$ / POINT</p>
+                  </div>
+                  <p className="text-2xl font-display italic text-soyuz">{nextPointProgress.toFixed(1)}%</p>
+               </div>
+               <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${nextPointProgress}%` }}
+                    className="h-full bg-soyuz shadow-[0_0_30px_rgba(255,0,0,0.3)]"
+                  />
+               </div>
+            </div>
 
+            {/* RECENT SALES */}
             <div className="space-y-8">
-              {[
-                { name: 'ALEX T.', sales: '$42.1K', tier: 'LEGEND' },
-                { name: 'SARAH C.', sales: '$38.5K', tier: 'ELITE' },
-                { name: 'DAVID M.', sales: '$12.4K', tier: 'PRO' },
-                { name: 'VOUS', sales: `$${totalSales > 0 ? (totalSales / 1000).toFixed(1) : '0'}K`, tier: 'AGENT', current: true },
-              ].map((rep, i) => (
-                <div key={i} className={`flex items-center justify-between p-5 ${rep.current ? 'bg-soyuz/10 border border-soyuz/20' : 'bg-black border border-white/5'}`}>
-                  <div className="flex items-center gap-4">
-                    <span className={`text-[10px] font-black ${i < 3 ? 'text-soyuz' : 'text-[#444444]'}`}>0{i + 1}</span>
-                    <div>
-                      <p className={`text-[11px] font-black uppercase tracking-tight ${rep.current ? 'text-white' : 'text-[#888888]'}`}>{rep.name}</p>
-                      <p className="text-[8px] font-black text-[#444444] tracking-widest">{rep.tier}</p>
-                    </div>
+               <h3 className="text-2xl font-display italic text-white uppercase">ACTIVITÉ <span className="outline-text-white">RÉCENTE</span></h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {commissions.slice(0, 6).map((comm) => (
+                   <div key={comm.id} className="bg-[#0A0A0A] border border-white/5 p-8 flex items-center justify-between group hover:border-soyuz/20 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-soyuz">
+                          <ShoppingBag size={18} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white font-black tracking-widest uppercase">VENTE RÉFÉRÉE</p>
+                          <p className="text-[9px] text-white/20 font-black tracking-widest uppercase">{new Date(comm.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-display italic text-white">+${comm.amount.toFixed(2)}</p>
+                        <p className="text-[8px] text-soyuz font-black uppercase tracking-widest">{comm.status?.toUpperCase()}</p>
+                      </div>
+                   </div>
+                 ))}
+                 {commissions.length === 0 && (
+                   <div className="col-span-full py-20 border border-dashed border-white/5 flex flex-col items-center justify-center text-white/10 uppercase font-black text-[10px] tracking-[0.5em]">
+                     AUCUNE TRANSMISSION DÉTÉCTÉE
+                   </div>
+                 )}
+               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'objectives' && (
+          <motion.div
+            key="objectives"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-12"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+               {/* Points Status */}
+               <div className="bg-[#0A0A0A] border border-white/5 p-12 space-y-8">
+                  <h3 className="text-3xl font-display italic text-white uppercase tracking-tighter">VOTRE <span className="text-soyuz">ARSENAL</span> DE POINTS</h3>
+                  <div className="flex items-center gap-8">
+                     <div className="w-32 h-32 rounded-full border-4 border-soyuz/20 border-t-soyuz flex items-center justify-center relative">
+                        <div className="text-center">
+                           <p className="text-4xl font-display italic text-white leading-none">{currentPoints}</p>
+                           <p className="text-[8px] text-white/20 font-black uppercase tracking-widest">TOTAL</p>
+                        </div>
+                     </div>
+                     <div className="space-y-4">
+                        <p className="text-[#888888] text-[10px] font-black uppercase tracking-widest leading-relaxed">
+                          Chaque tranche de {ptsRatio}$ de ventes cumulées vous rapporte 1 Point Dashboard. Ces points sont réinitialisés le 1er du mois.
+                        </p>
+                        <div className="flex items-center gap-3">
+                           <Zap size={14} className="text-soyuz" />
+                           <span className="text-[10px] text-white font-black uppercase tracking-widest">Prochain cadeau à 50 PTS</span>
+                        </div>
+                     </div>
                   </div>
-                  <p className="text-sm font-display italic text-white">{rep.sales}</p>
-                </div>
-              ))}
+               </div>
+
+               {/* Current Rank */}
+               <div className="bg-soyuz/5 border border-soyuz/20 p-12 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-soyuz font-black uppercase tracking-widest">RANG ACTUEL</p>
+                    <h3 className="text-5xl font-display italic text-white uppercase tracking-tighter">{currentRank().toUpperCase()}</h3>
+                  </div>
+                  <div className="flex justify-between items-end border-t border-soyuz/20 pt-8 mt-8">
+                     <div className="space-y-1">
+                        <p className="text-[9px] text-[#444444] font-black uppercase tracking-widest">AVANTAGES RANG {currentRank().toUpperCase()}</p>
+                        <p className="text-[10px] text-white font-black uppercase tracking-widest italic">Commission Standard (15%) + Accès Dashboard Pro</p>
+                     </div>
+                     <Trophy size={48} className="text-soyuz/20" />
+                  </div>
+               </div>
             </div>
 
-            <div className="mt-20 p-8 border border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
-               <p className="text-[9px] text-[#444444] font-black uppercase tracking-[0.4em] mb-6 text-center">PROGRESSION PROCHAIN TIER</p>
-               <div className="h-1 text-xs flex mt-2 overflow-hidden bg-white/5 mb-4">
-                  <div style={{ width: "65%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-soyuz"></div>
-               </div>
-               <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-white/20">
-                  <span>AGENT</span>
-                  <span className="text-soyuz">PRO</span>
+            {/* List of Goals */}
+            <div className="space-y-8">
+               <h3 className="text-2xl font-display italic text-white uppercase">OBJECTIFS DE <span className="outline-text-white">CAMPAGNE</span></h3>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    { title: 'PREMIER VOL', target: 1000, reward: 'STICKERS SOYUZ ELITE', desc: 'Générez vos premières ventes.' },
+                    { title: 'ORBITE STABLE', target: 5000, reward: 'T-SHIRT AMBASSADEUR', desc: 'Atteignez le volume de croisière.' },
+                    { title: 'HYPERESPACE', target: 20000, reward: 'NOUVEAU BÂTON PERSONNALISÉ', desc: 'Performance exceptionnelle.' }
+                  ].map((goal, i) => {
+                    const progress = Math.min(100, (totalSales / goal.target) * 100);
+                    return (
+                      <div key={i} className={`bg-[#0A0A0A] border p-10 space-y-8 transition-all relative ${progress >= 100 ? 'border-green-500/40' : 'border-white/5'}`}>
+                         <div className="space-y-2">
+                           <div className="flex justify-between items-start">
+                             <h4 className="text-xl font-display italic text-white uppercase leading-none">{goal.title}</h4>
+                             <p className="text-[10px] text-soyuz font-black tracking-widest">${goal.target}</p>
+                           </div>
+                           <p className="text-[9px] text-white/20 font-black uppercase tracking-widest">{goal.desc}</p>
+                         </div>
+                         
+                         <div className="space-y-3">
+                            <div className="h-1 bg-white/5 overflow-hidden">
+                               <motion.div 
+                                 initial={{ width: 0 }}
+                                 animate={{ width: `${progress}%` }}
+                                 className={`h-full ${progress >= 100 ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : 'bg-white/20'}`}
+                               />
+                            </div>
+                            <div className="flex justify-between items-center text-[8px] font-black tracking-widest uppercase">
+                               <span className={progress >= 100 ? 'text-green-500' : 'text-[#444444]'}>{progress >= 100 ? 'RÉCOMPENSE DÉBLOQUÉE' : 'EN COURS'}</span>
+                               <span className="text-white/10">{progress.toFixed(0)}%</span>
+                            </div>
+                         </div>
+
+                         <div className="pt-4 border-t border-white/[0.02] flex items-center gap-3">
+                            <Star size={12} className={progress >= 100 ? 'text-green-500' : 'text-[#222222]'} />
+                            <p className={`text-[10px] font-black uppercase tracking-widest ${progress >= 100 ? 'text-white' : 'text-[#444444]'}`}>{goal.reward}</p>
+                         </div>
+                      </div>
+                    );
+                  })}
                </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
 
-      {uploading && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center space-y-4 z-[200]">
-           <div className="w-8 h-8 border-2 border-soyuz border-t-transparent rounded-full animate-spin" />
-           <p className="text-[10px] font-black text-white uppercase tracking-widest">TRANSMISSION...</p>
-        </div>
-      )}
+        {activeTab === 'messages' && (
+          <motion.div
+            key="messages"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="max-w-4xl mx-auto space-y-8"
+          >
+            <div className="flex items-center justify-between">
+               <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">CANAL DE <span className="outline-text-white">TRANSMISSION</span></h3>
+               <p className="text-[10px] text-white/20 font-black tracking-widest uppercase">SYSTÈME EN SENS UNIQUE UNIQUEMENT</p>
+            </div>
+
+            {messages.length === 0 ? (
+              <div className="py-32 border border-dashed border-white/5 flex flex-col items-center justify-center space-y-6 text-center">
+                 <Mail size={48} className="text-[#111111]" />
+                 <div className="space-y-2">
+                    <p className="text-[10px] text-white/20 font-black tracking-widest uppercase">AUCUN MESSAGE DANS LE CANAL</p>
+                    <p className="text-[9px] text-[#222222] font-black uppercase tracking-widest">VOTRE BOÎTE EST VIDE POUR LE MOMENT.</p>
+                 </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`bg-[#0A0A0A] border p-10 group hover:border-white/10 transition-all ${!msg.is_read ? 'border-soyuz/20' : 'border-white/5'}`}>
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-3">
+                             {!msg.is_read && <div className="w-2 h-2 rounded-full bg-soyuz shadow-[0_0_10px_rgba(204,0,0,0.5)]" />}
+                             <h4 className="text-xl font-display italic text-white uppercase tracking-tight">{msg.subject}</h4>
+                          </div>
+                          <p className="text-[9px] text-[#444444] font-black uppercase tracking-widest">EXPÉDIÉ LE {new Date(msg.created_at).toLocaleDateString()} PAR ADMIN</p>
+                        </div>
+                        {msg.is_broadcast ? (
+                          <span className="px-3 py-1 bg-soyuz/10 border border-soyuz/20 text-[8px] text-soyuz font-black uppercase tracking-widest rounded-full">BROADCAST</span>
+                        ) : (
+                          <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-[8px] text-blue-500 font-black uppercase tracking-widest rounded-full">PRIVÉ</span>
+                        )}
+                      </div>
+                      <p className="text-white/60 text-sm leading-relaxed whitespace-pre-wrap font-medium tracking-wide border-l-2 border-white/5 pl-8 py-2">
+                        {msg.body}
+                      </p>
+                      <div className="mt-8 flex justify-end">
+                         <p className="text-[8px] text-[#222222] font-black uppercase tracking-widest italic group-hover:text-white/10 transition-colors">
+                            {msg.is_perpetual ? 'MESSAGE PERPÉTUEL' : 'AUTO-SUPPRESSION LE 1ER DU MOIS'}
+                         </p>
+                      </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === 'leaderboard' && (
+          <motion.div
+            key="leaderboard"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-12"
+          >
+            <div className="max-w-5xl mx-auto space-y-12">
+               <div className="text-center space-y-4">
+                  <h3 className="text-6xl font-display italic text-white uppercase tracking-tighter">LE <span className="outline-text-white text-soyuz">CLASSEMENT</span></h3>
+                  <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.4em]">LES TOP NODES DU RÉSEAU SOYUZ</p>
+               </div>
+
+               <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
+                  {/* Table Header */}
+                  <div className="grid grid-cols-4 px-12 py-8 bg-white/[0.02] border-b border-white/5 text-[9px] font-black text-[#444444] uppercase tracking-widest">
+                    <span className="col-span-2">AMBASSADEUR</span>
+                    <span className="text-center">VOLUME</span>
+                    <span className="text-right">RANG</span>
+                  </div>
+
+                  {/* Top 3 Special Style */}
+                  <div className="divide-y divide-white/5">
+                    {leaderboard.map((item, i) => {
+                      const isMe = item.profiles.full_name === profile.full_name;
+                      return (
+                        <div key={i} className={`grid grid-cols-4 items-center px-12 py-10 transition-all ${isMe ? 'bg-soyuz/5' : 'hover:bg-white/[0.01]'}`}>
+                           <div className="col-span-2 flex items-center gap-8">
+                              <span className={`text-2xl font-display italic w-8 ${i === 0 ? 'text-soyuz' : i === 1 ? 'text-blue-400' : i === 2 ? 'text-green-400' : 'text-white/10'}`}>
+                                 {i + 1}
+                              </span>
+                              <div className="flex items-center gap-6">
+                                 <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 overflow-hidden relative">
+                                    {item.profiles.avatar_url ? (
+                                      <img src={item.profiles.avatar_url} className="w-full h-full object-cover" alt="" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-white/10">
+                                         <Users size={24} />
+                                      </div>
+                                    )}
+                                    {isMe && <div className="absolute inset-0 border-2 border-soyuz animate-pulse" />}
+                                 </div>
+                                 <div>
+                                   <p className={`text-lg font-display italic uppercase tracking-tight ${isMe ? 'text-soyuz' : 'text-white'}`}>
+                                      {item.profiles.full_name}
+                                   </p>
+                                   <p className="text-[8px] text-[#444444] font-black uppercase tracking-widest">MÉTROPOLE : QUÉBEC</p>
+                                 </div>
+                              </div>
+                           </div>
+                           <div className="text-center">
+                              <p className="text-2xl font-display italic text-white tracking-widest">${(item.total_sales / 1000).toFixed(1)}K</p>
+                           </div>
+                           <div className="text-right">
+                              <span className="px-4 py-1.5 border border-white/5 bg-white/[0.02] text-[8px] text-white/40 font-black uppercase tracking-widest rounded-full">
+                                 {item.total_sales >= 50000 ? 'LEGEND' : item.total_sales >= 15000 ? 'ELITE' : 'PRO'}
+                              </span>
+                           </div>
+                        </div>
+                      );
+                    })}
+                    {leaderboard.length === 0 && (
+                      <div className="py-20 text-center uppercase font-black text-white/10 text-[10px] tracking-widest">
+                         EN ATTENTE DE DONNÉES DE SECTEUR...
+                      </div>
+                    )}
+                  </div>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx global>{`
+        .outline-text-white {
+          -webkit-text-stroke: 1px white;
+          color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </PageLayout>
   );
 }

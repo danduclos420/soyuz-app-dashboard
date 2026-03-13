@@ -60,18 +60,31 @@ export async function POST(req: NextRequest) {
     if (order && session.metadata?.affiliate_code) {
       const { data: affiliate } = await (supabaseAdmin
         .from('affiliates')
-        .select('id, commission_rate') as any)
-        .eq('code', session.metadata.affiliate_code)
+        .select('id, commission_rate, total_sales') as any)
+        .eq('affiliate_code', session.metadata.affiliate_code)
         .single();
 
       if (affiliate) {
-        const commissionAmount = ((order as any).subtotal * (affiliate.commission_rate || 10)) / 100;
+        const commissionRate = affiliate.commission_rate || 15; // Updated to 15% as per V1 preference
+        const commissionAmount = ((order as any).subtotal * commissionRate) / 100;
+        
+        // Insert Commission
         await (supabaseAdmin.from('commissions') as any).insert({
           affiliate_id: affiliate.id,
           order_id: (order as any).id,
           amount: commissionAmount,
           status: 'pending'
         });
+
+        // Update Affiliate Stats (Total Sales for Ranking/Points)
+        await (supabaseAdmin.from('affiliates') as any)
+          .update({ 
+            total_sales: (affiliate.total_sales || 0) + (order as any).subtotal,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', affiliate.id);
+          
+        console.log(`Commission of ${commissionAmount} attributed to affiliate ${affiliate.id}`);
       }
     }
 

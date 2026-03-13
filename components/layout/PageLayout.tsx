@@ -74,7 +74,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         )}
 
         {/* Scrollable Main Content */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 overflow-y-auto scrollbar-hide relative">
           {children}
         </div>
       </div>

@@ -37,19 +37,11 @@ export async function POST() {
   try {
     console.log('API: Starting QuickBooks inventory sync...');
     const result = await syncQuickBooksInventory() as any;
-    if (result.success) {
-      console.log('API: Sync completed successfully');
-      return NextResponse.json({ message: 'Sync completed successfully', count: result.count });
-    } else {
-      console.error('API: Sync failed with result:', result.error);
-      const isAuthError = result.error?.includes('not connected') || result.error?.includes('authenticate');
-      return NextResponse.json(
-        { error: result.error }, 
-        { status: isAuthError ? 400 : 500 }
-      );
-    }
+    return NextResponse.json(result, { 
+      status: result.success ? 200 : (result.error?.includes('not connected') ? 400 : 500) 
+    });
   } catch (error: any) {
     console.error('API: Sync route exception:', error.message || error);
-    return NextResponse.json({ error: error.message || String(error) }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || String(error) }, { status: 500 });
   }
 }

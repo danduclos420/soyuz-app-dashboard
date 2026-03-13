@@ -1,8 +1,9 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDevStore } from '@/lib/store/dev';
-import { X, Type, Move, RotateCcw, Maximize, Palette, Layers, Box, Info, Code, ChevronRight, ChevronDown, Minus, GripHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { X, Type, Move, RotateCcw, Maximize, Palette, Layers, Box, Info, Code, ChevronRight, ChevronDown, Minus, GripHorizontal, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 const premiumFonts = [
   { name: 'Archivo Black', value: '"Archivo Black", sans-serif' },
@@ -16,11 +17,41 @@ const premiumFonts = [
 ];
 
 export default function StudioSidebar() {
-  const { isWixModeActive, selectedElementId, setSelectedElementId, elementStyles, updateElementStyle, elementTree } = useDevStore();
+  const { 
+    isWixModeActive, 
+    selectedElementId, 
+    setSelectedElementId, 
+    elementStyles, 
+    updateElementStyle, 
+    elementTree,
+    publishStyles,
+    loadStyles 
+  } = useDevStore();
   const [activeTab, setActiveTab] = useState<'props' | 'tree' | 'style' | 'layout'>('props');
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  // Load styles on mount (Step 14)
+  useEffect(() => {
+    if (isWixModeActive) {
+      loadStyles().catch(console.error);
+    }
+  }, [isWixModeActive, loadStyles]);
 
   if (!isWixModeActive) return null;
+
+  const handlePublish = async () => {
+    setIsPublishing(true);
+    try {
+      await publishStyles();
+      toast.success('Design publié globalement !');
+    } catch (err) {
+      console.error('Publish Error:', err);
+      toast.error('Échec de la publication');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   const currentStyle = (selectedElementId ? elementStyles[selectedElementId] : {}) || {};
 
@@ -95,7 +126,6 @@ export default function StudioSidebar() {
 
       {!isMinimized && (
         <>
-
       {/* TABS */}
       <div className="flex p-2 bg-black/20 gap-1 border-b border-white/5">
         {[
@@ -165,7 +195,7 @@ export default function StudioSidebar() {
                     </div>
                     <input 
                       type="range" min={slider.min} max={slider.max} step={slider.step}
-                      value={slider.key === 'scale' ? currentStyle[slider.key] || 1 : parseInt(currentStyle[slider.key]) || 400}
+                      value={slider.key === 'scale' ? currentStyle[slider.key] || 1 : parseInt(currentStyle[slider.key]) || 0}
                       onChange={(e) => handleStyleChange(slider.key, slider.key === 'scale' ? parseFloat(e.target.value) : (slider.key === 'rotate' ? parseInt(e.target.value) : `${e.target.value}px`))}
                       className="w-full accent-soyuz h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer"
                     />
@@ -229,7 +259,6 @@ export default function StudioSidebar() {
 
             {activeTab === 'style' && (
               <div className="space-y-10">
-                {/* Advanced Typography */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 text-[10px] text-white/30 font-black uppercase tracking-widest">
                     <Type size={12} />
@@ -261,7 +290,6 @@ export default function StudioSidebar() {
                   </div>
                 </div>
 
-                {/* VISUAL EFFECTS */}
                 <div className="space-y-6 pt-6 border-t border-white/5">
                   <div className="flex items-center gap-2 text-[10px] text-white/30 font-black uppercase tracking-widest">
                     <Palette size={12} />
@@ -280,27 +308,6 @@ export default function StudioSidebar() {
                         className="w-full accent-soyuz h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer"
                      />
                   </div>
-
-                  <div className="space-y-4">
-                     <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-white/30">
-                        <span>DROP SHADOW (SOFT)</span>
-                        <span className="text-soyuz">{currentStyle.boxShadow ? 'ACTIVE' : 'OFF'}</span>
-                     </div>
-                     <div className="grid grid-cols-2 gap-2">
-                        <button 
-                           onClick={() => handleStyleChange('boxShadow', 'none')}
-                           className={`py-3 rounded-xl text-[8px] font-black border transition-all ${!currentStyle.boxShadow || currentStyle.boxShadow === 'none' ? 'bg-soyuz border-soyuz text-black' : 'bg-white/5 border-white/5 text-white/40'}`}
-                        >
-                           NONE
-                        </button>
-                        <button 
-                           onClick={() => handleStyleChange('boxShadow', '0 10px 30px rgba(0,0,0,0.5)')}
-                           className={`py-3 rounded-xl text-[8px] font-black border transition-all ${currentStyle.boxShadow?.includes('30px') ? 'bg-soyuz border-soyuz text-black' : 'bg-white/5 border-white/5 text-white/40'}`}
-                        >
-                           SOFT GLOW
-                        </button>
-                     </div>
-                  </div>
                 </div>
               </div>
             )}
@@ -318,9 +325,12 @@ export default function StudioSidebar() {
 
       <div className="p-6 border-t border-white/5 bg-black/40 flex items-center gap-3">
         <button 
-          className="flex-1 py-4 bg-soyuz text-black font-black italic uppercase tracking-widest text-[10px] rounded-xl hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
+          onClick={handlePublish}
+          disabled={isPublishing}
+          className="flex-1 py-4 bg-soyuz text-black font-black italic uppercase tracking-widest text-[10px] rounded-xl hover:shadow-[0_0_30px_rgba(255,0,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          SYNC TO CODE
+          {isPublishing ? <RefreshCw size={14} className="animate-spin" /> : <ChevronRight size={14} />}
+          {isPublishing ? 'PUBLICATION...' : 'PUBLIER GLOBAL'}
         </button>
         <button className="w-12 h-14 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:text-white transition-all">
           <Code size={18} />

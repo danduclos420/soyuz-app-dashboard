@@ -3,7 +3,7 @@ import { exchangeQBCode } from '@/lib/quickbooks';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+  const searchParams = req.nextUrl.searchParams;
   const code = searchParams.get('code');
   const realmId = searchParams.get('realmId');
 
@@ -15,21 +15,19 @@ export async function GET(req: NextRequest) {
     const token = await exchangeQBCode(code, realmId);
     const supabase = getSupabaseAdmin();
 
-    // Store token in Supabase
-    const { error } = await (supabase
-      .from('app_config') as any)
-      .upsert({
-        key: 'quickbooks_token',
-        value: token,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'key' });
+    // Store the token in app_config
+    const { error } = await (supabase.from('app_config') as any).upsert({
+      key: 'quickbooks_token',
+      value: token,
+      updated_at: new Date().toISOString(),
+    });
 
     if (error) throw error;
 
-    // Redirect back to admin dashboard with success message
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin?qb_sync=success`);
+    // Redirect to Admin Inventory page
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin?tab=inventory&success=true`);
   } catch (error: any) {
-    console.error('QuickBooks Callback Error:', error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin?qb_sync=error&message=${encodeURIComponent(error.message)}`);
+    console.error('QB Callback Error:', error);
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin?tab=inventory&error=${encodeURIComponent(error.message)}`);
   }
 }

@@ -42,7 +42,11 @@ export async function POST() {
       return NextResponse.json({ message: 'Sync completed successfully', count: result.count });
     } else {
       console.error('API: Sync failed with result:', result.error);
-      return NextResponse.json({ error: result.error }, { status: 500 });
+      const isAuthError = result.error?.includes('not connected') || result.error?.includes('authenticate');
+      return NextResponse.json(
+        { error: result.error }, 
+        { status: isAuthError ? 400 : 500 }
+      );
     }
   } catch (error: any) {
     console.error('API: Sync route exception:', error.message || error);

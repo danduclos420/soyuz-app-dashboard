@@ -59,12 +59,16 @@ export default function AdminDashboard() {
     try {
       const resp = await fetch('/api/admin/sync', { method: 'POST' });
       const data = await resp.json();
-      if (data.success || resp.ok) {
+      if (resp.ok && data.message) {
+        alert(`SUCCESS: ${data.message} (${data.count} items)`);
         fetchData();
       } else {
-        console.error('Sync error:', data.error);
+        const errMsg = data.error || 'Unknown sync error';
+        alert(`SYNC FAILED: ${errMsg}`);
+        console.error('Sync error:', errMsg);
       }
     } catch (err) {
+      alert('Network error during sync');
       console.error('Sync failed', err);
     } finally {
       setSyncing(false);

@@ -17,13 +17,11 @@ import {
   Trophy,
   Target
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase-client';
-import { Button } from '@/components/ui/Button';
-import Link from 'next/link';
+import { PageLayout } from '@/components/layout/PageLayout';
 import HockeyCard from '@/components/affiliate/HockeyCard';
 import { toPng } from 'html-to-image';
-import ImageCropper from '@/components/ImageCropper';
 import { Camera, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function AffiliateDashboard() {
   const [profile, setProfile] = useState<any>(null);
@@ -446,47 +444,12 @@ export default function AffiliateDashboard() {
         </div>
       </div>
 
-      {/* PHOTO CROP MODAL */}
-      <AnimatePresence>
-        {isCropping && tempImage && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-8 bg-black/90 backdrop-blur-xl">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-[#050505] border border-white/10 p-10 w-full max-w-2xl relative"
-            >
-              <button 
-                onClick={() => setIsCropping(false)}
-                className="absolute top-6 right-6 text-white/20 hover:text-white transition-colors"
-                disabled={uploading}
-              >
-                <X size={24} />
-              </button>
-
-              <div className="text-center mb-10">
-                <h3 className="text-3xl font-display italic text-white uppercase">AJUSTEMENT <span className="outline-text-white">PHOTO</span></h3>
-                <p className="text-[10px] text-white/20 uppercase tracking-[0.3em] mt-2">DÉPLOYEZ VOTRE MEILLEUR PROFIL</p>
-              </div>
-
-              <div className="max-w-md mx-auto">
-                <ImageCropper 
-                  initialImage={tempImage}
-                  onCropped={handlePhotoUpload}
-                  label="DÉCOUPE DE LA CARTE"
-                />
-              </div>
-
-              {uploading && (
-                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center space-y-4 z-[110]">
-                  <div className="w-8 h-8 border-2 border-soyuz border-t-transparent rounded-full animate-spin" />
-                  <p className="text-[10px] font-black text-white uppercase tracking-widest">TRANSMISSION...</p>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {uploading && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center space-y-4 z-[200]">
+           <div className="w-8 h-8 border-2 border-soyuz border-t-transparent rounded-full animate-spin" />
+           <p className="text-[10px] font-black text-white uppercase tracking-widest">TRANSMISSION...</p>
+        </div>
+      )}
     </PageLayout>
   );
 }

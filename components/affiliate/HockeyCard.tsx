@@ -2,8 +2,14 @@
 
 import { useState, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Trophy, Star, Target, DollarSign, ShoppingBag, Calendar, Download, Crown, Camera, Zap } from 'lucide-react';
+import { Trophy, Star, Target, DollarSign, ShoppingBag, Calendar, Download, Crown, Camera, Zap, Check, X, RotateCcw, Maximize2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
+
+interface PhotoSettings {
+  x: number;
+  y: number;
+  scale: number;
+}
 
 interface HockeyCardProps {
   user: {
@@ -25,18 +31,34 @@ interface HockeyCardProps {
     active_affiliates?: number;
   };
   rank?: 'agent' | 'pro' | 'elite' | 'legend' | 'mvp';
+  editMode?: boolean;
+  tempPhotoUrl?: string | null;
   onDownload?: () => void;
   onEditPhoto?: () => void;
+  onSaveEdit?: (settings: PhotoSettings) => void;
+  onCancelEdit?: () => void;
 }
 
-export default function HockeyCard({ user, stats, rank = 'agent', onDownload, onEditPhoto }: HockeyCardProps) {
+export default function HockeyCard({ 
+  user, 
+  stats, 
+  rank = 'agent', 
+  editMode = false,
+  tempPhotoUrl,
+  onDownload, 
+  onEditPhoto,
+  onSaveEdit,
+  onCancelEdit
+}: HockeyCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   
-  // Interactive mouse tracking
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  // Photo Edit State
+  const [zoom, setZoom] = useState(1);
+  const photoX = useMotionValue(0);
+  const photoY = useMotionValue(0);
   const mouseXSpring = useSpring(x);
   const mouseYSpring = useSpring(y);
   
@@ -123,13 +145,30 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
                alt="Background"
             />
 
-            {/* LAYER 2: USER PHOTO */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-               {user.avatar_url ? (
-                 <img src={user.avatar_url} className="w-full h-full object-cover contrast-[1.1] brightness-[1.1]" />
-               ) : (
-                 <Star size={120} className="text-white/5" />
-               )}
+            {/* LAYER 2: USER PHOTO (Draggable if editing) */}
+            <div className={`absolute inset-0 z-10 flex items-center justify-center ${editMode ? 'cursor-move' : 'pointer-events-none'}`}>
+               <motion.div
+                 ref={photoRef}
+                 drag={editMode}
+                 dragMomentum={false}
+                 style={{ 
+                    x: photoX, 
+                    y: photoY, 
+                    scale: zoom,
+                    touchAction: 'none'
+                 }}
+                 className="w-full h-full flex items-center justify-center"
+               >
+                  {tempPhotoUrl || user.avatar_url ? (
+                    <img 
+                       src={tempPhotoUrl || user.avatar_url} 
+                       className="w-full h-full object-cover contrast-[1.1] brightness-[1.1]" 
+                       draggable={false}
+                    />
+                  ) : (
+                    <Star size={120} className="text-white/5" />
+                  )}
+               </motion.div>
             </div>
 
             {/* LAYER 3: TOP ASSET (Over Photo) */}
@@ -138,6 +177,41 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
                className="absolute inset-0 w-full h-full object-fill z-20 pointer-events-none" 
                alt="Overlay"
             />
+
+            {/* EDIT TOOLS OVERLAY */}
+            {editMode && (
+               <div className="absolute inset-x-0 top-0 z-50 bg-black/60 backdrop-blur-md p-4 flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-4 w-full px-4">
+                     <Maximize2 size={12} className="text-white/40" />
+                     <input 
+                        type="range" 
+                        min="0.5" 
+                        max="3" 
+                        step="0.01" 
+                        value={zoom}
+                        onChange={(e) => setZoom(parseFloat(e.target.value))}
+                        className="flex-1 accent-soyuz h-1"
+                     />
+                  </div>
+                  <div className="flex gap-4">
+                     <button 
+                        onClick={(e) => { e.stopPropagation(); onCancelEdit?.(); }}
+                        className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full text-[8px] font-bold uppercase tracking-widest text-white/60 hover:text-white transition-all"
+                     >
+                        <X size={12} /> ANNULER
+                     </button>
+                     <button 
+                        onClick={(e) => { 
+                           e.stopPropagation(); 
+                           onSaveEdit?.({ x: photoX.get(), y: photoY.get(), scale: zoom }); 
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-soyuz/20 border border-soyuz/40 rounded-full text-[8px] font-bold uppercase tracking-widest text-soyuz hover:bg-soyuz/40 transition-all"
+                     >
+                        <Check size={12} /> ENREGISTRER
+                     </button>
+                  </div>
+               </div>
+            )}
 
             {/* LAYER 4: DYNAMIC TEXT Overlays */}
             <div className="absolute inset-x-0 bottom-0 z-30 h-32 flex flex-col justify-end px-8 pb-6">

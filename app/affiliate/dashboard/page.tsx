@@ -21,12 +21,20 @@ import { supabase } from '@/lib/supabase-client';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { PageLayout } from '@/components/layout/PageLayout';
+import HockeyCard from '@/components/affiliate/HockeyCard';
+import { toPng } from 'html-to-image';
 
 export default function AffiliateDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [commissions, setCommissions] = useState<any[]>([]);
   const [objectives, setObjectives] = useState<any[]>([]);
   const [pointsConfig, setPointsConfig] = useState({ dollars_per_point: 1000 });
+  const [rankThresholds, setRankThresholds] = useState({
+    agent: 0,
+    pro: 5000,
+    elite: 15000,
+    legend: 50000
+  });
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -51,13 +59,17 @@ export default function AffiliateDashboard() {
           .order('created_at', { ascending: false });
         setCommissions(comms || []);
 
-        // Fetch Points Config
         const { data: sData } = await supabase
            .from('app_settings')
-           .select('*')
-           .eq('key', 'points_config')
-           .single();
-        if (sData?.value) setPointsConfig(sData.value);
+           .select('*');
+        
+        if (sData) {
+          const ptCfg = sData.find(s => s.key === 'points_config')?.value;
+          if (ptCfg) setPointsConfig(ptCfg);
+          
+          const rCfg = sData.find(s => s.key === 'rank_thresholds')?.value;
+          if (rCfg) setRankThresholds(rCfg);
+        }
 
         // Fetch Targeted Objectives
         const { data: objData } = await supabase
@@ -109,6 +121,16 @@ export default function AffiliateDashboard() {
   const currentPoints = Math.floor(totalSales / ptsRatio);
   const nextPointProgress = ((totalSales % ptsRatio) / ptsRatio) * 100;
 
+  // Rank Logic
+  const calculateRank = (): 'agent' | 'pro' | 'elite' | 'legend' => {
+     if (totalSales >= rankThresholds.legend) return 'legend';
+     if (totalSales >= rankThresholds.elite) return 'elite';
+     if (totalSales >= rankThresholds.pro) return 'pro';
+     return 'agent';
+  };
+
+  const currentRank = calculateRank();
+
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-8">
       <div className="w-12 h-12 border-2 border-soyuz border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(255,0,0,0.2)]" />
@@ -135,6 +157,54 @@ export default function AffiliateDashboard() {
         </>
       }
     >
+      {/* 2. IDENTITY SECTION (HOT HERO) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-20 items-center">
+         <div className="lg:col-span-2 space-y-8">
+            <h2 className="text-6xl font-display italic text-white uppercase leading-tight">
+              VOTRE AGENT <span className="outline-text-white">EN ACTION</span>
+            </h2>
+            <p className="text-[#888888] text-lg uppercase font-bold tracking-widest max-w-xl">
+              VOUS ÊTES ACTUELLEMENT RANG <span className="text-soyuz">{currentRank.toUpperCase()}</span>. CONTINUEZ À DÉPLOYER VOTRE RÉSEAU POUR ATTEINDRE LE NIVEAU LÉGENDE.
+            </p>
+            <div className="flex flex-wrap gap-4 pt-4">
+               <div className="px-6 py-4 bg-white/5 border border-white/10 rounded-2xl">
+                  <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest mb-1">CODE D'ACTIVATION</p>
+                  <p className="text-xl font-mono text-white tracking-[0.2em]">{profile?.affiliate_code}</p>
+               </div>
+               <div className="px-6 py-4 bg-white/5 border border-white/10 rounded-2xl">
+                  <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest mb-1">POINTS TOTALS</p>
+                  <p className="text-xl font-display italic text-soyuz">{currentPoints} PTS</p>
+               </div>
+            </div>
+         </div>
+         <div className="flex justify-center">
+            <HockeyCard 
+              user={{
+                full_name: profile?.full_name || 'INITIALIZING...',
+                avatar_url: profile?.avatar_url,
+                role: 'affiliate',
+                affiliate_code: profile?.affiliate_code,
+                created_at: profile?.created_at || new Date().toISOString()
+              }}
+              stats={{
+                total_sales: totalSales,
+                points: currentPoints,
+                commissions: totalCommissions
+              }}
+              rank={currentRank}
+              onDownload={() => {
+                const el = document.querySelector('.perspective-1000');
+                if (el) toPng(el as HTMLElement).then(dataUrl => {
+                  const link = document.createElement('a');
+                  link.download = `SOYUZ-CARD-${profile?.full_name}.png`;
+                  link.href = dataUrl;
+                  link.click();
+                });
+              }}
+            />
+         </div>
+      </div>
+
       {/* 2. STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-20">
         {[

@@ -26,6 +26,8 @@ import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { FormLayout } from '@/components/layout/FormLayout';
+import HockeyCard from '@/components/affiliate/HockeyCard';
+import { toPng } from 'html-to-image';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'affiliates' | 'products' | 'invites' | 'settings'>('overview');
@@ -42,6 +44,12 @@ export default function AdminDashboard() {
   
   // Settings State
   const [pointsConfig, setPointsConfig] = useState({ dollars_per_point: 1000 });
+  const [rankThresholds, setRankThresholds] = useState({
+    agent: 0,
+    pro: 5000,
+    elite: 15000,
+    legend: 50000
+  });
   const [editingObjective, setEditingObjective] = useState<any>(null);
   const [isSavingObjective, setIsSavingObjective] = useState(false);
 
@@ -62,6 +70,9 @@ export default function AdminDashboard() {
     if (sData) {
       const pCfg = sData.find(s => s.key === 'points_config')?.value;
       if (pCfg) setPointsConfig(pCfg);
+      
+      const rCfg = sData.find(s => s.key === 'rank_thresholds')?.value;
+      if (rCfg) setRankThresholds(rCfg);
     }
 
     setOrders(oData || []);
@@ -87,6 +98,7 @@ export default function AdminDashboard() {
     
     if (!error) {
       if (key === 'points_config') setPointsConfig(value);
+      if (key === 'rank_thresholds') setRankThresholds(value);
       alert('Paramètres mis à jour');
     } else {
       alert('Erreur lors de la mise à jour');
@@ -253,6 +265,40 @@ export default function AdminDashboard() {
             exit={{ opacity: 0, y: -20 }}
             className="space-y-16"
           >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+              <div className="lg:col-span-2 space-y-8">
+                <h2 className="text-6xl font-display italic text-white uppercase leading-tight">
+                  VOTRE CENTRE DE <span className="outline-text-white">COMMANDEMENT</span>
+                </h2>
+                <p className="text-[#888888] text-lg uppercase font-bold tracking-widest max-w-xl">
+                  GÉREZ VOTRE RÉSEAU AVEC UNE PRÉCISION ABSOLUE. SURVEILLEZ LES FLUX, APPROUVEZ LES AGENTS ET DÉPLOYEZ VOS OBJECTIFS.
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <HockeyCard 
+                  user={{
+                    full_name: "DANY SOYUZ",
+                    role: 'admin',
+                    created_at: new Date().toISOString(),
+                    avatar_url: "/assets/logo-short.png" // Temporary or fallback
+                  }}
+                  stats={{
+                    network_revenue: stats.revenue,
+                    active_affiliates: affiliates.filter(a => a.status === 'approved').length,
+                    total_sales: stats.orders,
+                  }}
+                  onDownload={() => {
+                    const el = document.querySelector('.perspective-1000');
+                    if (el) toPng(el as HTMLElement).then(dataUrl => {
+                      const link = document.createElement('a');
+                      link.download = 'DANY-MVP-CARD.png';
+                      link.href = dataUrl;
+                      link.click();
+                    });
+                  }}
+                />
+              </div>
+            </div>
             {/* Primary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {[
@@ -484,6 +530,38 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   <p className="text-[9px] text-white/20 italic">Définit combien de dollars de ventes valent 1 point dashboard.</p>
+                </div>
+             </div>
+
+             {/* 1.1 Rank Thresholds Config */}
+             <div className="bg-[#0A0A0A] border border-white/5 p-12">
+                <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">SEUILS DE <span className="outline-text-white">RANGS</span></h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                  {[
+                    { id: 'agent', label: 'AGENT' },
+                    { id: 'pro', label: 'PRO' },
+                    { id: 'elite', label: 'ELITE' },
+                    { id: 'legend', label: 'LÉGENDE' }
+                  ].map((r) => (
+                    <div key={r.id} className="space-y-4">
+                      <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">{r.label} ($)</label>
+                      <input 
+                        type="number" 
+                        value={(rankThresholds as any)[r.id]}
+                        onChange={(e) => setRankThresholds({ ...rankThresholds, [r.id]: parseInt(e.target.value) })}
+                        className="w-full bg-black border border-white/10 p-4 text-white font-display italic text-xl focus:border-soyuz outline-none transition-colors"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 flex justify-end">
+                  <button 
+                    onClick={() => updateGlobalSettings('rank_thresholds', rankThresholds)}
+                    disabled={updatingSettings}
+                    className="px-8 py-4 bg-soyuz/10 border border-soyuz/20 text-soyuz text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-30"
+                  >
+                    {updatingSettings ? '...' : 'ENREGISTRER LES SEUILS'}
+                  </button>
                 </div>
              </div>
 

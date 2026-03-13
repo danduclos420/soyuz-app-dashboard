@@ -6,9 +6,13 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { User, Package, Settings, LogOut } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
+import HockeyCard from '@/components/affiliate/HockeyCard';
+import { toPng } from 'html-to-image';
 
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -40,6 +44,21 @@ export default function AccountPage() {
       setLoading(false);
     }
     getProfile();
+
+    async function fetchStats() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: pData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      setProfile(pData);
+
+      const { data: oData } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('customer_email', user.email);
+      setOrders(oData || []);
+    }
+    fetchStats();
   }, [router]);
 
   if (loading) {
@@ -69,6 +88,41 @@ export default function AccountPage() {
         </button>
       }
     >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16 items-center">
+         <div className="lg:col-span-2 space-y-8">
+            <h2 className="text-6xl font-display italic text-white uppercase leading-tight">
+              VOTRE CARTE <span className="outline-text-white">SOYUZ</span>
+            </h2>
+            <p className="text-[#888888] text-lg uppercase font-bold tracking-widest max-w-xl">
+              EN TANT QUE CLIENT PRIVILÉGIÉ, VOUS POSSÉDEZ UNE CARTE DE COLLECTION UNIQUE. RETOURNEZ-LA POUR VOIR VOS STATS.
+            </p>
+         </div>
+         <div className="flex justify-center">
+            <HockeyCard 
+              user={{
+                full_name: profile?.full_name || user?.user_metadata?.full_name || 'CLIENT',
+                avatar_url: profile?.avatar_url,
+                role: 'customer',
+                created_at: profile?.created_at || new Date().toISOString()
+              }}
+              stats={{
+                purchase_count: orders.length,
+                total_spent: orders.reduce((sum, o) => sum + (o.total || 0), 0),
+                favorite_product: '---' // To be implemented with product counts
+              }}
+              onDownload={() => {
+                const el = document.querySelector('.perspective-1000');
+                if (el) toPng(el as HTMLElement).then(dataUrl => {
+                  const link = document.createElement('a');
+                  link.download = `SOYUZ-CUSTOMER-CARD.png`;
+                  link.href = dataUrl;
+                  link.click();
+                });
+              }}
+            />
+         </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
         <div className="bg-[#0A0A0A] border border-white/5 p-10 flex flex-col justify-between h-48 group hover:border-soyuz/20 transition-all">
           <div className="space-y-1">

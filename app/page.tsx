@@ -43,42 +43,40 @@ export default function HomePage() {
       {/* 1. HERO SECTION (RESET) */}
       <section 
         ref={heroRef}
-        className="relative min-h-[calc(100dvh-150px)] w-full flex items-center justify-center overflow-hidden border-b border-white/5"
+        className="relative min-h-[100dvh] flex flex-col items-center justify-center pt-16 overflow-hidden carbon-bg"
       >
-        <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 h-full w-full bg-[#111111]">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-background" />
-          <div className="absolute inset-0 carbon-texture opacity-10" />
-          <Image 
-            src="/assets/hero-bg.png"
-            alt="SOYUZ Background"
-            fill
-            className="object-cover opacity-40 mix-blend-overlay"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
-        </motion.div>
+        <div className="absolute inset-0 z-0">
+          <motion.div 
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.5 }}
+            className="absolute inset-0"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
+          </motion.div>
+        </div>
 
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-8 md:-mt-20">
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-8 md:-mt-20 px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="w-full flex flex-col items-center"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-4 backdrop-blur-md">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-soyuz font-label text-[10px] mb-10 md:mb-14 backdrop-blur-md">
               DESIGNED FOR ELITE ATHLETES
             </span>
             
-            <h1 className="font-display text-4xl sm:text-6xl md:text-8xl lg:text-9xl mb-8 leading-[0.9] tracking-tighter italic w-full">
+            <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-14 md:mb-18 leading-[0.85] tracking-tighter italic w-full">
               ENGINEERED <br />
               <span className="outline-text-white block mt-2">FOR POWER</span>
             </h1>
 
-            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-12 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-4">
+            <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-18 md:mb-22 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-2">
               SOYUZ BC North America — The standard in <br className="hidden md:block" /> professional performance hockey.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-sm sm:max-w-none px-6 sm:px-0">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0">
               <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black whitespace-nowrap">
                 SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
@@ -89,15 +87,17 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        <motion.button
-          onClick={scrollToCollections}
+        <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 group cursor-pointer"
+          className="absolute bottom-10 left-0 right-0 z-10 flex justify-center"
         >
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
-          <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
-        </motion.button>
+          <button onClick={scrollToCollections} className="flex flex-col items-center gap-2 group cursor-pointer px-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
+            <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
+          </button>
+        </motion.div>
+
       </section>
 
       {/* 2. INFINITE TICKER (RED) */}

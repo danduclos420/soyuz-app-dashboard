@@ -97,9 +97,12 @@ export async function refreshQBToken(refreshToken: string): Promise<QBToken> {
 }
 
 export async function getQBInventoryItems(token: QBToken) {
-  const query = "SELECT * FROM Item WHERE Type='Inventory'";
+  // Broaden query to see what's actually there
+  const query = "SELECT * FROM Item WHERE Active = true";
   const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
 
+  console.log(`[QB Audit] Fetching all active items for Realm: ${token.realmId}`);
+  
   const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${token.access_token}`,
@@ -109,11 +112,32 @@ export async function getQBInventoryItems(token: QBToken) {
 
   if (!response.ok) {
     const error = await response.text();
+    console.error(`[QB Audit] Query Failed:`, error);
     throw new Error(`QuickBooks Query Failed: ${error}`);
   }
 
   const data = await response.json();
-  return data.QueryResponse.Item || [];
+  const allItems = data.QueryResponse.Item || [];
+  
+  console.log(`[QB Audit] Found ${allItems.length} total active items.`);
+  
+  // Log types for debugging
+  const typeCounts: Record<string, number> = {};
+  allItems.forEach((i: any) => {
+    typeCounts[i.Type] = (typeCounts[i.Type] || 0) + 1;
+    if (!i.Sku) {
+      // console.log(`[QB Audit] Item "${i.Name}" missing SKU (Type: ${i.Type})`);
+    }
+  });
+  console.log(`[QB Audit] Item Types Summary:`, typeCounts);
+
+  // Filter for items we can actually use
+  const validItems = allItems.filter((item: any) => 
+    item.Sku && ['Inventory', 'NonInventory', 'Service'].includes(item.Type)
+  );
+
+  console.log(`[QB Audit] Filtered down to ${validItems.length} valid items with SKUs.`);
+  return validItems;
 }
 
 export async function syncQuickBooksInventory() {

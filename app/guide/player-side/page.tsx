@@ -1,10 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Shield, Info, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, Info, CheckCircle2, Target, Zap, Hand } from 'lucide-react';
+import { useState } from 'react';
 import BackButton from '@/components/BackButton';
 
 export default function PlayerSideGuide() {
+  const [side, setSide] = useState<'left' | 'right'>('left');
+
   return (
     <div className="bg-background min-h-screen pt-32 pb-24 selection:bg-soyuz selection:text-white">
       <div className="absolute inset-0 carbon-texture opacity-5 pointer-events-none" />
@@ -18,77 +21,114 @@ export default function PlayerSideGuide() {
             animate={{ opacity: 1, x: 0 }}
           >
             <span className="inline-block px-3 py-1 bg-soyuz/10 border border-soyuz/20 text-soyuz font-label text-[9px] mb-4 uppercase tracking-[0.2em] rounded-full">
-              ORIENTATION & HANDEDNESS
+              ERGONOMIC ORIENTATION
             </span>
             <h1 className="text-6xl md:text-8xl font-display italic tracking-tighter leading-[0.85] mb-8">
               PLAYER <br /><span className="outline-text-white">SIDE</span>
             </h1>
             
             <div className="space-y-12">
-              <p className="text-[#888888] font-bold uppercase tracking-widest text-sm leading-relaxed">
-                Choosing your side is the most fundamental decision. It's not always as simple as being right or left-handed in daily life.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="p-10 bg-white/[0.02] border border-white/5 hover:border-soyuz/40 transition-all text-center group">
-                   <h3 className="text-4xl font-display text-white italic mb-4 group-hover:text-soyuz transition-colors">LEFT</h3>
-                   <p className="text-[10px] text-white/40 uppercase tracking-widest font-black mb-6">Right hand at the top</p>
-                   <p className="text-[#666] text-xs font-medium uppercase tracking-widest leading-relaxed">
-                     Usually preferred by players who are and right-hand dominant, as the dominant hand provides control at the top of the shaft.
-                   </p>
-                </div>
-
-                <div className="p-10 bg-white/[0.02] border border-white/5 hover:border-soyuz/40 transition-all text-center group">
-                   <h3 className="text-4xl font-display text-white italic mb-4 group-hover:text-soyuz transition-colors">RIGHT</h3>
-                   <p className="text-[10px] text-white/40 uppercase tracking-widest font-black mb-6">Left hand at the top</p>
-                   <p className="text-[#666] text-xs font-medium uppercase tracking-widest leading-relaxed">
-                     Usually preferred by players who are left-hand dominant, or those who naturally feel more comfortable with their right hand lower on the stick.
-                   </p>
-                </div>
+              <div className="flex gap-4">
+                 <button 
+                  onClick={() => setSide('left')}
+                  className={`flex-1 py-8 border transition-all flex flex-col items-center justify-center gap-4 ${side === 'left' ? 'bg-white/[0.05] border-soyuz' : 'bg-transparent border-white/5 hover:border-white/20'}`}
+                 >
+                   <span className={`text-4xl font-display italic ${side === 'left' ? 'text-white' : 'text-white/20'}`}>LEFT</span>
+                   <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${side === 'left' ? 'text-soyuz' : 'text-[#333]'}`}>Right Hand Top</span>
+                 </button>
+                 <button 
+                  onClick={() => setSide('right')}
+                  className={`flex-1 py-8 border transition-all flex flex-col items-center justify-center gap-4 ${side === 'right' ? 'bg-white/[0.05] border-soyuz' : 'bg-transparent border-white/5 hover:border-white/20'}`}
+                 >
+                   <span className={`text-4xl font-display italic ${side === 'right' ? 'text-white' : 'text-white/20'}`}>RIGHT</span>
+                   <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${side === 'right' ? 'text-soyuz' : 'text-[#333]'}`}>Left Hand Top</span>
+                 </button>
               </div>
 
-              <section className="p-8 bg-[#0D0D0D] border border-white/5">
-                <h4 className="text-white font-display text-xl mb-4 italic uppercase">The Dominant Hand Theory</h4>
-                <p className="text-[#AAAAAA] text-xs font-bold uppercase tracking-widest leading-relaxed">
-                   Many elite coaches recommend placing your dominant hand at the top of the stick for better puck control and one-handed stick handling, but comfort remains the ultimate guide.
-                </p>
-              </section>
+              <div className="space-y-6">
+                <div className={`p-8 border-l-2 transition-colors duration-500 ${side === 'left' ? 'bg-white/[0.02] border-soyuz' : 'bg-transparent border-white/5'}`}>
+                  <h3 className="text-xl font-display text-white italic mb-2 uppercase">CONTROL HAND</h3>
+                  <p className="text-[#888888] text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                    Whichever hand is at the <span className="text-soyuz">TOP</span> of the stick provides 90% of your puck handling control. It's usually best to place your <span className="text-white">dominant hand</span> here.
+                  </p>
+                </div>
+                <div className={`p-8 border-l-2 transition-colors duration-500 ${side === 'right' ? 'bg-white/[0.02] border-soyuz' : 'bg-transparent border-white/5'}`}>
+                  <h3 className="text-xl font-display text-white italic mb-2 uppercase">POWER HAND</h3>
+                  <p className="text-[#888888] text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                    Whichever hand is in the <span className="text-soyuz">MIDDLE</span> of the shaft provides the leverage for power and stability during shots.
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
 
+          {/* VISUALIZER SIDE */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="sticky top-32"
           >
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-12 relative overflow-hidden">
+            <div className="aspect-[4/5] bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden flex flex-col items-center justify-center">
                <div className="absolute inset-0 carbon-texture opacity-10" />
-               <div className="relative z-10 flex flex-col items-center">
-                  <Shield className="w-24 h-24 text-soyuz/20 mb-12" />
-                  
-                  <div className="flex gap-4 w-full h-48">
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }}
-                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-soyuz/5 transition-colors"
-                    >
-                      <span className="text-2xl font-display italic text-white/40">L</span>
-                      <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-2">LEFTIE</span>
-                    </motion.div>
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }}
-                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-soyuz/5 transition-colors"
-                    >
-                      <span className="text-2xl font-display italic text-white/40">R</span>
-                      <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-2">RIGHTIE</span>
-                    </motion.div>
-                  </div>
+               <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+               
+               {/* THE VISUAL STICK & HANDS */}
+               <svg viewBox="0 0 400 600" className="w-full h-full">
+                  <defs>
+                    <radialGradient id="handGlow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#CC0000" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#CC0000" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
 
-                  <div className="mt-12 text-center">
-                    <p className="text-[#666666] text-[9px] font-black uppercase tracking-[0.3em] mb-4">Finding your balance</p>
-                    <div className="h-1 w-full bg-white/5 rounded-full">
-                       <div className="h-full w-1/2 bg-soyuz mx-auto" />
-                    </div>
+                  {/* The Stick */}
+                  <rect x="195" y="50" width="10" height="500" fill="#111" rx="2" />
+                  <rect x="198" y="50" width="4" height="500" fill="#222" rx="1" />
+
+                  {/* Top Hand (Control) */}
+                  <motion.g
+                    animate={{ x: side === 'left' ? -20 : 20 }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                  >
+                    <circle cx="200" cy="80" r="30" fill="url(#handGlow)" className="blur-[10px]" />
+                    <rect x="180" y="65" width="40" height="30" fill="#222" rx="15" className="shadow-2xl" />
+                    <text x="200" y="82" fill="#CC0000" fontSize="8" textAnchor="middle" className="font-black uppercase tracking-widest">TOP</text>
+                  </motion.g>
+
+                  {/* Bottom Hand (Power) */}
+                  <motion.g
+                    animate={{ 
+                      x: side === 'left' ? -20 : 20,
+                      y: 200
+                    }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                  >
+                    <circle cx="200" cy="80" r="25" fill="url(#handGlow)" className="blur-[10px]" strokeOpacity="0.2" />
+                    <rect x="180" y="65" width="40" height="30" fill="#222" rx="15" />
+                    <text x="200" y="82" fill="white" fillOpacity="0.2" fontSize="8" textAnchor="middle" className="font-black uppercase tracking-widest">MID</text>
+                  </motion.g>
+
+                  {/* Blade (Perspective shift) */}
+                  <motion.path 
+                    animate={{ d: side === 'left' ? "M 195 550 L 150 580" : "M 205 550 L 250 580" }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    stroke="#CC0000" strokeWidth="12" strokeLinecap="round"
+                  />
+               </svg>
+
+               <div className="absolute top-8 left-8">
+                  <div className="flex items-center gap-2 mb-2">
+                     <span className="w-2 h-2 rounded-full bg-soyuz shadow-[0_0_10px_red]" />
+                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Kinematic Mapping</span>
                   </div>
+                  <div className="text-[20px] font-display italic text-white/5 uppercase select-none leading-none">
+                     Hand Placement <br />Calibration {side.toUpperCase()}
+                  </div>
+               </div>
+
+               <div className="absolute bottom-8 right-8 text-right">
+                  <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em] block">Dominant Hand</span>
+                  <span className="text-xl font-display italic text-soyuz leading-none">{side === 'left' ? 'RIGHT' : 'LEFT'}</span>
                </div>
             </div>
 
@@ -97,7 +137,7 @@ export default function PlayerSideGuide() {
               <div>
                 <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
                 <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
-                   Try picking up a broom or a shovel. Whichever hand naturally goes to the top is likely the hand that should be at the top of your hockey stick.
+                   Try grabbing a shovel or broom naturally. Whichever hand goes to the top is almost certainly your correct top hand for hockey.
                 </p>
               </div>
             </div>

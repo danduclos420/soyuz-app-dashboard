@@ -24,6 +24,9 @@ interface HockeyCardProps {
     role: 'admin' | 'affiliate' | 'customer';
     affiliate_code?: string;
     created_at: string;
+    // New Persistence Fields
+    hockey_card_photo_url?: string | null;
+    hockey_card_settings?: PhotoSettings;
   };
   stats: {
     total_sales?: number;
@@ -63,9 +66,19 @@ export default function HockeyCard({
   const [isDownloading, setIsDownloading] = useState(false);
   
   // Photo Edit State - Locally managed for immediate feedback
-  const [zoom, setZoom] = useState(1);
-  const photoX = useMotionValue(0);
-  const photoY = useMotionValue(0);
+  const savedSettings = user.hockey_card_settings || { x: 0, y: 0, scale: 1 };
+  const [zoom, setZoom] = useState(savedSettings.scale);
+  const photoX = useMotionValue(savedSettings.x);
+  const photoY = useMotionValue(savedSettings.y);
+
+  // Sync with prop updates (e.g. after save)
+  useEffect(() => {
+    if (!editMode && user.hockey_card_settings) {
+      setZoom(user.hockey_card_settings.scale);
+      photoX.set(user.hockey_card_settings.x);
+      photoY.set(user.hockey_card_settings.y);
+    }
+  }, [user.hockey_card_settings, editMode]);
 
   // Mouse Tracking for Tilt
   const x = useMotionValue(0);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Trophy, Star, Target, DollarSign, ShoppingBag, Calendar, Download, Crown, Camera, Zap, Check, X, RotateCcw, Maximize2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
@@ -45,6 +45,8 @@ export default function HockeyCard({
   rank = 'agent', 
   editMode = false,
   tempPhotoUrl,
+  onDownload, 
+  onPhotoSelected,
   onSaveEdit,
   onCancelEdit
 }: HockeyCardProps) {

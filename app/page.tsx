@@ -57,7 +57,7 @@ export default function HomePage() {
         </div>
 
         {/* HERO CONTENT */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-16 md:-mt-24 px-[2%] w-full">
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center justify-center -mt-24 md:-mt-32 px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -92,7 +92,7 @@ export default function HomePage() {
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[20%] left-1/2 -translate-x-1/2 z-10 hidden sm:flex flex-col items-center gap-2 group cursor-pointer"
+          className="absolute bottom-[18%] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 group cursor-pointer"
         >
           <button onClick={scrollToCollections} className="flex flex-col items-center gap-2">
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>

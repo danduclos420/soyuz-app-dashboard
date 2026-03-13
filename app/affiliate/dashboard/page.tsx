@@ -20,9 +20,10 @@ import {
 import { supabase } from '@/lib/supabase-client';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
-import { PageLayout } from '@/components/layout/PageLayout';
 import HockeyCard from '@/components/affiliate/HockeyCard';
 import { toPng } from 'html-to-image';
+import ImageCropper from '@/components/ImageCropper';
+import { Camera, X } from 'lucide-react';
 
 export default function AffiliateDashboard() {
   const [profile, setProfile] = useState<any>(null);
@@ -37,6 +38,9 @@ export default function AffiliateDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [isCropping, setIsCropping] = useState(false);
+  const [tempImage, setTempImage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -110,6 +114,49 @@ export default function AffiliateDashboard() {
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePhotoUpload = async (base64: string) => {
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Convert base64 to Blob
+      const res = await fetch(base64);
+      const blob = await res.blob();
+      
+      const fileName = `${user.id}-${Math.random()}.jpg`;
+      const filePath = `avatars/${fileName}`;
+
+      // 2. Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, blob, { contentType: 'image/jpeg', upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // 3. Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // 4. Update Profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile({ ...profile, avatar_url: publicUrl });
+      setIsCropping(false);
+    } catch (err) {
+      console.error('Error uploading photo:', err);
+      alert('Erreur lors de l\'upload de la photo');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const totalSales = commissions.reduce((sum, c) => sum + (c.orders?.total || 0), 0);
@@ -192,30 +239,25 @@ export default function AffiliateDashboard() {
                 commissions: totalCommissions
               }}
               rank={currentRank}
+              rank={currentRank}
               onEditPhoto={() => {
-                // Trigger the file input or cropper update
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = 'image/*';
-                input.onchange = async (e: any) => {
+                input.onchange = (e: any) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    // We'll need to properly integrate this with the existing ImageCropper
-                    // For now, let's at least trigger the alert or a simple upload logic
-                    alert('Ouverture du sélecteur de photo...');
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setTempImage(reader.result as string);
+                      setIsCropping(true);
+                    };
+                    reader.readAsDataURL(file);
                   }
                 };
                 input.click();
               }}
-              onDownload={() => {
-                const el = document.querySelector('.perspective-1000');
-                if (el) toPng(el as HTMLElement).then(dataUrl => {
-                  const link = document.createElement('a');
-                  link.download = `SOYUZ-CARD-${profile?.full_name}.png`;
-                  link.href = dataUrl;
-                  link.click();
-                });
-              }}
+              onDownload={() => {}}
             />
          </div>
       </div>
@@ -403,6 +445,48 @@ export default function AffiliateDashboard() {
           </div>
         </div>
       </div>
+
+      {/* PHOTO CROP MODAL */}
+      <AnimatePresence>
+        {isCropping && tempImage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-8 bg-black/90 backdrop-blur-xl">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-[#050505] border border-white/10 p-10 w-full max-w-2xl relative"
+            >
+              <button 
+                onClick={() => setIsCropping(false)}
+                className="absolute top-6 right-6 text-white/20 hover:text-white transition-colors"
+                disabled={uploading}
+              >
+                <X size={24} />
+              </button>
+
+              <div className="text-center mb-10">
+                <h3 className="text-3xl font-display italic text-white uppercase">AJUSTEMENT <span className="outline-text-white">PHOTO</span></h3>
+                <p className="text-[10px] text-white/20 uppercase tracking-[0.3em] mt-2">DÉPLOYEZ VOTRE MEILLEUR PROFIL</p>
+              </div>
+
+              <div className="max-w-md mx-auto">
+                <ImageCropper 
+                  initialImage={tempImage}
+                  onCropped={handlePhotoUpload}
+                  label="DÉCOUPE DE LA CARTE"
+                />
+              </div>
+
+              {uploading && (
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center space-y-4 z-[110]">
+                  <div className="w-8 h-8 border-2 border-soyuz border-t-transparent rounded-full animate-spin" />
+                  <p className="text-[10px] font-black text-white uppercase tracking-widest">TRANSMISSION...</p>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </PageLayout>
   );
 }

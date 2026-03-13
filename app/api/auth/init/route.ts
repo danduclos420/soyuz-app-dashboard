@@ -12,11 +12,11 @@ export async function GET() {
     if (listError) throw listError;
 
     const existingUser = users.find(u => u.email === adminEmail);
-    let userId = existingUser?.id;
+    let userId: string | undefined = existingUser?.id;
 
     if (!existingUser) {
       // Create user
-      const { data: user, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: adminEmail,
         password: adminPassword,
         email_confirm: true,
@@ -24,8 +24,10 @@ export async function GET() {
       });
 
       if (createError) throw createError;
-      userId = user.user.id;
+      userId = createData.user.id;
     }
+
+    if (!userId) throw new Error('Failed to obtain User ID');
 
     // Create profile if not exists
     const { data: existingProfile } = await supabaseAdmin
@@ -43,7 +45,7 @@ export async function GET() {
           role: 'admin',
           status: 'approved',
           full_name: 'Admin Protos'
-        });
+        } as any);
 
       if (profileError) throw profileError;
     }

@@ -288,15 +288,10 @@ export default function AdminDashboard() {
                     total_sales: stats.orders,
                   }}
                   rank="mvp"
-                  onEditPhoto={() => alert('Édition de la photo MVP...')}
+                  onPhotoSelected={(url) => console.log('Photo selected:', url)}
                   onDownload={() => {
-                    const el = document.querySelector('.perspective-1000');
-                    if (el) toPng(el as HTMLElement).then(dataUrl => {
-                      const link = document.createElement('a');
-                      link.download = 'DANY-MVP-CARD.png';
-                      link.href = dataUrl;
-                      link.click();
-                    });
+                    // Logic already handled in internal download if no prop provided,
+                    // but keeping this for custom behavior if needed.
                   }}
                 />
               </div>

@@ -26,7 +26,7 @@ export default function CheckoutPage() {
     getSubtotal, 
     getDiscountAmount, 
     getTotal, 
-    repCode, 
+    affiliateCode, 
     isCartOpen,
     toggleCart 
   } = useCartStore();
@@ -60,7 +60,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items,
-          affiliateCode: repCode,
+          affiliateCode: affiliateCode,
           customerEmail: '', // Optional for now
         }),
       });
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
                   
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-soyuz">
-                      <span>Rep ({repCode})</span>
+                      <span>Rep ({affiliateCode})</span>
                       <span className="italic">-${discountAmount.toFixed(2)}</span>
                     </div>
                   )}

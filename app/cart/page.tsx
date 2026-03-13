@@ -26,8 +26,8 @@ export default function CartPage() {
     getSubtotal, 
     getDiscountAmount, 
     getTotal,
-    repCode,
-    setRepCode
+    affiliateCode,
+    setAffiliateCode
   } = useCartStore();
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -36,8 +36,8 @@ export default function CartPage() {
 
   useEffect(() => {
     setIsHydrated(true);
-    if (repCode) setLocalRepCode(repCode);
-  }, [repCode]);
+    if (affiliateCode) setLocalRepCode(affiliateCode);
+  }, [affiliateCode]);
 
   const subtotal = getSubtotal();
   const discountAmount = getDiscountAmount();
@@ -51,7 +51,7 @@ export default function CartPage() {
     // Simulate API call for now - Phase 7 will implement real validation
     setTimeout(() => {
       if (localRepCode.toUpperCase() === 'DAN15') {
-        setRepCode(localRepCode.toUpperCase(), 15);
+        setAffiliateCode(localRepCode.toUpperCase(), 15);
       } else {
         alert('Invalid code. Try "DAN15" for testing.');
       }
@@ -193,7 +193,7 @@ export default function CartPage() {
                     
                     {discountAmount > 0 ? (
                       <div className="flex justify-between text-xs font-black uppercase tracking-widest text-soyuz">
-                        <span>Rep Discount ({repCode})</span>
+                        <span>Rep Discount ({affiliateCode})</span>
                         <span className="italic">-${discountAmount.toFixed(2)}</span>
                       </div>
                     ) : (

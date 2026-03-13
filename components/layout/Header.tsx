@@ -398,7 +398,16 @@ export default function Header() {
 
       {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="mobile-menu pt-16">
+        <div className="mobile-menu fixed inset-0 z-[100] bg-[#0D0D0D] p-6 pt-16 overflow-y-auto">
+          {/* CLOSE BUTTON INSIDE MENU */}
+          <button 
+            onClick={() => setMobileOpen(false)}
+            className="absolute top-6 right-6 p-2 text-soyuz hover:text-white transition-colors"
+            aria-label="Close menu"
+          >
+            <X size={32} />
+          </button>
+
           <div className="flex flex-col gap-1 mt-4">
             {NAV_LINKS.map((link) => (
               <Fragment key={link.name}>

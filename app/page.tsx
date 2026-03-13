@@ -58,8 +58,8 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* HERO CONTENT - Flex flow ensures Discover button is always below CTA buttons */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[10dvh] sm:pt-[12dvh] px-[2%] w-full h-full">
+        {/* HERO CONTENT - Proper bottom padding to protect the absolute Discover button */}
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[10dvh] sm:pt-[12dvh] pb-[20dvh] sm:pb-[25dvh] px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -88,28 +88,27 @@ export default function HomePage() {
               </Link>
             </div>
           </motion.div>
+        </div>
 
-          {/* DISCOVER BUTTON (In-flow for collision protection)
-              - mt-auto pushes it to the bottom of the container.
-              - pt-12 and pb-12 create an invisible protection zone.
-              - z-40 ensures it's above the ticker (z-30) but under nav (z-40+).
-          */}
-          <div className="mt-auto pt-12 pb-14 pointer-events-none relative z-40">
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="flex flex-col items-center gap-2 group cursor-pointer pointer-events-auto"
+        {/* DISCOVER BUTTON (Absolute Centered with Protection)
+            - bottom-[18%] ensures it's above the ticker (absolute bottom-0) with a healthy gap.
+            - z-40 ensures it's cliquable and above the ticker (z-30).
+        */}
+        <div className="absolute bottom-[18%] sm:bottom-[15%] left-0 right-0 z-40 flex justify-center pointer-events-none">
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-2 group cursor-pointer pointer-events-auto"
+          >
+            <button 
+              onClick={scrollToCollections} 
+              className="flex flex-col items-center gap-2 relative"
+              aria-label="Discover sections below"
             >
-              <button 
-                onClick={scrollToCollections} 
-                className="flex flex-col items-center gap-2 relative"
-                aria-label="Discover sections below"
-              >
-                <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
-                <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
-              </button>
-            </motion.div>
-          </div>
+              <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
+              <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
+            </button>
+          </motion.div>
         </div>
 
         {/* 2. INFINITE TICKER (Stuck to bottom initially)

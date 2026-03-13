@@ -156,7 +156,7 @@ export default function AdminDashboard() {
         <div className="flex gap-12 mb-16 overflow-x-auto pb-4 scrollbar-hide">
           {[
             { id: 'overview', label: 'STATUT DU RÉSEAU', icon: <BarChart3 size={18} /> },
-            { id: 'reps', label: 'REPRÉSENTANTS', icon: <Users size={18} /> },
+            { id: 'affiliates', label: 'AFFILIÉS', icon: <Users size={18} /> },
             { id: 'products', label: 'CATALOGUE D\'ACTIFS', icon: <Box size={18} /> },
             { id: 'invites', label: 'CODES D\'INVITATION', icon: <ShieldAlert size={18} /> },
           ].map((tab) => (

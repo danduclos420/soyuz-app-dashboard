@@ -47,7 +47,7 @@ export default function ShoppingCart() {
       }
 
       useCartStore.getState().setRepCode(data.affiliate_code, 15);
-      toast.success('Code Rep appliqué: 15% de rabais!');
+      toast.success('Code Affiliate appliqué: 15% de rabais!');
       setRepCodeInput('');
     } catch (err) {
       toast.error('Erreur de validation.');
@@ -194,7 +194,7 @@ export default function ShoppingCart() {
                         <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={12} />
                         <input 
                           type="text" 
-                          placeholder="REP CODE" 
+                          placeholder="AFFILIATE CODE" 
                           value={repCodeInput}
                           onChange={(e) => setRepCodeInput(e.target.value)}
                           className="w-full bg-black border border-white/10 rounded-lg pl-9 pr-4 py-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-soyuz transition-colors"

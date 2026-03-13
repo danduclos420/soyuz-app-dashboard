@@ -19,6 +19,23 @@ export default function AccountPage() {
         return;
       }
       setUser(session.user);
+      
+      // Role-based Redirects
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profile?.role === 'admin') {
+        router.push('/admin');
+        return;
+      }
+      if (profile?.role === 'rep') {
+        router.push('/affiliate');
+        return;
+      }
+
       setLoading(false);
     }
     getProfile();

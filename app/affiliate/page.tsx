@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function RepRedirect() {
   const router = useRouter();
   useEffect(() => {
-    router.replace('/rep/register');
+    router.replace('/affiliate/register');
   }, [router]);
 
   return (

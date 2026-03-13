@@ -173,7 +173,7 @@ export default function RepRegisterPage() {
                 </h1>
               </div>
               <p className="text-[#888888] text-base font-bold uppercase tracking-[0.1em] leading-relaxed max-w-md">
-                Become an authorized SOYUZ representative. Drive the North American expansion. Earn elite-tier commissions.
+                Become an authorized SOYUZ affiliate. Drive the North American expansion. Earn elite-tier commissions.
               </p>
             </motion.div>
             
@@ -272,7 +272,7 @@ export default function RepRegisterPage() {
                       <Input name="firstName" label="FIRST NAME" placeholder="JEAN" required value={formData.firstName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
                       <Input name="lastName" label="LAST NAME" placeholder="DUPONT" required value={formData.lastName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
                     </div>
-                    <Input name="email" label="SECURE EMAIL (MÊME QUE VOTRE COMPTE)" placeholder="REPRESENTATIVE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                    <Input name="email" label="SECURE EMAIL (MÊME QUE VOTRE COMPTE)" placeholder="AFFILIATE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
                     <div className="relative">
                       <Input 
                         name="password" 
@@ -293,7 +293,7 @@ export default function RepRegisterPage() {
                       </button>
                     </div>
                     <Input name="social" label="SOCIAL NODE (IG/TIKTOK)" placeholder="@USERNAME" required value={formData.social} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-                    <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                    <Input name="repCode" label="DESIRED AFFILIATE CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
                     
                     <div className="space-y-4">
                       <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">

@@ -40,6 +40,7 @@ export default function Header() {
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const [selectedCurrency, setSelectedCurrency] = useState(CURRENCIES[0]);
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const router = useRouter();
   
   const { getTotalItems, toggleCart } = useCartStore();
@@ -56,10 +57,20 @@ export default function Header() {
     // Check auth status
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
     });
 
     return () => {
@@ -67,6 +78,15 @@ export default function Header() {
       subscription.unsubscribe();
     };
   }, []);
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+    setUserProfile(data);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -199,10 +219,18 @@ export default function Header() {
                 <Search size={18} />
               </button>
 
-              {/* ACCOUNT */}
+              {/* ACCOUNT ICON REDIRECT LOGIC */}
               {user ? (
                 <div className="flex items-center gap-2">
-                  <Link href="/account" className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" aria-label="Account">
+                  <Link 
+                    href={
+                      userProfile?.role === 'admin' ? '/admin' :
+                      userProfile?.role === 'rep' ? '/affiliate' :
+                      '/account'
+                    } 
+                    className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" 
+                    aria-label="Account"
+                  >
                     <User size={18} />
                   </Link>
                   <button 

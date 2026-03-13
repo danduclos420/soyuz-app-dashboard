@@ -41,52 +41,45 @@ export default function HeightGuide() {
               STICK <br /><span className="outline-text-white">HEIGHT</span>
             </h1>
             
-            <div className="space-y-12">
-              <div className="flex gap-4">
+            <div className="space-y-6 lg:space-y-12">
+              <div className="flex flex-col sm:flex-row gap-4">
                  <button 
                   onClick={() => setOnIce(true)}
-                  className={`px-6 py-3 border transition-all font-black text-[10px] uppercase tracking-[0.2em] ${onIce ? 'bg-soyuz border-soyuz text-white' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
+                  className={`flex-1 px-6 py-4 border transition-all font-black text-[9px] uppercase tracking-[0.2em] ${onIce ? 'bg-soyuz border-soyuz text-white' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
                  >
                    ON ICE (WITH SKATES)
                  </button>
                  <button 
                   onClick={() => setOnIce(false)}
-                  className={`px-6 py-3 border transition-all font-black text-[10px] uppercase tracking-[0.2em] ${!onIce ? 'bg-soyuz border-soyuz text-white' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
+                  className={`flex-1 px-6 py-4 border transition-all font-black text-[9px] uppercase tracking-[0.2em] ${!onIce ? 'bg-soyuz border-soyuz text-white' : 'bg-white/5 border-white/10 text-white/40 hover:text-white'}`}
                  >
                    OFF ICE (NO SKATES)
                  </button>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {Object.entries(ZONES).map(([key, zone]) => (
                   <div 
                     key={key}
                     onMouseEnter={() => setActiveZone(key)}
-                    className={`p-6 border transition-all duration-500 cursor-pointer ${
-                      activeZone === key ? 'bg-white/[0.05] border-soyuz/50' : 'bg-white/[0.01] border-white/5'
+                    className={`p-4 lg:p-6 border transition-all duration-500 cursor-pointer ${
+                      activeZone === key ? 'bg-white/[0.05] border-soyuz/50 shadow-[0_0_20px_rgba(204,0,0,0.1)]' : 'bg-white/[0.01] border-white/5'
                     }`}
                   >
                     <div className="flex justify-between items-center">
                        <div>
-                          <h3 className={`text-xl font-display italic mb-1 ${activeZone === key ? 'text-white' : 'text-white/20'}`}>
+                          <h3 className={`text-lg lg:text-xl font-display italic mb-1 ${activeZone === key ? 'text-white' : 'text-white/20'}`}>
                              {zone.label} MEASUREMENT
                           </h3>
-                          <p className={`text-[9px] font-black uppercase tracking-[0.2em] ${activeZone === key ? 'text-soyuz' : 'text-[#333]'}`}>
+                          <p className={`text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] ${activeZone === key ? 'text-soyuz' : 'text-[#333]'}`}>
                              {zone.desc}
                           </p>
                        </div>
-                       <ChevronRight size={16} className={activeZone === key ? 'text-soyuz' : 'text-[#222]'} />
+                       <ChevronRight size={14} className={activeZone === key ? 'text-soyuz' : 'text-[#222]'} />
                     </div>
                   </div>
                 ))}
               </div>
-
-              <section className="p-8 bg-white/[0.02] border-l-2 border-soyuz">
-                <h3 className="text-xl font-display text-white italic mb-4 uppercase">The Pro Selection</h3>
-                <p className="text-[#AAAAAA] text-xs font-medium uppercase tracking-widest leading-relaxed">
-                  Most modern players cut their sticks to the {onIce ? 'chin/lip' : 'nose'} area to maximize the flex efficiency and puck control.
-                </p>
-              </section>
             </div>
           </motion.div>
 
@@ -94,7 +87,7 @@ export default function HeightGuide() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="sticky top-32"
+            className="lg:sticky lg:top-32"
           >
             <div className="aspect-[4/5] bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden flex flex-col items-center justify-center">
                <div className="absolute inset-0 carbon-texture opacity-10" />
@@ -177,14 +170,22 @@ export default function HeightGuide() {
                </div>
             </div>
 
-            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl flex gap-4 items-start">
-              <Info className="text-soyuz flex-shrink-0" size={20} />
-              <div>
-                <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
-                <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
-                   If you cut your stick, don't forget it gets stiffer. We recommend starting with a lower flex if you plan on a shorter-than-average height.
-                </p>
+            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl">
+              <div className="flex gap-4 items-start mb-6">
+                <Info className="text-soyuz flex-shrink-0" size={20} />
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
+                  <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
+                    If you cut your stick, don't forget it gets stiffer. We recommend starting with a lower flex if you plan on a shorter-than-average height.
+                  </p>
+                </div>
               </div>
+              <section className="p-6 bg-white/[0.02] border-l border-soyuz/30 rounded-r-xl">
+                <h3 className="text-sm font-display text-white italic mb-2 uppercase tracking-wide">The Pro Selection</h3>
+                <p className="text-[#888888] text-[9px] font-bold uppercase tracking-widest leading-relaxed">
+                  Most modern players cut their sticks to the {onIce ? 'chin/lip' : 'nose'} area to maximize the flex efficiency and puck control.
+                </p>
+              </section>
             </div>
           </motion.div>
         </div>

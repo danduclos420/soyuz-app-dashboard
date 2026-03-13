@@ -69,9 +69,9 @@ export default function KickPointGuide() {
       <div className="absolute inset-0 carbon-texture opacity-5 pointer-events-none" />
       
       <div className="soyuz-container relative z-10">
-        <BackButton href="/guide" label="BACK TO GUIDES" variant="relative" className="mb-12" />
+        <BackButton href="/guide" label="BACK TO GUIDES" variant="relative" className="mb-8" />
         
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           {/* CONTENT SIDE */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -80,30 +80,30 @@ export default function KickPointGuide() {
             <span className="inline-block px-3 py-1 bg-soyuz/10 border border-soyuz/20 text-soyuz font-label text-[9px] mb-4 uppercase tracking-[0.2em] rounded-full">
               ENERGY TRANSFER SIMULATOR
             </span>
-            <h1 className="text-6xl md:text-8xl font-display italic tracking-tighter leading-[0.85] mb-8">
+            <h1 className="text-5xl md:text-8xl font-display italic tracking-tighter leading-[0.85] mb-8">
               KICK <br /><span className="outline-text-white">POINT</span>
             </h1>
             
-            <div className="space-y-4">
+            <div className="space-y-3 mb-8 lg:mb-12">
               {KICK_POINTS.map((kp) => (
                 <motion.div 
                   key={kp.id}
                   onClick={() => setActiveKP(kp)}
                   onMouseEnter={() => setActiveKP(kp)}
-                  className={`cursor-pointer p-6 border-l-2 transition-all duration-500 group relative overflow-hidden ${
+                  className={`cursor-pointer p-4 lg:p-6 border-l-2 transition-all duration-500 group relative overflow-hidden ${
                     activeKP.id === kp.id 
                     ? 'bg-white/[0.03] border-soyuz' 
                     : 'bg-transparent border-white/10 hover:border-white/30'
                   }`}
                 >
                   <div className="relative z-10">
-                    <div className="flex justify-between items-center mb-2">
-                       <h3 className={`text-xl font-display italic tracking-wider transition-colors ${activeKP.id === kp.id ? 'text-white' : 'text-[#444] group-hover:text-[#888]'}`}>
+                    <div className="flex justify-between items-center mb-1">
+                       <h3 className={`text-lg lg:text-xl font-display italic tracking-wider transition-colors ${activeKP.id === kp.id ? 'text-white' : 'text-[#444] group-hover:text-[#888]'}`}>
                          {kp.title}
                        </h3>
                        {activeKP.id === kp.id && <Zap size={14} className="text-soyuz animate-pulse" />}
                     </div>
-                    <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-4 transition-colors ${activeKP.id === kp.id ? 'text-soyuz' : 'text-[#333]'}`}>
+                    <p className={`text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] mb-2 transition-colors ${activeKP.id === kp.id ? 'text-soyuz' : 'text-[#333]'}`}>
                       {kp.subtitle}
                     </p>
                     <AnimatePresence mode="wait">
@@ -112,14 +112,14 @@ export default function KickPointGuide() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="space-y-4"
+                          className="space-y-3"
                         >
-                          <p className="text-[#AAAAAA] text-[11px] font-medium uppercase tracking-wider leading-relaxed">
+                          <p className="text-[#AAAAAA] text-[10px] font-medium uppercase tracking-wider leading-relaxed">
                             {kp.description}
                           </p>
-                          <div className="pt-4 border-t border-white/10">
-                             <span className="text-[8px] font-black text-[#666] uppercase tracking-[0.3em] block mb-2">Best For Performance:</span>
-                             <p className="text-white/60 text-[10px] uppercase font-bold tracking-tight">
+                          <div className="pt-3 border-t border-white/5">
+                             <span className="text-[7px] font-black text-[#666] uppercase tracking-[0.3em] block mb-1">Performance:</span>
+                             <p className="text-white/60 text-[9px] uppercase font-bold tracking-tight">
                                {kp.bestFor}
                              </p>
                           </div>
@@ -136,24 +136,22 @@ export default function KickPointGuide() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="sticky top-32"
+            className="lg:sticky lg:top-32"
           >
             <div className="bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden aspect-[4/5] flex flex-col items-center justify-center">
-               {/* Grid Background */}
+               {/* ... (SVG content) ... */}
                <div className="absolute inset-0 carbon-texture opacity-10" />
                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
                
-               {/* Technical Labels */}
-               <div className="absolute top-8 left-8 text-[8px] font-black uppercase tracking-[0.4em] text-white/20">
+               <div className="absolute top-6 left-6 text-[7px] font-black uppercase tracking-[0.4em] text-white/20">
                   Simulation Stage: Active<br />
                   Carbon-X Loading... OK
                </div>
-               <div className="absolute bottom-8 right-8 text-right text-[8px] font-black uppercase tracking-[0.4em] text-white/20">
+               <div className="absolute bottom-6 right-6 text-right text-[7px] font-black uppercase tracking-[0.4em] text-white/20">
                   Model: SOYUZ PRO ALPHA<br />
-                  Energy Efficiency: 98.4%
+                  Efficiency: 98.4%
                </div>
 
-               {/* THE SIMULATOR SVG */}
                <div className="relative w-full h-full flex items-center justify-center cursor-pointer"
                     onMouseDown={() => setIsLoaded(true)}
                     onMouseUp={() => setIsLoaded(false)}
@@ -161,12 +159,11 @@ export default function KickPointGuide() {
                     onTouchEnd={() => setIsLoaded(false)}>
                   
                   <svg viewBox="0 0 400 500" className="w-full h-full">
-                    {/* Background Glow Base */}
                     <motion.circle 
                       cx="200" 
                       cy={activeKP.bendY} 
                       r="120" 
-                      fill={activeKP.glowColor} 
+                      fill={activeKP.glowColor || 'rgba(204, 0, 0, 0.2)'} 
                       className="blur-[60px]"
                       animate={{ 
                         opacity: isLoaded ? 0.6 : 0.2,
@@ -174,7 +171,6 @@ export default function KickPointGuide() {
                       }}
                     />
 
-                    {/* The Stick Shaft */}
                     <path 
                       d={getPath(0, activeKP.bendY)}
                       fill="none"
@@ -186,7 +182,7 @@ export default function KickPointGuide() {
                       initial={{ d: getPath(0, activeKP.bendY) }}
                       d={getPath(isLoaded ? 60 : 0, activeKP.bendY)}
                       fill="none"
-                      stroke="url(#stickGradient)"
+                      stroke="url(#stickGradientKP)"
                       strokeWidth="8"
                       strokeLinecap="round"
                       animate={{ 
@@ -195,7 +191,6 @@ export default function KickPointGuide() {
                       transition={{ type: "spring", stiffness: 200, damping: 20 }}
                     />
                     
-                    {/* Energy Nodes */}
                     <AnimatePresence>
                       {isLoaded && (
                         <motion.circle 
@@ -210,9 +205,8 @@ export default function KickPointGuide() {
                       )}
                     </AnimatePresence>
 
-                    {/* Definitions */}
                     <defs>
-                      <linearGradient id="stickGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <linearGradient id="stickGradientKP" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#333" />
                         <stop offset="50%" stopColor="#CC0000" />
                         <stop offset="100%" stopColor="#333" />
@@ -220,27 +214,26 @@ export default function KickPointGuide() {
                     </defs>
                   </svg>
 
-                  {/* Call to action overlay */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                      {!isLoaded && (
                         <motion.div 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="bg-black/80 backdrop-blur-md px-6 py-3 border border-white/10 rounded-full flex items-center gap-3"
+                          className="bg-black/80 backdrop-blur-md px-4 lg:py-3 py-2 border border-white/10 rounded-full flex items-center gap-3"
                         >
-                          <Target size={14} className="text-soyuz" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Press to Test Flex</span>
+                          <Target size={12} className="text-soyuz" />
+                          <span className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Press to Test Flex</span>
                         </motion.div>
                      )}
                   </div>
                </div>
             </div>
 
-            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl flex gap-4 items-start">
-              <Info className="text-soyuz flex-shrink-0" size={20} />
+            <div className="mt-8 p-4 lg:p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl flex gap-4 items-start">
+              <Info className="text-soyuz flex-shrink-0" size={18} />
               <div>
-                <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
-                <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
+                <h4 className="text-[9px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
+                <p className="text-[9px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
                    Modern "Liquid Carbon" tech allows SOYUZ sticks to recover faster from flex load, giving you that snappier feel regardless of kick point.
                 </p>
               </div>

@@ -42,55 +42,47 @@ export default function FlexGuide() {
               STICK <br /><span className="outline-text-white">FLEX</span>
             </h1>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-               {FLEX_DATA.map((flex) => (
-                 <div 
+            <div className="grid grid-cols-1 gap-3 mb-8 lg:mb-12">
+              {FLEX_DATA.map((flex) => (
+                <div 
                   key={flex.id}
-                  onMouseEnter={() => setActiveFlex(flex)}
                   onClick={() => setActiveFlex(flex)}
-                  className={`p-6 border transition-all duration-500 cursor-pointer ${
-                    activeFlex.id === flex.id ? 'bg-white/[0.05] border-soyuz shadow-[0_0_30px_rgba(204,0,0,0.1)]' : 'bg-white/[0.01] border-white/5'
+                  onMouseEnter={() => setActiveFlex(flex)}
+                  className={`p-4 lg:p-6 border transition-all duration-500 cursor-pointer group ${
+                    activeFlex.id === flex.id ? 'bg-white/[0.04] border-soyuz' : 'bg-white/[0.01] border-white/5 hover:border-white/10'
                   }`}
-                 >
-                   <h3 className={`text-2xl font-display italic transition-colors ${activeFlex.id === flex.id ? 'text-white' : 'text-[#444]'}`}>
-                     {flex.label}
-                   </h3>
-                   <p className={`text-[8px] font-black uppercase tracking-[0.3em] mb-4 ${activeFlex.id === flex.id ? 'text-soyuz' : 'text-[#222]'}`}>
-                     {flex.category}
-                   </p>
-                   <AnimatePresence mode="wait">
+                >
+                  <div className="flex justify-between items-center mb-1">
+                     <h3 className={`text-xl lg:text-3xl font-display italic ${activeFlex.id === flex.id ? 'text-white' : 'text-[#444] group-hover:text-[#888]'}`}>
+                        FLEX {flex.flex}
+                     </h3>
+                     {activeFlex.id === flex.id && <Zap size={14} className="text-soyuz" />}
+                  </div>
+                  <p className={`text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] mb-4 ${activeFlex.id === flex.id ? 'text-soyuz' : 'text-[#222]'}`}>
+                    {flex.label}
+                  </p>
+                  
+                  <AnimatePresence mode="wait">
                     {activeFlex.id === flex.id && (
                       <motion.p 
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="text-[#888888] text-[10px] font-bold uppercase tracking-widest leading-relaxed"
+                        className="text-[#AAAAAA] text-[10px] font-medium uppercase tracking-wider leading-relaxed pt-4 border-t border-white/5"
                       >
-                        {flex.desc}
+                        {flex.description}
                       </motion.p>
                     )}
-                   </AnimatePresence>
-                 </div>
-               ))}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
-
-            <section className="p-10 bg-white/[0.02] border border-white/5 rounded-3xl relative overflow-hidden group">
-               <div className="absolute inset-x-0 bottom-0 h-1 bg-soyuz/20 group-hover:bg-soyuz transition-colors" />
-               <h4 className="text-white font-display text-2xl mb-4 italic uppercase">Cutting vs Stiffness</h4>
-               <p className="text-[#AAAAAA] text-xs font-bold uppercase tracking-widest leading-relaxed mb-6">
-                 Reducing stick length increases its natural frequency and stiffness. A 75 Flex stick cut by 3 inches performs like an 85+ Flex stick.
-               </p>
-               <div className="flex items-center gap-4 text-soyuz font-label text-[10px] uppercase tracking-[0.2em] animate-pulse">
-                  <Zap size={14} /> Recalibrate your selection carefully
-               </div>
-            </section>
           </motion.div>
 
-          {/* SIMULATOR SIDE */}
+          {/* SIMULATOR VISUAL SIDE */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="sticky top-32"
+            className="lg:sticky lg:top-32"
           >
             <div className="aspect-[4/5] bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden flex flex-col items-center justify-center">
                <div className="absolute inset-0 carbon-texture opacity-10" />
@@ -181,14 +173,22 @@ export default function FlexGuide() {
                </div>
             </div>
 
-            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl flex gap-4 items-start">
-              <Info className="text-soyuz flex-shrink-0" size={20} />
-              <div>
-                <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
-                <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
-                   A whippier flex (low number) is generally better for snap shots, while a stiffer flex (high number) provides better accuracy for slap shots if you have the weight to load it.
-                </p>
+            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl">
+              <div className="flex gap-4 items-start mb-6">
+                <Info className="text-soyuz flex-shrink-0" size={20} />
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
+                  <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
+                    Younger players often use flexes that are too high. Your stick should flex slightly even on a simple wrist shot to maximize energy transfer.
+                  </p>
+                </div>
               </div>
+              <section className="p-6 bg-white/[0.02] border-l border-soyuz/30 rounded-r-xl">
+                <h3 className="text-sm font-display text-white italic mb-2 uppercase tracking-wide">Cutting vs Stiffness</h3>
+                <p className="text-[#888888] text-[9px] font-bold uppercase tracking-widest leading-relaxed">
+                  Remember: for every inch you cut, flex increases by ~3-5 points. A 75 cut by 2" becomes ~85.
+                </p>
+              </section>
             </div>
           </motion.div>
         </div>

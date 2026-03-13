@@ -61,48 +61,42 @@ export default function LieGuide() {
               BLADE <br /><span className="outline-text-white">LIE</span>
             </h1>
             
-            <div className="space-y-4">
-               {LIE_OPTIONS.map((lie) => (
-                 <div 
+            <div className="grid grid-cols-1 gap-3 mb-8 lg:mb-12">
+              {LIE_OPTIONS.map((lie) => (
+                <div 
                   key={lie.id}
-                  onMouseEnter={() => setActiveLie(lie)}
                   onClick={() => setActiveLie(lie)}
-                  className={`p-6 border transition-all duration-500 cursor-pointer ${
-                    activeLie.id === lie.id ? 'bg-white/[0.05] border-soyuz/50 shadow-[0_0_40px_rgba(204,0,0,0.1)]' : 'bg-white/[0.01] border-white/5'
+                  onMouseEnter={() => setActiveLie(lie)}
+                  className={`p-4 lg:p-6 border transition-all duration-500 cursor-pointer ${
+                    activeLie.id === lie.id ? 'bg-white/[0.04] border-soyuz' : 'bg-white/[0.01] border-white/5 hover:border-white/10'
                   }`}
-                 >
-                   <div className="flex justify-between items-center mb-2">
-                      <h3 className={`text-2xl font-display italic ${activeLie.id === lie.id ? 'text-white' : 'text-white/20'}`}>
-                        {lie.label}
-                      </h3>
-                      {activeLie.id === lie.id && <Zap size={12} className="text-soyuz animate-pulse" />}
-                   </div>
-                   <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-4 ${activeLie.id === lie.id ? 'text-soyuz' : 'text-[#333]'}`}>
-                      {lie.subtitle}
-                   </p>
-                   <AnimatePresence mode="wait">
+                >
+                  <div className="flex justify-between items-center mb-2">
+                     <h3 className={`text-xl lg:text-2xl font-display italic ${activeLie.id === lie.id ? 'text-white' : 'text-white/20'}`}>
+                        LIE {lie.label.split(' ')[1]}
+                     </h3>
+                     {activeLie.id === lie.id && <Target size={14} className="text-soyuz pulse-slow" />}
+                  </div>
+                  <p className={`text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] mb-4 ${activeLie.id === lie.id ? 'text-soyuz' : 'text-[#333]'}`}>
+                    {lie.subtitle}
+                  </p>
+                  
+                  <AnimatePresence mode="wait">
                     {activeLie.id === lie.id && (
-                      <motion.p 
+                      <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="text-[#AAAAAA] text-[11px] font-medium uppercase tracking-wider leading-relaxed"
+                        className="pt-4 border-t border-white/5"
                       >
-                        {lie.description}
-                      </motion.p>
+                         <span className="text-[7px] font-black text-[#555] uppercase tracking-widest block mb-2">Ideal for:</span>
+                         <p className="text-[#888888] text-[9px] uppercase font-bold tracking-tight leading-relaxed">
+                           {lie.idealFor}
+                         </p>
+                      </motion.div>
                     )}
-                   </AnimatePresence>
-                 </div>
-               ))}
-            </div>
-
-            <div className="mt-12 p-8 bg-white/[0.02] border-l-2 border-soyuz">
-              <h4 className="text-white font-display text-xl mb-4 italic uppercase">Tape Wear Diagnostics</h4>
-              <p className="text-[#888888] text-[10px] uppercase font-black tracking-widest leading-relaxed">
-                If your tape wears at the <span className="text-soyuz">toe</span>, your lie is too low. <br />
-                If it wears at the <span className="text-soyuz">heel</span>, your lie is too high. <br />
-                Consistent wear in the <span className="text-soyuz font-display">middle</span> means you've found your perfect lie.
-              </p>
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -110,7 +104,7 @@ export default function LieGuide() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="sticky top-32"
+            className="lg:sticky lg:top-32"
           >
             <div className="aspect-square bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden flex flex-col items-center justify-center">
                <div className="absolute inset-0 carbon-texture opacity-10" />
@@ -171,14 +165,26 @@ export default function LieGuide() {
                </div>
             </div>
 
-            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl flex gap-4 items-start">
-              <Info className="text-soyuz flex-shrink-0" size={20} />
-              <div>
-                <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
-                <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
-                   If you change your stick length, you're effectively changing your lie. Longer sticks act like lower lies, shorter sticks act like higher lies.
-                </p>
+            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl">
+              <div className="flex gap-4 items-start mb-6">
+                <Info className="text-soyuz flex-shrink-0" size={20} />
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
+                  <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
+                    The lie isn't about quality, it's about matching your skating posture. Lower lies (5) are for speed/lean, higher (6) for upright control.
+                  </p>
+                </div>
               </div>
+              
+              <section className="p-6 bg-white/[0.02] border-l border-soyuz/30 rounded-r-xl">
+                 <div className="flex items-center gap-3 mb-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-soyuz shadow-[0_0_10px_#CC0000]" />
+                    <h3 className="text-sm font-display text-white italic uppercase tracking-wide">Tape Wear Diagnostic</h3>
+                 </div>
+                 <p className="text-[#888888] text-[9px] font-bold uppercase tracking-widest leading-relaxed">
+                    Wear at the HEEL = lie too LOW. Wear at the TOE = lie too HIGH. Your goal is even wear in the CENTER.
+                 </p>
+              </section>
             </div>
           </motion.div>
         </div>

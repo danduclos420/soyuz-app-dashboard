@@ -61,9 +61,9 @@ export default function CurveGuide() {
       <div className="absolute inset-0 carbon-texture opacity-5 pointer-events-none" />
       
       <div className="soyuz-container relative z-10">
-        <BackButton href="/guide" label="BACK TO GUIDES" variant="relative" className="mb-12" />
+        <BackButton href="/guide" label="BACK TO GUIDES" variant="relative" className="mb-8" />
         
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -71,32 +71,32 @@ export default function CurveGuide() {
             <span className="inline-block px-3 py-1 bg-soyuz/10 border border-soyuz/20 text-soyuz font-label text-[9px] mb-4 uppercase tracking-[0.2em] rounded-full">
               BLADE GEOMETRY ANALYZER
             </span>
-            <h1 className="text-6xl md:text-8xl font-display italic tracking-tighter leading-[0.85] mb-8">
+            <h1 className="text-5xl md:text-8xl font-display italic tracking-tighter leading-[0.85] mb-8">
               CURVE <br /><span className="outline-text-white">GUIDE</span>
             </h1>
             
-            <div className="space-y-4 mb-12">
+            <div className="grid grid-cols-1 gap-3 mb-8 lg:mb-12">
               {CURVE_DATA.map((curve) => (
                 <div 
                   key={curve.id} 
                   onMouseEnter={() => setActiveCurve(curve)}
                   onClick={() => setActiveCurve(curve)}
-                  className={`p-6 border transition-all duration-500 cursor-pointer relative overflow-hidden ${
+                  className={`p-4 lg:p-6 border transition-all duration-500 cursor-pointer relative overflow-hidden ${
                     activeCurve.id === curve.id 
                     ? 'bg-white/[0.04] border-soyuz/50 shadow-[0_0_30px_rgba(204,0,0,0.1)]' 
                     : 'bg-white/[0.01] border-white/5 hover:border-white/10'
                   }`}
                 >
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-2 lg:mb-4">
                     <div>
-                       <h3 className={`text-3xl font-display italic transition-colors ${activeCurve.id === curve.id ? 'text-soyuz' : 'text-white/40'}`}>
+                       <h3 className={`text-xl lg:text-3xl font-display italic transition-colors ${activeCurve.id === curve.id ? 'text-soyuz' : 'text-white/40'}`}>
                          {curve.pattern}
                        </h3>
-                       <p className={`text-[9px] font-black uppercase tracking-[0.2em] ${activeCurve.id === curve.id ? 'text-white' : 'text-[#444]'}`}>
+                       <p className={`text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] ${activeCurve.id === curve.id ? 'text-white' : 'text-[#444]'}`}>
                          {curve.subtitle}
                        </p>
                     </div>
-                    <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] bg-white/5 px-3 py-1 rounded border border-white/5">
+                    <span className="text-[7px] lg:text-[9px] font-black text-white/20 uppercase tracking-[0.2em] bg-white/5 px-2 py-1 rounded border border-white/5">
                       Equiv: {curve.brandEquiv}
                     </span>
                   </div>
@@ -107,7 +107,7 @@ export default function CurveGuide() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="text-[#AAAAAA] text-xs font-medium uppercase tracking-wider leading-relaxed"
+                        className="text-[#AAAAAA] text-[10px] font-medium uppercase tracking-wider leading-relaxed"
                       >
                         {curve.description}
                       </motion.p>
@@ -122,7 +122,7 @@ export default function CurveGuide() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="sticky top-32"
+            className="lg:sticky lg:top-32"
           >
             <div className="aspect-video bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden flex flex-col items-center justify-center">
               <div className="absolute inset-0 carbon-texture opacity-10" />

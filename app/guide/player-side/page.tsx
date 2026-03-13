@@ -73,7 +73,7 @@ export default function PlayerSideGuide() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="sticky top-32"
+            className="lg:sticky lg:top-32"
           >
             <div className="aspect-[4/5] bg-[#050505] border border-white/5 rounded-3xl p-1 relative overflow-hidden flex flex-col items-center justify-center">
                <div className="absolute inset-0 carbon-texture opacity-10" />
@@ -142,14 +142,46 @@ export default function PlayerSideGuide() {
                </div>
             </div>
 
-            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl flex gap-4 items-start">
-              <Info className="text-soyuz flex-shrink-0" size={20} />
-              <div>
-                <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
-                <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
-                   Try grabbing a shovel or broom naturally. Whichever hand goes to the top is almost certainly your correct top hand for hockey.
-                </p>
+            <div className="mt-8 p-6 bg-soyuz/5 border border-soyuz/10 rounded-2xl">
+              <div className="flex gap-4 items-start mb-8">
+                <Info className="text-soyuz flex-shrink-0" size={20} />
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1">PRO ADVICE</h4>
+                  <p className="text-[10px] text-white/60 leading-relaxed uppercase font-bold tracking-tight">
+                    The top hand is responsible for 90% of puck handling. Keep a relaxed but firm grip to allow the shaft to rotate naturally within your bottom hand for shots.
+                  </p>
+                </div>
               </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={side}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="p-6 bg-white/[0.02] border-l border-soyuz/30 rounded-r-xl"
+                >
+                  <h3 className="text-sm font-display text-white italic mb-2 uppercase tracking-wide">
+                    {side === 'left' ? 'Left' : 'Right'}-Handed Mechanics
+                  </h3>
+                  <p className="text-[#888888] text-[9px] font-bold uppercase tracking-widest leading-relaxed mb-4">
+                    {side === 'left' 
+                      ? "Commonly used when your dominant hand is your right hand. Your right hand stays on top for maximum control."
+                      : "Commonly used when your dominant hand is your left hand. Your left hand stays on top for maximum control."
+                    }
+                  </p>
+                  <div className="flex gap-3">
+                    <div className="flex-1 p-3 bg-white/[0.03] rounded border border-white/5">
+                       <span className="text-[7px] font-black text-soyuz block mb-1">TOP HAND</span>
+                       <p className="text-white font-black text-[8px] uppercase">Control & Feel</p>
+                    </div>
+                    <div className="flex-1 p-3 bg-white/[0.03] rounded border border-white/5">
+                       <span className="text-[7px] font-black text-soyuz block mb-1">MID HAND</span>
+                       <p className="text-white font-black text-[8px] uppercase">Power & Torque</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>

@@ -100,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. INFINITE TICKER (RED) */}
-      <div id="collections-top" className="bg-soyuz overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[88px]">
+      <div id="collections-top" className="bg-soyuz overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[24px]">
         <div className="ticker-wrap flex items-center h-12 md:h-14">
           <div className="ticker-inner gap-16 md:gap-24 items-center">
             {[...Array(4)].map((_, i) => (

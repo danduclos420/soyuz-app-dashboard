@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import BackButton from '@/components/BackButton';
 import { Eye, EyeOff } from 'lucide-react';
+import { FormLayout } from '@/components/layout/FormLayout';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const useRouterInstance = useRouter();
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +22,6 @@ export default function LoginPage() {
     setError(null);
 
     // Map username to email if necessary
-    // For adminprotos, we use the initialized email
     const email = username === 'adminprotos' ? 'admin@soyuzbc.com' : username;
 
     const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
@@ -37,7 +36,6 @@ export default function LoginPage() {
     }
 
     if (user) {
-      // Fetch role from profiles
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -45,82 +43,86 @@ export default function LoginPage() {
         .single();
 
       if (profile?.role === 'admin') {
-        useRouterInstance.push('/admin');
-      } else if (profile?.role === 'rep') {
-        useRouterInstance.push('/affiliate');
+        router.push('/admin');
+      } else if (profile?.role === 'affiliate') {
+        router.push('/affiliate/dashboard');
       } else {
-        useRouterInstance.push('/account');
+        router.push('/account');
       }
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
-      <BackButton />
-      <div className="w-full max-w-md bg-[#0D0D0D] border border-white/10 p-10">
-        <div className="text-center mb-10 flex flex-col items-center">
-          <Image 
-            src="/assets/logo-short.png" 
-            alt="SOYUZ Toro" 
-            width={80} 
-            height={80} 
-            className="mb-6 h-20 w-auto object-contain"
+    <FormLayout
+      variant="page"
+      maxWidth="max-w-md"
+      title="BIENVENUE"
+      description="ACCÈS AU CENTRE DE COMMANDEMENT"
+    >
+      <div className="flex flex-col items-center mb-10">
+        <Image 
+          src="/assets/logo-short.png" 
+          alt="SOYUZ Toro" 
+          width={80} 
+          height={80} 
+          className="mb-6 h-20 w-auto object-contain"
+        />
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-6">
+        <div className="space-y-2">
+          <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Utilisateur</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            className="w-full bg-black border border-white/10 px-4 py-4 text-white font-mono text-sm focus:border-soyuz outline-none transition-colors"
+            placeholder="Username / Email"
           />
-          <h1 className="text-2xl font-bold uppercase tracking-[0.3em] text-white">SOYUZ LOGIN</h1>
-          <p className="text-gray-500 text-xs uppercase tracking-widest mt-2">Access the command center</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-gray-400 text-xs uppercase tracking-widest mb-2">Username</label>
+        <div className="space-y-2">
+          <label className="text-[10px] text-[#444444] font-black uppercase tracking-widest">Mot de Passe</label>
+          <div className="relative">
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors"
-              placeholder="Username"
+              className="w-full bg-black border border-white/10 px-4 py-4 text-white font-mono text-sm focus:border-soyuz outline-none transition-colors"
+              placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-soyuz transition-colors"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-gray-400 text-xs uppercase tracking-widest mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors"
-                placeholder="Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
+        {error && (
+          <p className="text-soyuz text-[10px] uppercase font-black tracking-widest bg-soyuz/10 p-4 border border-soyuz/20">
+            {error}
+          </p>
+        )}
 
-          {error && <p className="text-red-500 text-xs uppercase tracking-widest">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] py-5 hover:bg-soyuz hover:text-white transition-all shadow-[0_0_30px_rgba(255,255,255,0.05)] disabled:opacity-30"
+        >
+          {loading ? 'AUTHENTIFICATION...' : 'SE CONNECTER'}
+        </button>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-white text-black font-bold uppercase tracking-widest py-4 hover:bg-gray-200 transition-colors disabled:opacity-50"
-          >
-            {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
-          </button>
-
-          <div className="text-center pt-4">
-            <Link href="/register" className="text-gray-500 hover:text-white text-[10px] uppercase tracking-widest transition-colors font-black">
-              Don't have an account? Create one
-            </Link>
-          </div>
-        </form>
-      </div>
-    </main>
+        <div className="text-center pt-6">
+          <Link href="/register" className="text-white/20 hover:text-white text-[9px] uppercase tracking-widest transition-colors font-black">
+            Pas de compte ? Créer un profil
+          </Link>
+        </div>
+      </form>
+    </FormLayout>
   );
 }

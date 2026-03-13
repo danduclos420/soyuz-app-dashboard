@@ -40,10 +40,12 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION 
+          - h-[calc(100dvh-92px)] ensures it fits perfectly below the sticky header (approx 28px announcement + 64px logo bar)
+      */}
       <section 
         ref={heroRef}
-        className="relative h-dvh min-h-dvh flex flex-col items-center overflow-hidden carbon-bg"
+        className="relative h-[calc(100dvh-92px)] flex flex-col items-center overflow-hidden carbon-bg"
       >
         <div className="absolute inset-0 z-0">
           <motion.div 
@@ -56,8 +58,8 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* HERO CONTENT - Pulled higher with pt and tight gap to header */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[12dvh] sm:pt-[15dvh] px-[2%] w-full">
+        {/* HERO CONTENT - Positioned high with pt */}
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[10dvh] sm:pt-[12dvh] px-[2%] w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -74,7 +76,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-[#AAAAAA] text-[10px] sm:text-sm md:text-lg mb-10 md:mb-14 uppercase tracking-[0.2em] md:tracking-[0.3em] font-medium max-w-2xl mx-auto leading-relaxed px-2">
-              SOYUZ BC North America — The standard in <br className="hidden md:block" /> professional performance hockey.
+              SOYUZ BC North America — The standard in professional performance hockey.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4 sm:px-0 mt-6 md:mt-10">
@@ -89,7 +91,7 @@ export default function HomePage() {
         </div>
 
         {/* DISCOVER BUTTON (Perfect horizontal centering) */}
-        <div className="absolute bottom-[18%] left-0 right-0 z-20 flex justify-center pointer-events-none">
+        <div className="absolute bottom-[20%] sm:bottom-[15%] left-0 right-0 z-20 flex justify-center pointer-events-none">
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -102,10 +104,13 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* 2. INFINITE TICKER (Stuck to the bottom of the viewport) */}
+        {/* 2. INFINITE TICKER (Stuck to the absolute bottom of the viewport initially)
+            - z-[50] ensures it scrolls ABOVE the logo bar (z-40) but UNDER announcement (z-60)
+            - scroll-mt-[28px] aligns it precisely under the red announcement bar
+        */}
         <div 
           id="ticker-target"
-          className="absolute bottom-0 left-0 right-0 z-30 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[36px] sm:scroll-mt-[40px]"
+          className="absolute bottom-0 left-0 right-0 z-[50] bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[28px]"
         >
           <div className="ticker-wrap flex items-center h-12 md:h-14">
             <div className="ticker-inner gap-16 md:gap-24 items-center">

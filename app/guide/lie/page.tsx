@@ -1,3 +1,5 @@
+'use client';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, Info, CheckCircle2, ChevronDown, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';

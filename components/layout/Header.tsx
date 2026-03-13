@@ -473,16 +473,20 @@ export default function Header() {
             >
               {user ? 'My Account' : 'Login'}
             </Link>
+            
             {user && (
               <button
                 onClick={async () => {
-                  await supabase.auth.signOut();
-                  setMobileOpen(false);
-                  router.push('/');
+                  const { error } = await supabase.auth.signOut();
+                  if (!error) {
+                    setMobileOpen(false);
+                    router.push('/');
+                  }
                 }}
-                className="py-4 px-2 text-soyuz text-xl font-black uppercase tracking-wider border-b border-white/5 flex items-center gap-2 hover:text-white transition-colors"
+                className="py-6 px-2 text-soyuz text-xl font-black uppercase tracking-wider border-b border-white/5 flex items-center gap-3 hover:text-white transition-colors group w-full text-left"
               >
-                <LogOut size={20} /> Se déconnecter
+                <LogOut size={24} className="group-hover:scale-110 transition-transform" /> 
+                <span>SE DÉCONNECTER</span>
               </button>
             )}
           </div>

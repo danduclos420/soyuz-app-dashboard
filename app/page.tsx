@@ -42,7 +42,6 @@ export default function HomePage() {
     <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
       {/* 1. HERO SECTION 
           - h-[calc(100dvh-88px)] ensures the ticker stays at the bottom of the initial screen.
-          - z-[45] removed to ensure it doesn't create a stacking context that keeps the ticker on top.
       */}
       <section 
         ref={heroRef}
@@ -59,8 +58,8 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* HERO CONTENT - Positioned high to minimize gap to header */}
-        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[10dvh] sm:pt-[12dvh] px-[2%] w-full">
+        {/* HERO CONTENT - Flex flow ensures Discover button is always below CTA buttons */}
+        <div className="relative z-10 text-center soyuz-container flex flex-col items-center pt-[10dvh] sm:pt-[12dvh] px-[2%] w-full h-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -89,15 +88,13 @@ export default function HomePage() {
               </Link>
             </div>
           </motion.div>
-        </div>
 
-        {/* DISCOVER BUTTON (Centered wrapper with Protection Zone)
-            - Increased bottom margin on mobile to bottom-[30%] for maximum spacing.
-            - Added p-6 protection zone to prevent content collisions.
-            - z-40 ensures it stays above the ticker (z-30) and aligned with header depth.
-        */}
-        <div className="absolute bottom-[30%] sm:bottom-[15%] left-0 right-0 z-40 flex justify-center pointer-events-none">
-          <div className="p-12 pointer-events-none">
+          {/* DISCOVER BUTTON (In-flow for collision protection)
+              - mt-auto pushes it to the bottom of the container.
+              - pt-12 and pb-12 create an invisible protection zone.
+              - z-40 ensures it's above the ticker (z-30) but under nav (z-40+).
+          */}
+          <div className="mt-auto pt-12 pb-14 pointer-events-none relative z-40">
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -108,19 +105,16 @@ export default function HomePage() {
                 className="flex flex-col items-center gap-2 relative"
                 aria-label="Discover sections below"
               >
-                {/* Shield background - invisible but ensures no overlap */}
-                <div className="absolute -inset-8 bg-transparent" />
-                
-                <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors relative z-10">Discover</span>
-                <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors relative z-10" />
+                <span className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-bold group-hover:text-soyuz transition-colors">Discover</span>
+                <ChevronDown size={20} className="text-white/40 group-hover:text-soyuz transition-colors" />
               </button>
             </motion.div>
           </div>
         </div>
 
         {/* 2. INFINITE TICKER (Stuck to bottom initially)
-            - z-30 ensures it passes UNDERNEATH the Logo Bar (z-40).
-            - scroll-mt-[24px] aligns it below the 24px announcement bar.
+            - z-30 ensures it passes UNDERNEATH the Header (z-40).
+            - scroll-mt-[24px] coordinates it to touch the bottom of the red announcement bar (behinds the logo bar).
         */}
         <div 
           id="ticker-target"

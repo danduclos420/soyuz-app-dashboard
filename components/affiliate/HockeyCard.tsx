@@ -118,7 +118,7 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
           >
             {/* LAYER 1: BOTTOM ASSET (Under Photo) */}
             <img 
-               src="/components/soyuz-hockey-card/Bottom_underimage_soyuztopdeck.png" 
+               src="/assets/hockey-card/Bottom_underimage_soyuztopdeck.png" 
                className="absolute inset-0 w-full h-full object-cover z-0" 
                alt="Background"
             />
@@ -134,8 +134,8 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
 
             {/* LAYER 3: TOP ASSET (Over Photo) */}
             <img 
-               src="/components/soyuz-hockey-card/Top_overimage_soyuztopdeck.png" 
-               className="absolute inset-0 w-full h-full object-contain z-20 pointer-events-none" 
+               src="/assets/hockey-card/Top_overimage_soyuztopdeck.png" 
+               className="absolute inset-0 w-full h-full object-cover z-20 pointer-events-none" 
                alt="Overlay"
             />
 

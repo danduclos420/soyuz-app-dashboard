@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X, ShoppingBag, User, ChevronDown, Globe, Search } from 'lucide-react';
+import { useCartStore } from '@/lib/store/cart';
+import ShoppingCart from '../storefront/ShoppingCart';
 
 const LANGUAGES = [
   { code: 'en', label: 'English', flag: '🇺🇸' },
@@ -35,11 +37,15 @@ export default function Header() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const [selectedCurrency, setSelectedCurrency] = useState(CURRENCIES[0]);
-  const [cartCount] = useState(0);
+  
+  const { getTotalItems, toggleCart } = useCartStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+  
   const langRef = useRef<HTMLDivElement>(null);
   const currRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setIsHydrated(true);
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -58,6 +64,8 @@ export default function Header() {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  const cartCount = isHydrated ? getTotalItems() : 0;
 
   return (
     <>
@@ -124,7 +132,7 @@ export default function Header() {
                   <ChevronDown size={12} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {langOpen && (
-                  <div className="lang-dropdown">
+                  <div className="lang-dropdown absolute right-0 mt-2 bg-carbon-surface border border-white/5 shadow-2xl py-2 w-48 z-50">
                     {LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
@@ -152,7 +160,7 @@ export default function Header() {
                   <ChevronDown size={12} className={`transition-transform ${currencyOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {currencyOpen && (
-                  <div className="lang-dropdown">
+                  <div className="lang-dropdown absolute right-0 mt-2 bg-carbon-surface border border-white/5 shadow-2xl py-2 w-48 z-50">
                     {CURRENCIES.map((curr) => (
                       <button
                         key={curr.code}
@@ -180,14 +188,18 @@ export default function Header() {
               </Link>
 
               {/* CART */}
-              <Link href="/cart" className="relative flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" aria-label="Cart">
+              <button 
+                onClick={() => toggleCart(true)}
+                className="relative flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" 
+                aria-label="Cart"
+              >
                 <ShoppingBag size={18} />
                 {cartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-[#CC0000] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                     {cartCount}
                   </span>
                 )}
-              </Link>
+              </button>
 
               {/* MOBILE MENU TOGGLE */}
               <button
@@ -270,6 +282,8 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      <ShoppingCart />
     </>
   );
 }

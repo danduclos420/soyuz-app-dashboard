@@ -16,6 +16,8 @@ import {
   Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCartStore } from '@/lib/store/cart';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { dummyProducts } from '@/lib/mock-products';
 import AnimatedKickPoint from '@/components/tech-guide/AnimatedKickPoint';
@@ -25,6 +27,8 @@ export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
   
+  const { addItem, toggleCart } = useCartStore();
+
   // Find product or default to first dummy
   const product = useMemo(() => {
     return dummyProducts.find(p => p.slug === slug) || dummyProducts[0];
@@ -34,6 +38,33 @@ export default function ProductDetailPage() {
   const [selectedHand, setSelectedHand] = useState('Gauche');
   const [selectedFlex, setSelectedFlex] = useState(product.tech.flex[0]);
   const [selectedCurve, setSelectedCurve] = useState(product.tech.curves[0]);
+
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.priceRaw,
+      image: product.images[0],
+      quantity: 1,
+      variantId: `${selectedHand}-${selectedFlex}-${selectedCurve}`,
+      flex: selectedFlex.toString(),
+      side: selectedHand === 'Gauche' ? 'left' : 'right',
+      sku: (product as any).sku || `SOYUZ-${product.id}`,
+    });
+    
+    toast.success(`${product.name} added to locker`, {
+      style: {
+        background: '#1A1A1A',
+        color: '#fff',
+        border: '1px solid rgba(255,255,255,0.1)',
+        fontSize: '12px',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+      },
+    });
+    
+    toggleCart(true);
+  };
 
   return (
     <div className="bg-black min-h-screen pt-24 pb-24 overflow-x-hidden">

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Trophy, Users, Zap, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Trophy, Users, Zap, Loader2, ArrowRight, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase-client';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ export default function RepRegisterPage() {
     motivation: '',
     repCode: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +181,25 @@ export default function RepRegisterPage() {
                 <Input name="lastName" label="LAST NAME" placeholder="DUPONT" required value={formData.lastName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
               </div>
               <Input name="email" label="SECURE EMAIL" placeholder="REPRESENTATIVE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-              <Input name="password" label="ACCESS KEY" placeholder="••••••••" type="password" required value={formData.password} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+              <div className="relative">
+                <Input 
+                  name="password" 
+                  label="ACCESS KEY (PASSWORD)" 
+                  placeholder="••••••••" 
+                  type={showPassword ? "text" : "password"} 
+                  required 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  className="bg-black border-white/5 focus:border-soyuz pr-12" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 bottom-3.5 text-gray-500 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <Input name="social" label="SOCIAL NODE (IG/TIKTOK)" placeholder="@USERNAME" required value={formData.social} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
               
               <div className="space-y-4">

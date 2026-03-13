@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [year, setYear] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [language, setLanguage] = useState('en');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +36,8 @@ export default function RegisterPage() {
         data: {
           full_name: `${firstName} ${lastName}`,
           dob: dob,
-          role: 'client'
+          role: 'client',
+          preferred_language: language
         }
       }
     });
@@ -147,6 +149,19 @@ export default function RegisterPage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-gray-400 text-xs uppercase tracking-widest mb-2">Langue Préférée</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              required
+              className="w-full bg-black border border-white/10 px-4 py-3 text-white focus:border-white outline-none transition-colors text-xs appearance-none"
+            >
+              <option value="en">English (Default)</option>
+              <option value="fr">Français</option>
+            </select>
           </div>
 
           <div>

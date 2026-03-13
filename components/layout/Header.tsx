@@ -214,6 +214,7 @@ export default function Header() {
                     aria-label="Logout"
                   >
                     <LogOut size={16} />
+                    <span className="hidden lg:block text-[9px] font-black ml-1 uppercase">DÉCONNEXION</span>
                   </button>
                 </div>
               ) : (

@@ -20,6 +20,7 @@ export default function RepRegisterPage() {
     social: '',
     motivation: '',
     repCode: '',
+    language: 'en',
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -42,14 +43,36 @@ export default function RepRegisterPage() {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create account');
 
-      // 2. We assume a trigger handles profile creation, or we do it here if needed
-      const { error: repError } = await supabase.from('reps').insert({
-        user_id: authData.user.id,
-        code: formData.repCode.toUpperCase() || authData.user.id.slice(0, 5).toUpperCase(),
-        status: 'pending',
-      });
-
-      if (repError) console.error('Rep record error:', repError);
+      // 2. Insert profile data directly (Supabase Auth trigger might create a basic profile, so we update it or upsert)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: `${formData.firstName} ${formData.lastName}`,
+          role: 'rep',
+          status: 'pending',
+          affiliate_code: formData.repCode.toUpperCase() || authData.user.id.slice(0, 5).toUpperCase(),
+          preferred_language: formData.language,
+          social_node: formData.social,
+          motivation: formData.motivation
+        })
+        .eq('id', authData.user.id);
+      
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        // If update fails (maybe profile doesn't exist yet), try insert
+        const { error: insertError } = await supabase.from('profiles').insert({
+          id: authData.user.id,
+          full_name: `${formData.firstName} ${formData.lastName}`,
+          role: 'rep',
+          status: 'pending',
+          affiliate_code: formData.repCode.toUpperCase() || authData.user.id.slice(0, 5).toUpperCase(),
+          preferred_language: formData.language,
+          social_node: formData.social,
+          motivation: formData.motivation,
+          email: formData.email
+        });
+        if (insertError) throw insertError;
+      }
 
       // 3. Trigger Emails via API
       await fetch('/api/rep/register', {
@@ -68,7 +91,7 @@ export default function RepRegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -184,7 +207,7 @@ export default function RepRegisterPage() {
               <div className="relative">
                 <Input 
                   name="password" 
-                  label="ACCESS KEY (PASSWORD)" 
+                  label="PASSWORD" 
                   placeholder="••••••••" 
                   type={showPassword ? "text" : "password"} 
                   required 
@@ -216,7 +239,23 @@ export default function RepRegisterPage() {
                 />
               </div>
               
-              <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">
+                    PREFERRED LANGUAGE
+                  </label>
+                  <select
+                    name="language"
+                    value={formData.language}
+                    onChange={handleChange}
+                    className="w-full bg-black border border-white/5 rounded-none px-6 py-4 text-xs text-white uppercase font-bold focus:outline-none focus:border-soyuz appearance-none transition-all"
+                  >
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                  </select>
+                </div>
+                <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+              </div>
               
               <div className="pt-8 space-y-8">
                 <button 

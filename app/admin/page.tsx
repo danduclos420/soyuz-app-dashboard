@@ -87,7 +87,7 @@ export default function AdminDashboard() {
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-8">
       <div className="w-12 h-12 border-2 border-soyuz border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(255,0,0,0.2)]" />
-      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">ACCESSING COMMAND CENTER...</p>
+      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">ACCÈS AU CENTRE DE COMMANDEMENT...</p>
     </div>
   );
 
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, x: 0 }}
           >
             <span className="inline-block px-3 py-1 bg-soyuz/10 border border-soyuz/20 text-soyuz font-label text-[9px] mb-6 uppercase tracking-[0.2em] rounded-full">
-              ADMINISTRATIVE NODE
+              NŒUD ADMINISTRATIF
             </span>
             <h1 className="text-6xl md:text-8xl font-display italic tracking-tighter leading-[0.85] uppercase">
               BONJOUR <br /><span className="outline-text-white">DANY</span>
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
               onClick={() => window.location.href = '/api/auth/quickbooks'}
               className="px-6 py-4 bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-[#888888] hover:text-white hover:border-white/20 transition-all flex items-center gap-2"
             >
-              <Database size={14} /> CONNECT QBO
+              <Database size={14} /> CONNECTER QBO
             </button>
             <button 
               onClick={handleSync}
@@ -132,10 +132,10 @@ export default function AdminDashboard() {
               className="px-6 py-4 bg-soyuz/10 border border-soyuz/20 text-[10px] font-black uppercase tracking-widest text-soyuz hover:bg-soyuz hover:text-white transition-all flex items-center gap-2 shadow-[0_0_30px_rgba(255,0,0,0.1)] group disabled:opacity-30"
             >
               <RefreshCw size={14} className={syncing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} /> 
-              {syncing ? 'RE-SYNCING...' : 'SYNC INVENTORY'}
+              {syncing ? 'SYNCHRONISATION...' : 'SYNCHRONISER L\'INVENTAIRE'}
             </button>
             <Link href="/" className="px-6 py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all flex items-center gap-2">
-              <ArrowUpRight size={14} /> STOREFRONT
+              <ArrowUpRight size={14} /> BOUTIQUE
             </Link>
           </motion.div>
         </div>
@@ -143,9 +143,9 @@ export default function AdminDashboard() {
         {/* 2. NAVIGATION NODES */}
         <div className="flex gap-12 mb-16 overflow-x-auto pb-4 scrollbar-hide">
           {[
-            { id: 'overview', label: 'NETWORK STATUS', icon: <BarChart3 size={18} /> },
-            { id: 'reps', label: 'REPRESENTATIVES', icon: <Users size={18} /> },
-            { id: 'products', label: 'ASSET CATALOG', icon: <Box size={18} /> },
+            { id: 'overview', label: 'STATUT DU RÉSEAU', icon: <BarChart3 size={18} /> },
+            { id: 'reps', label: 'REPRÉSENTANTS', icon: <Users size={18} /> },
+            { id: 'products', label: 'CATALOGUE D\'ACTIFS', icon: <Box size={18} /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -177,10 +177,10 @@ export default function AdminDashboard() {
               {/* Primary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 {[
-                  { label: 'GROSS REVENUE', value: `$${stats.revenue.toFixed(2)}`, icon: <TrendingUp size={20} /> },
-                  { label: 'ACTIVE TRANSACTIONS', value: stats.orders, icon: <ShoppingBag size={20} /> },
-                  { label: 'QBO INTEGRATION', value: 'OPERATIONAL', icon: <Zap size={20} /> },
-                  { label: 'PENDING AGENTS', value: reps.filter(r => r.status === 'pending').length, icon: <Users size={20} /> },
+                  { label: 'CHIFFRE D\'AFFAIRES BRUT', value: `$${stats.revenue.toFixed(2)}`, icon: <TrendingUp size={20} /> },
+                  { label: 'TRANSACTIONS ACTIVES', value: stats.orders, icon: <ShoppingBag size={20} /> },
+                  { label: 'INTÉGRATION QBO', value: 'OPÉRATIONNELLE', icon: <Zap size={20} /> },
+                  { label: 'AGENTS EN ATTENTE', value: reps.filter(r => r.status === 'pending').length, icon: <Users size={20} /> },
                 ].map((stat, i) => (
                   <div key={i} className="bg-[#0A0A0A] border border-white/5 p-10 flex flex-col justify-between h-48 group hover:border-soyuz/20 transition-all relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 text-white/5 group-hover:text-soyuz/10 transition-colors">
@@ -198,17 +198,17 @@ export default function AdminDashboard() {
               {/* Data Grid */}
               <div className="bg-[#0A0A0A] border border-white/5 p-12">
                 <div className="flex justify-between items-end mb-12">
-                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">TRANSACTION <span className="outline-text-white">RECAP</span></h3>
-                  <p className="text-[9px] text-[#444444] font-black uppercase tracking-[0.3em]">LIVE ENCRYPTION ACTIVE</p>
+                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">RÉCAPITULATIF <span className="outline-text-white">DES TRANSACTIONS</span></h3>
+                  <p className="text-[9px] text-[#444444] font-black uppercase tracking-[0.3em]">CHIFFREMENT EN DIRECT ACTIF</p>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
                       <tr className="border-b border-white/5 text-[10px] text-[#444444] font-black uppercase tracking-widest">
-                        <th className="pb-6 px-4">IDENTIFIER</th>
-                        <th className="pb-6 px-4">OPERATOR</th>
+                        <th className="pb-6 px-4">IDENTIFIANT</th>
+                        <th className="pb-6 px-4">OPÉRATEUR</th>
                         <th className="pb-6 px-4">TOTAL CAD</th>
-                        <th className="pb-6 px-4">STATUS</th>
+                        <th className="pb-6 px-4">STATUT</th>
                         <th className="pb-6 px-4">AGENT</th>
                       </tr>
                     </thead>
@@ -244,7 +244,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* Pending */}
                 <div className="bg-[#0A0A0A] border border-white/5 p-12">
-                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">PENDING <span className="outline-text-white">APPLICATIONS</span></h3>
+                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">CANDIDATURES <span className="outline-text-white">EN ATTENTE</span></h3>
                   <div className="space-y-6">
                     {reps.filter(r => r.status === 'pending').map((rep) => (
                       <div key={rep.id} className="p-8 bg-black border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-8 group hover:border-soyuz/30 transition-all">
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
                     ))}
                     {reps.filter(r => r.status === 'pending').length === 0 && (
                       <div className="py-20 text-center border border-dashed border-white/5">
-                        <p className="text-[10px] font-black text-[#222222] uppercase tracking-[0.4em]">NO PENDING REQUESTS</p>
+                        <p className="text-[10px] font-black text-[#222222] uppercase tracking-[0.4em]">AUCUNE DEMANDE EN ATTENTE</p>
                       </div>
                     )}
                   </div>
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
 
                 {/* Approved */}
                 <div className="bg-[#0A0A0A] border border-white/5 p-12">
-                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">ACTIVE <span className="outline-text-white">AGENTS</span></h3>
+                  <h3 className="text-2xl font-display italic text-white uppercase tracking-tight mb-12">AGENTS <span className="outline-text-white">ACTIFS</span></h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {reps.filter(r => r.status === 'approved').map((rep) => (
                       <div key={rep.id} className="p-6 bg-black border border-white/5 flex items-center justify-between group hover:border-soyuz/20 transition-all">
@@ -304,19 +304,19 @@ export default function AdminDashboard() {
                className="bg-[#0A0A0A] border border-white/5 p-20 text-center"
             >
                <ShieldAlert className="text-soyuz mx-auto mb-12" size={60} />
-               <h3 className="text-3xl font-display italic text-white uppercase tracking-tighter mb-6">ASSET CORE <span className="outline-text-white">PROTECTED</span></h3>
+               <h3 className="text-3xl font-display italic text-white uppercase tracking-tighter mb-6">CŒUR DES ACTIFS <span className="outline-text-white">PROTÉGÉ</span></h3>
                <p className="text-[#888888] text-xs uppercase font-bold tracking-[0.2em] max-w-xl mx-auto mb-12 leading-loose">
-                 DIRECT LOCAL MODIFICATION IS DISABLED. QUICKBOOKS ONLINE IS THE SOLE SOURCE OF TRUTH FOR INVENTORY AND PRICING DATA. USE THE GLOBAL SYNC NODE ABOVE TO REFRESH LOCAL STATE.
+                 LA MODIFICATION LOCALE DIRECTE EST DÉSACTIVÉE. QUICKBOOKS ONLINE EST LA SEULE SOURCE DE VÉRITÉ POUR LES DONNÉES D'INVENTAIRE ET DE PRIX. UTILISEZ LE NŒUD DE SYNCHRONISATION GLOBAL CI-DESSUS POUR RAFRAÎCHIR L'ÉTAT LOCAL.
                </p>
                <div className="flex justify-center gap-8">
                   <div className="flex flex-col items-center gap-2">
-                    <p className="text-[9px] text-[#444444] font-black">LOCAL ASSETS</p>
+                    <p className="text-[9px] text-[#444444] font-black">ACTIFS LOCAUX</p>
                     <p className="text-2xl font-display italic text-white">{stats.products}</p>
                   </div>
                   <div className="w-[1px] h-12 bg-white/5" />
                   <div className="flex flex-col items-center gap-2">
-                    <p className="text-[9px] text-[#444444] font-black">SYNC STATUS</p>
-                    <p className="text-2xl font-display italic text-soyuz">ENCRYPTED</p>
+                    <p className="text-[9px] text-[#444444] font-black">STATUT SYNC</p>
+                    <p className="text-2xl font-display italic text-soyuz">CHIFFRÉ</p>
                   </div>
                </div>
             </motion.div>

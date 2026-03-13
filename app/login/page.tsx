@@ -47,7 +47,7 @@ export default function LoginPage() {
       if (profile?.role === 'admin') {
         useRouterInstance.push('/admin');
       } else if (profile?.role === 'rep') {
-        useRouterInstance.push('/rep/dashboard');
+        useRouterInstance.push('/affiliate');
       } else {
         useRouterInstance.push('/account');
       }

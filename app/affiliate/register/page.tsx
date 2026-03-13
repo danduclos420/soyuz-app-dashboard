@@ -97,7 +97,7 @@ export default function RepRegisterPage() {
         .eq('code', inviteCode.toUpperCase());
 
       // 4. Trigger Emails via API
-      await fetch('/api/rep/register', {
+      await fetch('/api/affiliate/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

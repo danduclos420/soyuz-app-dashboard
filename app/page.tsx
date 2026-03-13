@@ -74,7 +74,7 @@ export default function HomePage() {
               <Link href="/products" className="btn-primary group min-w-[200px] h-14 flex items-center justify-center text-sm font-black">
                 SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/rep/register" className="btn-outline h-14 flex items-center justify-center min-w-[200px] text-sm font-black bg-white/5 backdrop-blur-sm">
+              <Link href="/affiliate/register" className="btn-outline h-14 flex items-center justify-center min-w-[200px] text-sm font-black bg-white/5 backdrop-blur-sm">
                 JOIN THE TEAM
               </Link>
             </div>
@@ -196,7 +196,7 @@ export default function HomePage() {
               Join the official SOYUZ North America rep network. Access exclusive B2B portals and dominate your local market.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-              <Link href="/rep/register" className="btn-primary h-16 px-12 text-sm">
+              <Link href="/affiliate/register" className="btn-primary h-16 px-12 text-sm">
                 BECOME A REP <Zap size={16} fill="white" />
               </Link>
               <a href="https://soyuz-hockey.erplain.app/b2b/login" target="_blank" className="btn-outline h-16 px-12 text-sm border-white/20">

@@ -55,7 +55,7 @@ export default function B2BSection() {
                 </a>
               </Button>
               <Button variant="outline" size="lg" className="min-w-[280px] rounded-none py-4 border-white/20 text-white" asChild>
-                <a href="/rep/register">Devenir Partenaire</a>
+                <a href="/affiliate/register">Devenir Partenaire</a>
               </Button>
             </div>
           </div>

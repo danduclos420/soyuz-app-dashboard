@@ -145,6 +145,17 @@ export default function HockeyCard({
 
   const firstName = user.full_name.split(' ')[0] || 'Dany';
 
+  const handlePhotoSelected = (dataUrl: string) => {
+    // 1. Send photo to parent (which should then set editMode prop to true)
+    if (onPhotoSelected) {
+      onPhotoSelected(dataUrl);
+    }
+    // 2. Local fallback if parent doesn't immediately sync
+    if (isFlipped) setIsFlipped(false);
+    x.set(0);
+    y.set(0);
+  };
+
   return (
     <div className="flex flex-col items-center gap-12">
       <style jsx global>{`
@@ -248,7 +259,7 @@ export default function HockeyCard({
           const file = e.target.files?.[0];
           if (file) {
             const reader = new FileReader();
-            reader.onload = () => onPhotoSelected?.(reader.result as string);
+            reader.onload = () => handlePhotoSelected(reader.result as string);
             reader.readAsDataURL(file);
             e.target.value = '';
           }

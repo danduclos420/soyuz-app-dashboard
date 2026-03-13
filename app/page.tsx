@@ -58,7 +58,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
-        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto -mt-16 md:-mt-20">
+        <div className="relative z-10 text-center soyuz-container -mt-16 md:-mt-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -77,11 +77,11 @@ export default function HomePage() {
               SOYUZ BC North America — The standard in <br className="hidden md:block" /> professional performance hockey.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link href="/products" className="btn-primary group min-w-[200px] h-14 flex items-center justify-center text-sm font-black">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/products" className="btn-primary group w-full sm:w-[240px] h-14 flex items-center justify-center text-sm font-black">
                 SHOP COLLECTION <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/affiliate/register" className="btn-outline h-14 flex items-center justify-center min-w-[200px] text-sm font-black bg-white/5 backdrop-blur-sm">
+              <Link href="/affiliate/register" className="btn-outline h-14 flex items-center justify-center w-full sm:w-[240px] text-sm font-black bg-white/5 backdrop-blur-sm">
                 JOIN THE TEAM
               </Link>
             </div>
@@ -122,7 +122,7 @@ export default function HomePage() {
       {/* 3. COLLECTIONS GRID */}
       <section className="section-padding carbon-bg relative overflow-hidden" id="collections">
         <div className="absolute top-0 left-0 w-full h-px bg-white/5" />
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="soyuz-container relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-xl">
               <p className="text-soyuz font-label mb-3">Elite Tier Gear</p>
@@ -168,7 +168,7 @@ export default function HomePage() {
 
       {/* 4. PERFORMANCE HIGHLIGHTS */}
       <section className="py-32 bg-[#0D0D0D] border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="soyuz-container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {[
               { icon: Zap, title: "Lethal Release", desc: "Proprietary taper design for instant power transfer." },
@@ -191,7 +191,7 @@ export default function HomePage() {
       {/* 5. B2B / REP CTA */}
       <section className="relative py-32 overflow-hidden bg-black">
         <div className="absolute inset-0 carbon-texture opacity-5 animate-shimmer" />
-        <div className="max-w-5xl mx-auto text-center px-6 relative z-10">
+        <div className="soyuz-container text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}

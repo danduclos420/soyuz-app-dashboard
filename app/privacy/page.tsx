@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <div className="absolute inset-0 carbon-texture opacity-5" />
       </div>
 
-      <div className="max-w-3xl mx-auto relative z-10">
+      <div className="soyuz-container relative z-10">
         <BackButton variant="relative" className="mb-12" />
 
         <motion.div

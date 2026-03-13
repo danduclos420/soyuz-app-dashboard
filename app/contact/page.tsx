@@ -9,7 +9,7 @@ export default function ContactPage() {
     <div className="bg-background min-h-screen pt-32 pb-20 selection:bg-soyuz selection:text-white">
       <div className="absolute inset-0 carbon-texture opacity-5 pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="soyuz-container relative z-10">
         <BackButton variant="relative" className="mb-12" />
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

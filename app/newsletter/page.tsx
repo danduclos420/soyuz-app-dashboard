@@ -12,7 +12,7 @@ export default function NewsletterPage() {
         <div className="absolute inset-0 carbon-texture opacity-5" />
       </div>
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="soyuz-container relative z-10">
         <BackButton />
         
         <div className="mt-20 space-y-12">

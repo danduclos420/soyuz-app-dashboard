@@ -58,7 +58,7 @@ export default function ProductsPage() {
       {/* 1. HEADER AREA */}
       <section className="relative pt-40 pb-20 border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 carbon-texture opacity-5" />
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="soyuz-container relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -96,7 +96,7 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="soyuz-container py-16">
         <div className="flex flex-col lg:flex-row gap-16">
           {/* 2. SIDEBAR FILTERS */}
           <aside className="hidden lg:block w-64 space-y-12 shrink-0 sticky top-32 h-fit">

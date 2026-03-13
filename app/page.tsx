@@ -8,17 +8,17 @@ import { useRef } from 'react';
 
 // COLLECTIONS
 const COLLECTIONS = [
-  { name: 'HIT ULTRA Series', image: 'https://images.unsplash.com/photo-1580748141549-71748d60bd95?q=80&w=800&auto=format&fit=crop', count: 'Pro Level Flex', slug: 'hit-ultra', color: 'from-soyuz/20' },
-  { name: 'MASTER FRST Pro', image: 'https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=800&auto=format&fit=crop', count: 'Elite Power', slug: 'master-frst', color: 'from-blue-500/10' },
-  { name: 'LORD Goalie', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=800&auto=format&fit=crop', count: 'Ultimate Defense', slug: 'lord-goalie', color: 'from-amber-500/10' },
-  { name: 'CLASSIC Legacy', image: 'https://images.unsplash.com/photo-1518091044124-01bcc10af152?q=80&w=800&auto=format&fit=crop', count: 'Heritage Feel', slug: 'classic', color: 'from-white/10' },
+  { name: 'HIT ULTRA Series', image: '/assets/products/hit-ultra.png', count: 'Pro Level Flex', slug: 'hit-ultra', color: 'from-soyuz/20' },
+  { name: 'MASTER FRST Pro', image: '/assets/products/master-frst.png', count: 'Elite Power', slug: 'master-frst', color: 'from-blue-500/10' },
+  { name: 'LORD Goalie', image: '/assets/products/lord-goalie.png', count: 'Ultimate Defense', slug: 'lord-goalie', color: 'from-amber-500/10' },
+  { name: 'CLASSIC Legacy', image: '/assets/products/classic.png', count: 'Heritage Feel', slug: 'classic', color: 'from-white/10' },
 ];
 
 // FEATURED PRODUCTS
 const FEATURED = [
-  { id: 1, name: 'HIT ULTRA Flex 75', price: 184.00, image: 'https://images.unsplash.com/photo-1580748141549-71748d60bd95?q=80&w=800&auto=format&fit=crop', slug: 'hit-ultra-75', badge: 'Best Seller' },
-  { id: 2, name: 'MASTER FRST Pro', price: 199.00, image: 'https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=800&auto=format&fit=crop', slug: 'master-frst-pro', badge: 'Elite Choice' },
-  { id: 3, name: 'LORD Goalie Stick', price: 224.00, image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=800&auto=format&fit=crop', slug: 'lord-goalie', badge: 'New' },
+  { id: 1, name: 'HIT ULTRA Flex 75', price: 184.00, image: '/assets/products/hit-ultra.png', slug: 'hit-ultra-75', badge: 'Best Seller' },
+  { id: 2, name: 'MASTER FRST Pro', price: 199.00, image: '/assets/products/master-frst.png', slug: 'master-frst-pro', badge: 'Elite Choice' },
+  { id: 3, name: 'LORD Goalie Stick', price: 224.00, image: '/assets/products/lord-goalie.png', slug: 'lord-goalie', badge: 'New' },
 ];
 
 export default function HomePage() {
@@ -41,8 +41,7 @@ export default function HomePage() {
         <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 h-full w-full bg-[#111111]">
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-background" />
           <div className="absolute inset-0 carbon-texture opacity-10" />
-          {/* Fallback for background since New arrival.png is missing */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/10" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 
         <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">

@@ -95,14 +95,14 @@ export default function HomePage() {
       <div className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)]">
         <div className="ticker-wrap">
           <div className="ticker-inner">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-center whitespace-nowrap px-12">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex items-center whitespace-nowrap gap-16 px-8">
                 <span className="text-white font-black uppercase tracking-[0.25em] text-xs">STRENGTH IN UNITY</span>
-                <span className="mx-12 text-white/40 font-light text-2xl">/</span>
+                <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80" />
                 <span className="text-white font-black uppercase tracking-[0.25em] text-xs">POWER WITH SOYUZ</span>
-                <span className="mx-12 text-white/40 font-light text-2xl">/</span>
+                <img src="/assets/player-banner.webp" alt="" className="h-8 w-auto grayscale brightness-150" />
                 <span className="text-white font-black uppercase tracking-[0.25em] text-xs">BREAK EVERY LIMIT</span>
-                <span className="mx-12 text-white/40 font-light text-2xl">/</span>
+                <img src="/assets/logo-banner.png" alt="" className="h-6 w-auto brightness-0 invert opacity-80" />
               </div>
             ))}
           </div>
@@ -197,7 +197,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
               <Link href="/affiliate/register" className="btn-primary h-16 px-12 text-sm">
-                BECOME A REP <Zap size={16} fill="white" />
+                JOIN THE AFFILIATES <Zap size={16} fill="white" />
               </Link>
               <a href="https://soyuz-hockey.erplain.app/b2b/login" target="_blank" className="btn-outline h-16 px-12 text-sm border-white/20">
                 B2B LOGIN

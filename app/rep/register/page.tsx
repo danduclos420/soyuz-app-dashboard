@@ -19,8 +19,8 @@ export default function RepRegisterPage() {
     password: '',
     social: '',
     motivation: '',
+    motivation: '',
     repCode: '',
-    language: 'en',
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,50 +29,40 @@ export default function RepRegisterPage() {
     setLoading(true);
 
     try {
-      // 1. Sign up user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: `${formData.firstName} ${formData.lastName}`,
-          }
+      // 1. We assume the user already has an account. 
+      // We try to sign in or just get the current session if they are already logged in.
+      let userId = '';
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        userId = session.user.id;
+      } else {
+        // Try to sign in with provided credentials to verify they have an account
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        
+        if (signInError) {
+          throw new Error('Identifiants invalides. Veuillez vous assurer d\'avoir d\'abord créé un compte client.');
         }
-      });
+        userId = signInData.user.id;
+      }
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create account');
-
-      // 2. Insert profile data directly (Supabase Auth trigger might create a basic profile, so we update it or upsert)
+      // 2. Insert profile data directly
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           full_name: `${formData.firstName} ${formData.lastName}`,
           role: 'rep',
           status: 'pending',
-          affiliate_code: formData.repCode.toUpperCase() || authData.user.id.slice(0, 5).toUpperCase(),
-          preferred_language: formData.language,
+          affiliate_code: formData.repCode.toUpperCase() || userId.slice(0, 5).toUpperCase(),
           social_node: formData.social,
           motivation: formData.motivation
         })
-        .eq('id', authData.user.id);
+        .eq('id', userId);
       
-      if (profileError) {
-        console.error('Profile update error:', profileError);
-        // If update fails (maybe profile doesn't exist yet), try insert
-        const { error: insertError } = await supabase.from('profiles').insert({
-          id: authData.user.id,
-          full_name: `${formData.firstName} ${formData.lastName}`,
-          role: 'rep',
-          status: 'pending',
-          affiliate_code: formData.repCode.toUpperCase() || authData.user.id.slice(0, 5).toUpperCase(),
-          preferred_language: formData.language,
-          social_node: formData.social,
-          motivation: formData.motivation,
-          email: formData.email
-        });
-        if (insertError) throw insertError;
-      }
+      if (profileError) throw profileError;
 
       // 3. Trigger Emails via API
       await fetch('/api/rep/register', {
@@ -199,15 +189,23 @@ export default function RepRegisterPage() {
           >
             <div className="absolute inset-0 carbon-texture opacity-5" />
             <form onSubmit={handleSubmit} className="relative z-10 space-y-10">
+              <div className="p-6 bg-soyuz/10 border border-soyuz/20 space-y-2">
+                <p className="text-[10px] font-black text-soyuz uppercase tracking-widest">IMPORTANT</p>
+                <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider leading-relaxed">
+                  Vous devez déjà avoir créé un compte client pour faire une demande d'affiliation. 
+                  Utilisez les mêmes identifiants de connexion ci-dessous.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-8">
                 <Input name="firstName" label="FIRST NAME" placeholder="JEAN" required value={formData.firstName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
                 <Input name="lastName" label="LAST NAME" placeholder="DUPONT" required value={formData.lastName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
               </div>
-              <Input name="email" label="SECURE EMAIL" placeholder="REPRESENTATIVE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+              <Input name="email" label="SECURE EMAIL (MÊME QUE VOTRE COMPTE)" placeholder="REPRESENTATIVE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
               <div className="relative">
                 <Input 
                   name="password" 
-                  label="PASSWORD" 
+                  label="PASSWORD (MÊME QUE VOTRE COMPTE)" 
                   placeholder="••••••••" 
                   type={showPassword ? "text" : "password"} 
                   required 
@@ -224,38 +222,9 @@ export default function RepRegisterPage() {
                 </button>
               </div>
               <Input name="social" label="SOCIAL NODE (IG/TIKTOK)" placeholder="@USERNAME" required value={formData.social} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+              <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
               
               <div className="space-y-4">
-                <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">
-                  MISSION STATEMENT / BACKGROUND
-                </label>
-                <textarea 
-                  name="motivation"
-                  value={formData.motivation}
-                  onChange={handleChange}
-                  className="w-full bg-black border border-white/5 rounded-none px-6 py-5 text-xs text-white uppercase font-bold focus:outline-none focus:border-soyuz min-h-[160px] placeholder:text-white/10 transition-all"
-                  placeholder="EXPLAIN YOUR NETWORK AND EXPERIENCE..."
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">
-                    PREFERRED LANGUAGE
-                  </label>
-                  <select
-                    name="language"
-                    value={formData.language}
-                    onChange={handleChange}
-                    className="w-full bg-black border border-white/5 rounded-none px-6 py-4 text-xs text-white uppercase font-bold focus:outline-none focus:border-soyuz appearance-none transition-all"
-                  >
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                  </select>
-                </div>
-                <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-              </div>
               
               <div className="pt-8 space-y-8">
                 <button 

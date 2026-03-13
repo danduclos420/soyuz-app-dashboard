@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Instagram, Facebook, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import { Instagram, Facebook, Mail, MapPin, Phone, Music2 } from 'lucide-react';
 
 const FOOTER_LINKS = {
   shop: [
@@ -30,9 +30,9 @@ const FOOTER_LINKS = {
 };
 
 const SOCIALS = [
+  { icon: Facebook, href: 'https://www.facebook.com/SoyuzNA', label: 'Facebook' },
   { icon: Instagram, href: 'https://www.instagram.com/soyuznorthamerica/', label: 'Instagram' },
-  { icon: Facebook, href: 'https://www.facebook.com', label: 'Facebook' },
-  { icon: Youtube, href: '#', label: 'YouTube' },
+  { icon: Music2, href: 'https://www.tiktok.com/@soyuz_north_america', label: 'TikTok' },
 ];
 
 export default function Footer() {

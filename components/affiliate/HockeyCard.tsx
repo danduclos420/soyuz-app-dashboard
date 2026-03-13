@@ -99,7 +99,7 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => { x.set(0); y.set(0); }}
-        className="relative w-[340px] h-[480px] perspective-2000 cursor-pointer group select-none shadow-2xl"
+        className="relative w-[340px] h-[470px] perspective-2000 cursor-pointer group select-none shadow-2xl"
         onClick={() => !isDownloading && setIsFlipped(!isFlipped)}
       >
         <motion.div
@@ -119,7 +119,7 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
             {/* LAYER 1: BOTTOM ASSET (Under Photo) */}
             <img 
                src="/assets/hockey-card/Bottom_underimage_soyuztopdeck.png" 
-               className="absolute inset-0 w-full h-full object-cover z-0" 
+               className="absolute inset-0 w-full h-full object-fill z-0" 
                alt="Background"
             />
 
@@ -135,7 +135,7 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
             {/* LAYER 3: TOP ASSET (Over Photo) */}
             <img 
                src="/assets/hockey-card/Top_overimage_soyuztopdeck.png" 
-               className="absolute inset-0 w-full h-full object-cover z-20 pointer-events-none" 
+               className="absolute inset-0 w-full h-full object-fill z-20 pointer-events-none" 
                alt="Overlay"
             />
 

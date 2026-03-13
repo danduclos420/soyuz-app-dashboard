@@ -7,11 +7,10 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'plus.unsplash.com' },
       { protocol: 'https', hostname: 'soyuzhockey.com' },
       { protocol: 'https', hostname: 'cdn.shopify.com' },
     ],
-    // Also allow local dev
-    unoptimized: process.env.NODE_ENV === 'development',
   },
   async headers() {
     return [

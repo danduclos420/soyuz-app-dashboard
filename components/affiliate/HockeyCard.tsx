@@ -160,8 +160,8 @@ export default function HockeyCard({
            className="w-full h-full relative"
            initial={false}
            animate={{ 
-             rotateY: isFlipped ? 180 : rotateY.get(),
-             rotateX: isFlipped ? 0 : rotateX.get()
+             rotateY: isFlipped ? 180 : (editMode ? 0 : rotateY.get()),
+             rotateX: isFlipped ? 0 : (editMode ? 0 : rotateX.get())
            }}
            style={{ 
               transformStyle: 'preserve-3d'

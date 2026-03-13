@@ -41,12 +41,12 @@ export default function HomePage() {
   return (
     <div className="flex flex-col w-full bg-background selection:bg-soyuz selection:text-white">
       {/* 1. HERO SECTION 
-          - h-[calc(100dvh-92px)] ensures the ticker stays at the bottom of the initial screen.
-          - Removed z-index to allow Ticker (z-10) to pass underneath the Header (z-40).
+          - h-[calc(100dvh-88px)] ensures the ticker stays at the bottom of the initial screen.
+          - Added z-[45] for proper stacking context.
       */}
       <section 
         ref={heroRef}
-        className="relative h-[calc(100dvh-92px)] flex flex-col items-center overflow-hidden carbon-bg"
+        className="relative h-[calc(100dvh-88px)] flex flex-col items-center overflow-hidden carbon-bg z-[45]"
       >
         <div className="absolute inset-0 z-0">
           <motion.div 
@@ -106,12 +106,12 @@ export default function HomePage() {
         </div>
 
         {/* 2. INFINITE TICKER (Stuck to bottom initially)
-            - z-10 ensures it passes UNDERNEATH the Header (z-40) and Announcement Bar (z-60).
-            - scroll-mt-[92px] aligns it below the entire header (28px announcement + 64px header).
+            - z-[50] ensures it passes ABOVE the Logo Bar (z-40) but UNDER the Announcement Bar (z-60).
+            - scroll-mt-[24px] aligns it below the 24px announcement bar.
         */}
         <div 
           id="ticker-target"
-          className="absolute bottom-0 left-0 right-0 z-10 bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]"
+          className="absolute bottom-0 left-0 right-0 z-[50] bg-soyuz overflow-hidden shadow-[0_-10px_50px_rgba(204,0,0,0.2)] scroll-mt-[24px]"
         >
           <div className="ticker-wrap flex items-center h-12 md:h-14">
             <div className="ticker-inner gap-16 md:gap-24 items-center">

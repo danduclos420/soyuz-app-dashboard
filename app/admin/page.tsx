@@ -24,12 +24,14 @@ import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'reps' | 'products'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'reps' | 'products' | 'invites'>('overview');
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [generatingCode, setGeneratingCode] = useState(false);
   const [stats, setStats] = useState({ revenue: 0, orders: 0, products: 0, reps: 0 });
   const [reps, setReps] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [inviteCodes, setInviteCodes] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -40,9 +42,11 @@ export default function AdminDashboard() {
     const { data: oData } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     const { data: pData } = await supabase.from('products').select('id');
     const { data: rData } = await supabase.from('profiles').select('*').in('role', ['affiliate', 'rep']).order('status', { ascending: false });
+    const { data: iData } = await supabase.from('invite_codes').select('*').order('created_at', { ascending: false });
 
     setOrders(oData || []);
     setReps(rData || []);
+    setInviteCodes(iData || []);
     
     setStats({
       revenue: oData?.reduce((sum, o) => sum + (o.total || 0), 0) || 0,
@@ -82,6 +86,14 @@ export default function AdminDashboard() {
       .eq('id', id);
 
     if (!error) fetchData();
+  };
+
+  const generateInviteCode = async () => {
+    setGeneratingCode(true);
+    const newCode = `SOYUZ-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const { error } = await supabase.from('invite_codes').insert({ code: newCode });
+    if (!error) fetchData();
+    setGeneratingCode(false);
   };
 
   if (loading) return (
@@ -146,6 +158,7 @@ export default function AdminDashboard() {
             { id: 'overview', label: 'STATUT DU RÉSEAU', icon: <BarChart3 size={18} /> },
             { id: 'reps', label: 'REPRÉSENTANTS', icon: <Users size={18} /> },
             { id: 'products', label: 'CATALOGUE D\'ACTIFS', icon: <Box size={18} /> },
+            { id: 'invites', label: 'CODES D\'INVITATION', icon: <ShieldAlert size={18} /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -249,8 +262,8 @@ export default function AdminDashboard() {
                     {reps.filter(r => r.status === 'pending').map((rep) => (
                       <div key={rep.id} className="p-8 bg-black border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-8 group hover:border-soyuz/30 transition-all">
                         <div className="space-y-2">
-                          <p className="text-lg font-display italic text-white uppercase leading-none">{rep.first_name} {rep.last_name}</p>
-                          <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest">{rep.email}</p>
+                          <p className="text-lg font-display italic text-white uppercase leading-none">{rep.full_name || `${rep.first_name || ''} ${rep.last_name || ''}`}</p>
+                          <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest">{rep.email || 'NO EMAIL'}</p>
                         </div>
                         <div className="flex gap-4">
                           <button 
@@ -283,7 +296,7 @@ export default function AdminDashboard() {
                     {reps.filter(r => r.status === 'approved').map((rep) => (
                       <div key={rep.id} className="p-6 bg-black border border-white/5 flex items-center justify-between group hover:border-soyuz/20 transition-all">
                         <div className="space-y-2">
-                          <p className="text-xs font-black text-white uppercase tracking-tight">{rep.first_name} {rep.last_name}</p>
+                          <p className="text-xs font-black text-white uppercase tracking-tight">{rep.full_name || `${rep.first_name || ''} ${rep.last_name || ''}`}</p>
                           <p className="text-[9px] text-soyuz font-black uppercase tracking-widest leading-none">CODE: {rep.affiliate_code}</p>
                         </div>
                         <ChevronRight size={14} className="text-[#333333] group-hover:text-soyuz transition-colors" />
@@ -317,6 +330,57 @@ export default function AdminDashboard() {
                   <div className="flex flex-col items-center gap-2">
                     <p className="text-[9px] text-[#444444] font-black">STATUT SYNC</p>
                     <p className="text-2xl font-display italic text-soyuz">CHIFFRÉ</p>
+                  </div>
+               </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'invites' && (
+            <motion.div 
+               key="invites"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -20 }}
+               className="space-y-12"
+            >
+               <div className="bg-[#0A0A0A] border border-white/5 p-12">
+                  <div className="flex justify-between items-center mb-12">
+                     <h3 className="text-2xl font-display italic text-white uppercase tracking-tight">GÉNÉRATEUR <span className="outline-text-white">D'INVITATIONS</span></h3>
+                     <button 
+                        onClick={generateInviteCode}
+                        disabled={generatingCode}
+                        className="px-8 py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-30"
+                     >
+                        {generatingCode ? 'GÉNÉRATION...' : 'GÉNÉRER UN CODE UNIQUE'}
+                     </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                     {inviteCodes.map((invite) => (
+                        <div key={invite.id} className={`p-6 border border-white/5 relative group transition-all ${invite.is_used ? 'opacity-30' : 'bg-[#0D0D0D] hover:border-soyuz/30'}`}>
+                           <p className={`text-xl font-display italic tracking-[0.2em] ${invite.is_used ? 'text-white/20 line-through' : 'text-white'}`}>
+                              {invite.code}
+                           </p>
+                           <div className="flex justify-between items-center mt-4">
+                              <span className={`text-[8px] font-black uppercase tracking-widest ${invite.is_used ? 'text-[#444444]' : 'text-soyuz'}`}>
+                                 {invite.is_used ? 'UTILISÉ' : 'VALIDE'}
+                              </span>
+                              {!invite.is_used && (
+                                <button 
+                                  onClick={() => navigator.clipboard.writeText(invite.code)}
+                                  className="text-[8px] text-white/20 hover:text-white transition-colors uppercase font-black tracking-widest"
+                                >
+                                  COPIER
+                                </button>
+                              )}
+                           </div>
+                        </div>
+                     ))}
+                     {inviteCodes.length === 0 && (
+                        <div className="col-span-full py-20 text-center border border-dashed border-white/5">
+                           <p className="text-[10px] font-black text-[#222222] uppercase tracking-[0.4em]">AUCUN CODE GÉNÉRÉ</p>
+                        </div>
+                     )}
                   </div>
                </div>
             </motion.div>

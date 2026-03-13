@@ -21,7 +21,34 @@ export default function RepRegisterPage() {
     motivation: '',
     repCode: '',
   });
+  const [inviteCode, setInviteCode] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const verifyInvite = async () => {
+    if (!inviteCode) return;
+    setVerifyingCode(true);
+    try {
+      const { data, error } = await supabase
+        .from('invite_codes')
+        .select('*')
+        .eq('code', inviteCode.toUpperCase())
+        .eq('is_used', false)
+        .single();
+
+      if (error || !data) {
+        toast.error('Code invalide ou déjà utilisé.');
+        return;
+      }
+      setIsUnlocked(true);
+      toast.success('Code accepté. Accès autorisé.');
+    } catch (err) {
+      toast.error('Erreur de vérification.');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +90,13 @@ export default function RepRegisterPage() {
       
       if (profileError) throw profileError;
 
-      // 3. Trigger Emails via API
+      // 3. Mark invite code as used
+      await supabase
+        .from('invite_codes')
+        .update({ is_used: true, used_by: userId, used_at: new Date().toISOString() })
+        .eq('code', inviteCode.toUpperCase());
+
+      // 4. Trigger Emails via API
       await fetch('/api/rep/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -187,71 +220,110 @@ export default function RepRegisterPage() {
             className="bg-[#0A0A0A] border border-white/5 p-16 shadow-[0_0_100px_rgba(255,0,0,0.05)] relative overflow-hidden"
           >
             <div className="absolute inset-0 carbon-texture opacity-5" />
-            <form onSubmit={handleSubmit} className="relative z-10 space-y-10">
-              <div className="p-6 bg-soyuz/10 border border-soyuz/20 space-y-2">
-                <p className="text-[10px] font-black text-soyuz uppercase tracking-widest">IMPORTANT</p>
-                <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider leading-relaxed">
-                  Vous devez déjà avoir créé un compte client pour faire une demande d'affiliation. 
-                  Utilisez les mêmes identifiants de connexion ci-dessous.
-                </p>
-              </div>
+            
+            <AnimatePresence mode="wait">
+              {!isUnlocked ? (
+                <motion.div
+                  key="invite-gate"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="relative z-10 space-y-12 py-10"
+                >
+                  <div className="space-y-4 text-center">
+                    <ShieldCheck className="text-soyuz mx-auto" size={64} />
+                    <h2 className="text-3xl font-display italic text-white uppercase tracking-tight">INVITATION REQUISE</h2>
+                    <p className="text-[#888888] text-[10px] uppercase font-black tracking-[0.3em] leading-relaxed max-w-xs mx-auto">
+                      L'accès au réseau d'affiliation est strictement réservé. Veuillez entrer votre code d'invitation personnel.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <Input 
+                      placeholder="SOYUZ-XXXX" 
+                      value={inviteCode} 
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      className="text-center text-xl tracking-[0.5em] bg-black border-white/10"
+                    />
+                    <button 
+                      onClick={verifyInvite}
+                      disabled={verifyingCode || !inviteCode}
+                      className="w-full py-6 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-soyuz hover:text-white transition-all disabled:opacity-20 flex items-center justify-center gap-3"
+                    >
+                      {verifyingCode ? <Loader2 className="animate-spin" size={16} /> : <>VÉRIFIER LE CODE <ArrowRight size={14} /></>}
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="registration-form"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <form onSubmit={handleSubmit} className="relative z-10 space-y-10">
+                    <div className="p-6 bg-soyuz/10 border border-soyuz/20 space-y-2">
+                      <p className="text-[10px] font-black text-soyuz uppercase tracking-widest">SÉCURITÉ DÉVERROUILLÉE</p>
+                      <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider leading-relaxed">
+                        Compte client requis. Veuillez utiliser les mêmes identifiants pour lier votre affiliation.
+                      </p>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-8">
-                <Input name="firstName" label="FIRST NAME" placeholder="JEAN" required value={formData.firstName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-                <Input name="lastName" label="LAST NAME" placeholder="DUPONT" required value={formData.lastName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-              </div>
-              <Input name="email" label="SECURE EMAIL (MÊME QUE VOTRE COMPTE)" placeholder="REPRESENTATIVE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-              <div className="relative">
-                <Input 
-                  name="password" 
-                  label="PASSWORD (MÊME QUE VOTRE COMPTE)" 
-                  placeholder="••••••••" 
-                  type={showPassword ? "text" : "password"} 
-                  required 
-                  value={formData.password} 
-                  onChange={handleChange} 
-                  className="bg-black border-white/5 focus:border-soyuz pr-12" 
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 bottom-3.5 text-gray-500 hover:text-white transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <Input name="social" label="SOCIAL NODE (IG/TIKTOK)" placeholder="@USERNAME" required value={formData.social} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-              <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
-              
-              <div className="space-y-4">
-                <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">
-                  MISSION STATEMENT / BACKGROUND
-                </label>
-                <textarea 
-                  name="motivation"
-                  value={formData.motivation}
-                  onChange={handleChange}
-                  className="w-full bg-black border border-white/5 rounded-none px-6 py-5 text-xs text-white uppercase font-bold focus:outline-none focus:border-soyuz min-h-[160px] placeholder:text-white/10 transition-all"
-                  placeholder="EXPLAIN YOUR NETWORK AND EXPERIENCE..."
-                  required
-                />
-              </div>
-              
-              <div className="pt-8 space-y-8">
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full py-6 bg-white text-black text-xs font-black uppercase tracking-[0.3em] hover:bg-soyuz hover:text-white transition-all shadow-[0_0_30px_rgba(255,255,255,0.05)] disabled:opacity-30 flex items-center justify-center gap-3"
-                >
-                  {loading ? <Loader2 className="animate-spin" size={18} /> : (
-                    <>SUBMIT DATA <ArrowRight size={16} /></>
-                  )}
-                </button>
-                <p className="text-center text-[8px] text-[#222222] font-black uppercase tracking-widest leading-loose">
-                  BY SUBMITTING, YOU AGREE TO OUR ELITE PARTNER TERMS AND DATA PROCESSING PROTOCOLS.
-                </p>
-              </div>
-            </form>
+                    <div className="grid grid-cols-2 gap-8">
+                      <Input name="firstName" label="FIRST NAME" placeholder="JEAN" required value={formData.firstName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                      <Input name="lastName" label="LAST NAME" placeholder="DUPONT" required value={formData.lastName} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                    </div>
+                    <Input name="email" label="SECURE EMAIL (MÊME QUE VOTRE COMPTE)" placeholder="REPRESENTATIVE@SOYUZ.APP" type="email" required value={formData.email} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                    <div className="relative">
+                      <Input 
+                        name="password" 
+                        label="PASSWORD (MÊME QUE VOTRE COMPTE)" 
+                        placeholder="••••••••" 
+                        type={showPassword ? "text" : "password"} 
+                        required 
+                        value={formData.password} 
+                        onChange={handleChange} 
+                        className="bg-black border-white/5 focus:border-soyuz pr-12" 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 bottom-3.5 text-gray-500 hover:text-white transition-colors"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <Input name="social" label="SOCIAL NODE (IG/TIKTOK)" placeholder="@USERNAME" required value={formData.social} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                    <Input name="repCode" label="DESIRED REP CODE" placeholder="AGENT001" value={formData.repCode} onChange={handleChange} className="bg-black border-white/5 focus:border-soyuz" />
+                    
+                    <div className="space-y-4">
+                      <label className="block text-[9px] font-black uppercase tracking-[0.3em] text-[#444444]">
+                        MISSION STATEMENT / BACKGROUND
+                      </label>
+                      <textarea 
+                        name="motivation"
+                        value={formData.motivation}
+                        onChange={handleChange}
+                        className="w-full bg-black border border-white/5 rounded-none px-6 py-5 text-xs text-white uppercase font-bold focus:outline-none focus:border-soyuz min-h-[160px] placeholder:text-white/10 transition-all"
+                        placeholder="EXPLIQUEZ VOTRE RÉSEAU ET EXPÉRIENCE..."
+                        required
+                      />
+                    </div>
+                    
+                    <div className="pt-8 space-y-8">
+                      <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="w-full py-6 bg-white text-black text-xs font-black uppercase tracking-[0.3em] hover:bg-soyuz hover:text-white transition-all shadow-[0_0_30px_rgba(255,255,255,0.05)] disabled:opacity-30 flex items-center justify-center gap-3"
+                      >
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                          <>SUBMIT APPLICATION <ArrowRight size={16} /></>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </div>

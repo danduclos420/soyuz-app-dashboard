@@ -69,7 +69,7 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => { x.set(0); y.set(0); }}
-        className="relative w-[340px] h-[500px] perspective-2000 cursor-pointer group select-none shadow-2xl rounded-[2.5rem]"
+        className="relative w-[340px] h-[500px] perspective-2000 cursor-pointer group select-none shadow-2xl rounded-2xl"
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <motion.div
@@ -81,13 +81,13 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
         >
           {/* OPAQUE CENTER CORE - The "Sandwich" middle layer */}
           <div 
-            className="absolute inset-[1px] bg-black z-10 rounded-[2.4rem] border border-white/5" 
+            className="absolute inset-[1px] bg-black z-10 rounded-2xl border border-white/5" 
             style={{ transform: 'translateZ(-1px)' }}
           />
 
           {/* FRONT SIDE (Young Guns Inspired) */}
           <div 
-            className={`absolute inset-0 rounded-[2.5rem] overflow-hidden border-[6px] ${theme.border} bg-[#050505] flex flex-col ${theme.glow}`}
+            className={`absolute inset-0 rounded-2xl overflow-hidden border-[6px] ${theme.border} bg-[#050505] flex flex-col ${theme.glow}`}
             style={{ backfaceVisibility: 'hidden', transform: 'translateZ(1px)' }}
           >
             {/* Header: Logo & Node Class */}
@@ -156,7 +156,7 @@ export default function HockeyCard({ user, stats, rank = 'agent', onDownload, on
 
           {/* BACK SIDE (Pettersson Accurate Layout) */}
           <div 
-            className="absolute inset-0 rounded-[2.5rem] overflow-hidden border-[6px] border-white/10 bg-white flex flex-col shadow-2xl"
+            className="absolute inset-0 rounded-2xl overflow-hidden border-[6px] border-white/10 bg-white flex flex-col shadow-2xl"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg) translateZ(1px)' }}
           >
              <div className="h-full flex flex-col p-8 text-black relative z-10">

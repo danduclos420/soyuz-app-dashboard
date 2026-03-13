@@ -43,7 +43,7 @@ export default function HomePage() {
       {/* 1. HERO SECTION (RESET) */}
       <section 
         ref={heroRef}
-        className="relative h-[90dvh] md:h-[100dvh] w-full flex items-center justify-center overflow-hidden border-b border-white/5"
+        className="relative min-h-[calc(100dvh-150px)] w-full flex items-center justify-center overflow-hidden border-b border-white/5"
       >
         <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 h-full w-full bg-[#111111]">
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-background" />
@@ -100,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. INFINITE TICKER (RED) */}
-      <div id="collections-top" className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[80px]">
+      <div id="collections-top" className="bg-soyuz py-4 overflow-hidden relative z-20 shadow-[0_0_50px_rgba(204,0,0,0.2)] scroll-mt-[92px]">
         <div className="ticker-wrap">
           <div className="ticker-inner">
             {[...Array(8)].map((_, i) => (

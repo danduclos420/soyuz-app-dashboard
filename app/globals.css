@@ -38,7 +38,8 @@ body {
 /* CARBON TEXTURE - matching soyuzhockey.com */
 .carbon-bg {
   background-color: #0D0D0D;
-  background-image:
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(204, 0, 0, 0.05) 0%, transparent 70%),
     repeating-linear-gradient(
       45deg,
       transparent 0px,
@@ -53,6 +54,10 @@ body {
       rgba(255,255,255,0.012) 2px,
       rgba(255,255,255,0.012) 4px
     );
+}
+
+.carbon-texture {
+  background-image: var(--carbon-texture);
 }
 
 /* SCROLLBAR */

@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ShoppingBag, User, ChevronDown, Globe, Search } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, ChevronDown, Globe, Search, LogOut } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import ShoppingCart from '../storefront/ShoppingCart';
+import { supabase } from '@/lib/supabase-client';
+import { useRouter } from 'next/navigation';
 
 const LANGUAGES = [
   { code: 'en', label: 'English', flag: '🇺🇸' },
@@ -37,6 +39,8 @@ export default function Header() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const [selectedCurrency, setSelectedCurrency] = useState(CURRENCIES[0]);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
   
   const { getTotalItems, toggleCart } = useCartStore();
   const [isHydrated, setIsHydrated] = useState(false);
@@ -48,7 +52,20 @@ export default function Header() {
     setIsHydrated(true);
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Check auth status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -183,9 +200,27 @@ export default function Header() {
               </button>
 
               {/* ACCOUNT */}
-              <Link href="/login" className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" aria-label="Account">
-                <User size={18} />
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Link href="/account" className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" aria-label="Account">
+                    <User size={18} />
+                  </Link>
+                  <button 
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      router.push('/');
+                    }}
+                    className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-soyuz transition-colors" 
+                    aria-label="Logout"
+                  >
+                    <LogOut size={16} />
+                  </button>
+                </div>
+              ) : (
+                <Link href="/login" className="hidden md:flex items-center justify-center w-9 h-9 text-[#888888] hover:text-white transition-colors" aria-label="Account">
+                  <User size={18} />
+                </Link>
+              )}
 
               {/* CART */}
               <button 

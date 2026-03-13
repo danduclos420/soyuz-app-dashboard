@@ -101,6 +101,12 @@ export default function LoginPage() {
           >
             {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
           </button>
+
+          <div className="text-center pt-4">
+            <Link href="/register" className="text-gray-500 hover:text-white text-[10px] uppercase tracking-widest transition-colors font-black">
+              Don't have an account? Create one
+            </Link>
+          </div>
         </form>
       </div>
     </main>

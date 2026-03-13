@@ -41,6 +41,13 @@ export default function HomePage() {
         <motion.div style={{ y, opacity }} className="absolute inset-0 z-0 h-full w-full bg-[#111111]">
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-background" />
           <div className="absolute inset-0 carbon-texture opacity-10" />
+          <Image 
+            src="/assets/hero-bg.png"
+            alt="SOYUZ Background"
+            fill
+            className="object-cover opacity-40 mix-blend-overlay"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0D0D0D] via-[#111] to-[#CC0000]/20" />
         </motion.div>
 

@@ -107,7 +107,7 @@ export default function AdminDashboard() {
               ADMINISTRATIVE NODE
             </span>
             <h1 className="text-6xl md:text-8xl font-display italic tracking-tighter leading-[0.85] uppercase">
-              GLOBAL <br /><span className="outline-text-white">COMMAND</span>
+              BONJOUR <br /><span className="outline-text-white">DANY</span>
             </h1>
           </motion.div>
 

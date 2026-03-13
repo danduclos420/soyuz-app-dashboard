@@ -26,6 +26,18 @@ export default function KickPointGuide() {
             
             <div className="space-y-12">
               <section>
+                <h3 className="text-2xl font-display text-soyuz italic mb-4">ULTRA-LOW KICK POINT</h3>
+                <p className="text-[#888888] font-bold uppercase tracking-widest text-xs mb-6 leading-relaxed">
+                  Best for: Deceptive release, lightning-fast snapshots, and maximum feeling.
+                </p>
+                <div className="p-6 bg-white/[0.02] border border-soyuz/20 group hover:border-soyuz/50 transition-all">
+                  <p className="text-[#AAAAAA] text-[11px] font-medium uppercase tracking-wider leading-relaxed">
+                    Designed for the ultimate deceptive release. The flex occurs at the absolute bottom of the shaft, providing a vertical kick that is nearly impossible for goalies to read.
+                  </p>
+                </div>
+              </section>
+
+              <section>
                 <h3 className="text-2xl font-display text-white italic mb-4">LOW KICK POINT</h3>
                 <p className="text-[#888888] font-bold uppercase tracking-widest text-xs mb-6 leading-relaxed">
                   Best for: Quick snapshots, tight-space plays, and instant release.

@@ -53,30 +53,41 @@ export async function pushErplainProductsToQB() {
   let skippedCount = 0;
 
   for (const variant of (epProducts as any[])) {
-    // 4. Filter for Hockey Sticks only
+    // 4. Filter for Hockey Sticks mostly, but be very permissive
     const name = variant.name || variant.products?.name || '';
     const description = variant.products?.description || '';
-    
-    // Broad detection (Keywords OR Category)
     const category = variant.products?.category || '';
+    
+    // Logic: Assume it's a stick unless it's clearly something else (like shipping, gift card, etc)
+    // We already have 18 ignored items in the logs, let's see why.
     const isHockeyStick = 
-      category.toLowerCase().includes('hockey stick') ||
+      category.toLowerCase().includes('hockey') ||
+      category.toLowerCase().includes('baton') ||
       category.toLowerCase().includes('bâton') ||
-      name.toLowerCase().includes('hockey stick') || 
+      category.toLowerCase().includes('stick') ||
+      name.toLowerCase().includes('hockey') || 
       name.toLowerCase().includes('baton') ||
       name.toLowerCase().includes('bâton') ||
       name.toLowerCase().includes('stick') ||
-      description.toLowerCase().includes('hockey stick') ||
+      name.toLowerCase().includes('ace') || // Added specific models from screenshot
+      name.toLowerCase().includes('arcane') ||
+      name.toLowerCase().includes('aurora') ||
+      name.toLowerCase().includes('hit') ||
+      name.toLowerCase().includes('rapid') ||
+      name.toLowerCase().includes('std') ||
+      description.toLowerCase().includes('hockey') ||
       description.toLowerCase().includes('baton') ||
       description.toLowerCase().includes('bâton');
 
     if (!isHockeyStick) {
+      console.log(`[Sync] Skipping ${variant.sku} - Name: "${name}", Cat: "${category}" - Doesn't match stick keywords.`);
       skippedCount++;
       continue;
     }
 
     // 5. Check if already in QB
     if (qbSkus.has(variant.sku)) {
+      console.log(`[Sync] Match found in QB for ${variant.sku}. Skipping creation.`);
       continue;
     }
 

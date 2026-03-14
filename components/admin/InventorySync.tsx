@@ -127,10 +127,22 @@ export default function InventorySync() {
               </div>
               <div>
                  <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest leading-none mb-2">STATUT CONNEXION</p>
-                 <p className="text-lg font-display italic text-white uppercase tracking-tight">
-                    {config ? 'SÉCURISÉ & CONNECTÉ' : 'NON CONNECTÉ'}
-                 </p>
-              </div>
+                  <p className="text-lg font-display italic text-white uppercase tracking-tight">
+                     {config ? 'SÉCURISÉ & CONNECTÉ' : 'NON CONNECTÉ'}
+                  </p>
+                  {config && (
+                    <div className="mt-1">
+                      <p className="text-[10px] text-white/30 font-mono">
+                        REALM: {config.value?.realmId || 'INCONNU'}
+                      </p>
+                      {config.value?.realmId?.startsWith('9341') && (
+                        <p className="text-[10px] text-soyuz font-black animate-pulse uppercase tracking-tighter mt-1">
+                          ⚠️ CONFLIT : VOUS ÊTES CONNECTÉ AU SANDBOX (TEST). RE-CONNECTER QB VERS "PROTOS" !
+                        </p>
+                      )}
+                    </div>
+                  )}
+               </div>
            </div>
 
            <div className="grid grid-cols-1 gap-4">

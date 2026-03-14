@@ -78,7 +78,7 @@ export async function syncErplainProducts() {
           name: epProduct.name,
           slug,
           description: epProduct.description || '',
-          category: epProduct.category?.name || 'Hockey Sticks',
+          category: 'Hockey Sticks', // Force category to ensure site display Sync调整Sync
           images: epProduct.images?.map((img: any) => img.url) || [],
           is_active: true,
           updated_at: new Date().toISOString(),

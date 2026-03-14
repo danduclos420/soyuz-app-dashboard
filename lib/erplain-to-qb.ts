@@ -60,30 +60,8 @@ export async function pushErplainProductsToQB() {
     
     // Logic: Assume it's a stick unless it's clearly something else (like shipping, gift card, etc)
     // We already have 18 ignored items in the logs, let's see why.
-    const isHockeyStick = 
-      category.toLowerCase().includes('hockey') ||
-      category.toLowerCase().includes('baton') ||
-      category.toLowerCase().includes('bâton') ||
-      category.toLowerCase().includes('stick') ||
-      name.toLowerCase().includes('hockey') || 
-      name.toLowerCase().includes('baton') ||
-      name.toLowerCase().includes('bâton') ||
-      name.toLowerCase().includes('stick') ||
-      name.toLowerCase().includes('ace') || // Added specific models from screenshot
-      name.toLowerCase().includes('arcane') ||
-      name.toLowerCase().includes('aurora') ||
-      name.toLowerCase().includes('hit') ||
-      name.toLowerCase().includes('rapid') ||
-      name.toLowerCase().includes('std') ||
-      description.toLowerCase().includes('hockey') ||
-      description.toLowerCase().includes('baton') ||
-      description.toLowerCase().includes('bâton');
-
-    if (!isHockeyStick) {
-      console.log(`[Sync] Skipping ${variant.sku} - Name: "${name}", Cat: "${category}" - Doesn't match stick keywords.`);
-      skippedCount++;
-      continue;
-    }
+    // Logic: Every product synced from Erplain to our DB is intended for the store.
+    const isHockeyStick = true; // Permissive: We trust the Erplain sync to only bring sticks Sync调整Sync
 
     // 5. Check if already in QB
     if (qbSkus.has(variant.sku)) {

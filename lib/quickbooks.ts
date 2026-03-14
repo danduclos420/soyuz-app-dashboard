@@ -131,12 +131,12 @@ export async function getQBInventoryItems(token: QBToken) {
   });
   console.log(`[QB Audit] Item Types Summary:`, typeCounts);
 
-  // Filter for items we can actually use
+  // Filter for items we can actually use - now allowing missing SKU as we will fallback to Name or ID
   const validItems = allItems.filter((item: any) => 
-    item.Sku && ['Inventory', 'NonInventory', 'Service'].includes(item.Type)
+    ['Inventory', 'NonInventory', 'Service'].includes(item.Type)
   );
 
-  console.log(`[QB Audit] Filtered down to ${validItems.length} valid items with SKUs.`);
+  console.log(`[QB Audit] Filtered down to ${validItems.length} valid items for synchronization.`);
   return {
     items: validItems,
     audit: {
@@ -185,13 +185,19 @@ export async function syncQuickBooksInventory() {
     // 4. Update Supabase
     let updatedCount = 0;
     for (const item of qbItems) {
-      if (!item.Sku) continue;
+      // Logic for SKU: fallback to ID-based name if missing
+      const effectiveSku = item.Sku || `QB-${item.Id}`;
+      const effectiveName = item.Name || effectiveSku;
+
+      if (!item.Sku) {
+        console.log(`[QB Sync] Item "${item.Name}" has no SKU. Using fallback: ${effectiveSku}`);
+      }
 
       // Check if variant exists
       const { data: variant, error: variantError } = await (supabase
         .from('product_variants') as any)
         .select('id, product_id')
-        .eq('sku', item.Sku)
+        .eq('sku', effectiveSku)
         .maybeSingle();
 
       if (variantError) {
@@ -210,11 +216,10 @@ export async function syncQuickBooksInventory() {
         const { data: newProduct, error: productError } = await (supabase
           .from('products') as any)
           .insert({
-            name: item.Name || item.Sku,
-            slug: (item.Name || item.Sku).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+            name: effectiveName,
+            slug: effectiveName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
             description: item.Description || '',
             category: 'QuickBooks Import',
-            base_price: item.UnitPrice || 0,
             is_active: true
           })
           .select('id')
@@ -232,7 +237,8 @@ export async function syncQuickBooksInventory() {
           .from('product_variants') as any)
           .insert({
             product_id: productId,
-            sku: item.Sku,
+            sku: effectiveSku,
+            name: effectiveName,
             stock_qty: Math.max(0, item.QtyOnHand || 0),
             price_retail: item.UnitPrice || 0,
             updated_at: new Date().toISOString()
@@ -254,7 +260,7 @@ export async function syncQuickBooksInventory() {
             price_retail: item.UnitPrice || 0,
             updated_at: new Date().toISOString(),
           })
-          .eq('sku', item.Sku);
+          .eq('sku', effectiveSku);
 
         if (updateError) {
           console.error(`Error updating SKU ${item.Sku}:`, updateError);

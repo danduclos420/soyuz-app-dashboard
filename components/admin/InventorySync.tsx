@@ -135,7 +135,7 @@ export default function InventorySync() {
                       <p className="text-[10px] text-white/30 font-mono">
                         REALM: {config.value?.realmId || 'INCONNU'}
                       </p>
-                      {config.value?.realmId?.startsWith('9341') && (
+                      {config.value?.realmId === '9341456597297212' && (
                         <p className="text-[10px] text-soyuz font-black animate-pulse uppercase tracking-tighter mt-1">
                           ⚠️ CONFLIT : VOUS ÊTES CONNECTÉ AU SANDBOX (TEST). RE-CONNECTER QB VERS "PROTOS" !
                         </p>

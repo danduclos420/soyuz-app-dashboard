@@ -24,6 +24,7 @@ export function getQBAuthUrl(redirectUri: string) {
     scope: 'com.intuit.quickbooks.accounting',
     redirect_uri: redirectUri,
     state: 'soyuz-sync-state', // In production, use a secure CSRF token
+    prompt: 'select_account', // Force account/company selection screen
   });
   return `${QB_CONFIG.authUri}?${params.toString()}`;
 }
@@ -117,10 +118,11 @@ export async function getQBInventoryItems(token: QBToken) {
     
     // Explicit hint for 403 errors which are common when local realm doesn't match keys/env
     if (response.status === 403) {
-      const isSandboxRealm = token.realmId.startsWith('9341'); // Common prefix for sandbox but not guaranteed, better check env
+      const KNOWN_SANDBOX_REALM = '9341456597297212';
+      const isSandboxRealm = token.realmId === KNOWN_SANDBOX_REALM;
       console.warn('HINT: This 403 error often means your stored Token (Sandbox/Production) does not match your current environment variables.');
-      if (QB_CONFIG.environment === 'production' && token.realmId.length >= 15) {
-        console.warn('CRITICAL: You are in PRODUCTION mode but your Realm ID looks like a Sandbox or old ID. TRY RE-CONNECTING QUICKBOOKS and select your REAL company (Protos).');
+      if (QB_CONFIG.environment === 'production' && isSandboxRealm) {
+        console.warn('CRITICAL: You are in PRODUCTION mode but your Realm ID is definitely the Sandbox one. TRY RE-CONNECTING QUICKBOOKS and select your REAL company (Protos).');
       }
     }
     

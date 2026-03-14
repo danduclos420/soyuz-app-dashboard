@@ -49,7 +49,8 @@ export default function ProductsPage() {
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === 'ALL' || p.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const hasImage = p.images && p.images.length > 0 && p.images[0];
+    return matchesSearch && matchesCategory && hasImage;
   });
 
   const CATEGORIES = ['ALL', ...Array.from(new Set(products.map(p => p.category)))];

@@ -171,7 +171,13 @@ export async function getQBInventoryItems(token: QBToken) {
     const isHockeyStick = 
       item.Name.toLowerCase().includes('hockey stick') || 
       item.Name.toLowerCase().includes('baton') ||
-      (item.Description && item.Description.toLowerCase().includes('hockey stick'));
+      item.Name.toLowerCase().includes('bâton') ||
+      item.Name.toLowerCase().includes('stick') ||
+      (item.Description && (
+        item.Description.toLowerCase().includes('hockey stick') ||
+        item.Description.toLowerCase().includes('baton') ||
+        item.Description.toLowerCase().includes('bâton')
+      ));
     
     return isProductType && isHockeyStick;
   });

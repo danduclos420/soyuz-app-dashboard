@@ -4,35 +4,53 @@ export interface QBToken {
   expires_at: number; // Timestamp
   x_refresh_token_expires_at: number; // Timestamp
   realmId: string;
+  environment?: 'sandbox' | 'production'; // Add environment to token
 }
 
-export const QB_CONFIG = {
-  clientId: process.env.QUICKBOOKS_CLIENT_ID!,
-  clientSecret: process.env.QUICKBOOKS_CLIENT_SECRET!,
-  environment: (process.env.QUICKBOOKS_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox',
-  authUri: 'https://appcenter.intuit.com/connect/oauth2',
-  tokenUri: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
-  apiUri: (process.env.QUICKBOOKS_ENVIRONMENT === 'production') 
-    ? 'https://quickbooks.api.intuit.com/v3/company' 
-    : 'https://sandbox-quickbooks.api.intuit.com/v3/company',
+const QB_KEYS = {
+  sandbox: {
+    clientId: 'ABD4ytIh7B6KYThHo3NFzT26YKQO4DSk0WvpfeBNPjL3ToebKe',
+    clientSecret: 'Zh1yBkouX9F1kwk6WgNzn5SCkhm7qekDLbz1BTCJ',
+  },
+  production: {
+    clientId: 'ABmG9aXFPs1uQC0S5JooXafKZIjVGscwbKP9vCIJKr2JJK01XJ',
+    clientSecret: 'wn01EbyejcPviEUoqsN32djwrAl9QeUp0TR9wsMv',
+  }
 };
 
-export function getQBAuthUrl(redirectUri: string) {
+export function getQBConfig(env: 'sandbox' | 'production' = 'production') {
+  const keys = QB_KEYS[env];
+  return {
+    clientId: keys.clientId,
+    clientSecret: keys.clientSecret,
+    environment: env,
+    authUri: 'https://appcenter.intuit.com/connect/oauth2',
+    tokenUri: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
+    apiUri: (env === 'production') 
+      ? 'https://quickbooks.api.intuit.com/v3/company' 
+      : 'https://sandbox-quickbooks.api.intuit.com/v3/company',
+  };
+}
+
+export function getQBAuthUrl(redirectUri: string, env: 'sandbox' | 'production' = 'production') {
+  const config = getQBConfig(env);
   const params = new URLSearchParams({
-    client_id: QB_CONFIG.clientId,
+    client_id: config.clientId,
     response_type: 'code',
     scope: 'com.intuit.quickbooks.accounting',
     redirect_uri: redirectUri,
-    state: 'soyuz-sync-state', // In production, use a secure CSRF token
-    prompt: 'select_account', // Force account/company selection screen
+    state: env, // Use state to pass the environment back to the callback
+    prompt: 'select_account',
   });
-  return `${QB_CONFIG.authUri}?${params.toString()}`;
+  return `${config.authUri}?${params.toString()}`;
 }
 
-export async function exchangeQBCode(code: string, realmId: string, redirectUri: string): Promise<QBToken> {
-  const authHeader = Buffer.from(`${QB_CONFIG.clientId}:${QB_CONFIG.clientSecret}`).toString('base64');
+export async function exchangeQBCode(code: string, realmId: string, redirectUri: string, env: 'sandbox' | 'production' = 'production'): Promise<QBToken> {
+  const config = getQBConfig(env);
   
-  const response = await fetch(QB_CONFIG.tokenUri, {
+  const authHeader = Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64');
+  
+  const response = await fetch(config.tokenUri, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -60,13 +78,15 @@ export async function exchangeQBCode(code: string, realmId: string, redirectUri:
     expires_at: now + data.expires_in * 1000,
     x_refresh_token_expires_at: now + data.x_refresh_token_expires_in * 1000,
     realmId,
+    environment: env,
   };
 }
 
-export async function refreshQBToken(refreshToken: string): Promise<QBToken> {
-  const authHeader = Buffer.from(`${QB_CONFIG.clientId}:${QB_CONFIG.clientSecret}`).toString('base64');
+export async function refreshQBToken(refreshToken: string, env: 'sandbox' | 'production' = 'production'): Promise<QBToken> {
+  const config = getQBConfig(env);
+  const authHeader = Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64');
   
-  const response = await fetch(QB_CONFIG.tokenUri, {
+  const response = await fetch(config.tokenUri, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -93,16 +113,20 @@ export async function refreshQBToken(refreshToken: string): Promise<QBToken> {
     expires_at: now + data.expires_in * 1000,
     x_refresh_token_expires_at: now + data.x_refresh_token_expires_in * 1000,
     realmId: '', // To be filled from existing store
+    environment: env,
   };
 }
 
 export async function getQBInventoryItems(token: QBToken) {
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
+  
   // Broaden query to see what's actually there
   const query = "SELECT * FROM Item WHERE Active = true";
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
+  const url = `${config.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
 
-  console.log(`[QB Audit] Environment: ${QB_CONFIG.environment}`);
-  console.log(`[QB Audit] API URL: ${QB_CONFIG.apiUri}`);
+  console.log(`[QB Audit] Environment: ${env}`);
+  console.log(`[QB Audit] API URL: ${config.apiUri}`);
   console.log(`[QB Audit] Realm ID: ${token.realmId}`);
   
   const response = await fetch(url, {
@@ -121,7 +145,7 @@ export async function getQBInventoryItems(token: QBToken) {
       const KNOWN_SANDBOX_REALM = '9341456597297212';
       const isSandboxRealm = token.realmId === KNOWN_SANDBOX_REALM;
       console.warn('HINT: This 403 error often means your stored Token (Sandbox/Production) does not match your current environment variables.');
-      if (QB_CONFIG.environment === 'production' && isSandboxRealm) {
+      if (env === 'production' && isSandboxRealm) {
         console.warn('CRITICAL: You are in PRODUCTION mode but your Realm ID is definitely the Sandbox one. TRY RE-CONNECTING QUICKBOOKS and select your REAL company (Protos).');
       }
     }
@@ -167,8 +191,10 @@ export async function getQBInventoryItems(token: QBToken) {
  * Helper to find default account IDs dynamically
  */
 export async function findQBAccountIds(token: QBToken) {
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
   const query = "SELECT * FROM Account WHERE Name IN ('Sales of Product Income', 'Cost of Goods Sold', 'Inventory Asset')";
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
+  const url = `${config.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
 
   const response = await fetch(url, {
     headers: {
@@ -192,11 +218,13 @@ export async function findQBAccountIds(token: QBToken) {
  * Finds or creates the 'Hockey Sticks' category ID
  */
 export async function findOrCreateHockeyCategory(token: QBToken) {
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
   // Try to find
   const query = "SELECT * FROM Term WHERE Name = 'Hockey Sticks'"; // QBO calls categories 'Term' in some contexts or uses ParentRef
   // Correct check for Category: It's actually an Item of type 'Category'
   const catQuery = "SELECT * FROM Item WHERE Type = 'Category' AND Name = 'Hockey Sticks'";
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(catQuery)}&minorversion=65`;
+  const url = `${config.apiUri}/${token.realmId}/query?query=${encodeURIComponent(catQuery)}&minorversion=65`;
 
   const response = await fetch(url, {
     headers: {
@@ -235,7 +263,7 @@ export async function syncQuickBooksInventory() {
     // 2. Check Expiry and Refresh if needed
     if (Date.now() >= token.expires_at) {
       console.log('QB Token expired, refreshing...');
-      const newToken = await refreshQBToken(token.refresh_token);
+      const newToken = await refreshQBToken(token.refresh_token, token.environment || 'production');
       token = { ...token, ...newToken, realmId: token.realmId };
       
       await (supabase.from('app_config') as any).upsert({
@@ -380,7 +408,9 @@ export async function createQBItem(token: QBToken, itemData: {
     TrackQtyOnHand: true
   };
 
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/item?minorversion=65`;
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
+  const url = `${config.apiUri}/${token.realmId}/item?minorversion=65`;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -405,8 +435,10 @@ export async function createQBItem(token: QBToken, itemData: {
  * Updates stock quantity in QuickBooks (Adjustment)
  */
 export async function updateQBStock(token: QBToken, qbItemId: string, sku: string, adjustment: number) {
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
   // In QBO, we usually need to fetch the item first to get the current SyncToken
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/item/${qbItemId}?minorversion=65`;
+  const url = `${config.apiUri}/${token.realmId}/item/${qbItemId}?minorversion=65`;
   
   const getRes = await fetch(url, {
     headers: {
@@ -439,8 +471,10 @@ export async function updateQBStock(token: QBToken, qbItemId: string, sku: strin
  * Finds a QuickBooks Item ID by its SKU
  */
 export async function findQBItemBySku(token: QBToken, sku: string): Promise<string | null> {
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
   const query = `SELECT * FROM Item WHERE Sku = '${sku}'`;
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
+  const url = `${config.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
 
   const response = await fetch(url, {
     headers: {
@@ -495,7 +529,9 @@ export async function createQBSalesReceipt(token: QBToken, orderData: {
     // You can add more mapping here (PaymentMethodRef, DepositToAccountRef, etc.)
   };
 
-  const url = `${QB_CONFIG.apiUri}/${token.realmId}/salesreceipt?minorversion=65`;
+  const env = token.environment || 'production';
+  const config = getQBConfig(env);
+  const url = `${config.apiUri}/${token.realmId}/salesreceipt?minorversion=65`;
 
   const response = await fetch(url, {
     method: 'POST',

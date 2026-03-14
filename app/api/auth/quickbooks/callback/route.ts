@@ -6,6 +6,8 @@ export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const code = searchParams.get('code');
   const realmId = searchParams.get('realmId');
+  const state = searchParams.get('state');
+  const env = (state === 'sandbox' ? 'sandbox' : 'production') as 'sandbox' | 'production';
 
   const host = req.headers.get('host');
   const protocol = host?.includes('localhost') ? 'http' : 'https';
@@ -17,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const token = await exchangeQBCode(code, realmId, redirectUri);
+    const token = await exchangeQBCode(code, realmId, redirectUri, env);
     const supabase = getSupabaseAdmin();
 
     // Store the token in app_config

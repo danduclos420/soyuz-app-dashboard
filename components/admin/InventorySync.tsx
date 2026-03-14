@@ -51,7 +51,6 @@ export default function InventorySync() {
     
     try {
       addLog('APPEL DE L\'API DE SYNCHRONISATION (Vercel Production)...', 'info');
-      // Use the standard admin sync endpoint which already handles auth and role check
       const res = await fetch('/api/admin/sync', { method: 'POST' });
       const data = await res.json();
       
@@ -127,55 +126,71 @@ export default function InventorySync() {
               </div>
               <div>
                  <p className="text-[10px] text-[#444444] font-black uppercase tracking-widest leading-none mb-2">STATUT CONNEXION</p>
-                  <p className="text-lg font-display italic text-white uppercase tracking-tight">
-                     {config ? 'SÉCURISÉ & CONNECTÉ' : 'NON CONNECTÉ'}
-                  </p>
-                  {config && (
-                    <div className="mt-1">
-                      <p className="text-[10px] text-white/30 font-mono">
-                        REALM: {config.value?.realmId || 'INCONNU'}
-                      </p>
-                      {config.value?.realmId === '9341456597297212' && (
-                        <p className="text-[10px] text-soyuz font-black animate-pulse uppercase tracking-tighter mt-1">
-                          ⚠️ CONFLIT : VOUS ÊTES CONNECTÉ AU SANDBOX (TEST). RE-CONNECTER QB VERS "PROTOS" !
-                        </p>
-                      )}
-                    </div>
-                  )}
-               </div>
-           </div>
-
-           <div className="grid grid-cols-1 gap-4">
-              <div className="flex flex-col gap-4">
-                <SoyuzButton 
-                  onClick={triggerSync} 
-                  isLoading={syncing} 
-                  variant="primary" 
-                  icon={RefreshCw}
-                  className="w-full"
-                >
-                  SYNCHRONISER QB Vers SOYUZ
-                </SoyuzButton>
-                
-                <SoyuzButton 
-                  onClick={triggerErplainPush} 
-                  isLoading={syncing} 
-                  variant="outline" 
-                  icon={Database}
-                  className="w-full border-white/10 text-white/60 hover:text-white"
-                >
-                  EXPORTER ERPLAIN Vers QB
-                </SoyuzButton>
+                   <p className="text-lg font-display italic text-white uppercase tracking-tight">
+                      {config ? 'SÉCURISÉ & CONNECTÉ' : 'NON CONNECTÉ'}
+                   </p>
+                   {config && (
+                     <div className="mt-1">
+                       <p className="text-[10px] text-white/30 font-mono">
+                         REALM: {config.value?.realmId || 'INCONNU'}
+                       </p>
+                       {config.value?.realmId === '9341456597297212' && (
+                         <p className="text-[10px] text-soyuz font-black animate-pulse uppercase tracking-tighter mt-1">
+                           ⚠️ CONFLIT : VOUS ÊTES CONNECTÉ AU SANDBOX (TEST). RE-CONNECTER QB VERS "PROTOS" !
+                         </p>
+                       )}
+                     </div>
+                   )}
               </div>
-
-              <a 
-                href="/api/auth/quickbooks/login"
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black tracking-widest uppercase rounded-xl"
-              >
-                <ExternalLink size={14} />
-                RE-CONNECTER QB
-              </a>
            </div>
+
+           <div className="grid grid-cols-1 gap-8 pt-4">
+               <div className="flex flex-col gap-4">
+                 <SoyuzButton 
+                   onClick={triggerSync} 
+                   isLoading={syncing} 
+                   variant="primary" 
+                   icon={RefreshCw}
+                   className="w-full"
+                 >
+                   SYNCHRONISER QB Vers SOYUZ
+                 </SoyuzButton>
+                 
+                 <SoyuzButton 
+                   onClick={triggerErplainPush} 
+                   isLoading={syncing} 
+                   variant="outline" 
+                   icon={Database}
+                   className="w-full border-white/10 text-white/60 hover:text-white"
+                 >
+                   EXPORTER ERPLAIN Vers QB
+                 </SoyuzButton>
+               </div>
+
+               <div className="space-y-6 pt-4 border-t border-white/5">
+                 <div className="flex flex-col gap-3">
+                   <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em] px-1">Accès Production (Dany)</p>
+                   <a 
+                     href="/api/auth/quickbooks/login?env=production"
+                     className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-soyuz hover:bg-soyuz/90 transition-all text-xs font-black tracking-[0.15em] uppercase rounded-2xl text-white shadow-xl shadow-soyuz/20 group"
+                   >
+                     <ExternalLink size={18} className="group-hover:rotate-12 transition-transform" />
+                     CONNECTER COMPTE PRO (PRODUCTION)
+                   </a>
+                 </div>
+
+                 <div className="flex flex-col gap-3 opacity-30 hover:opacity-100 transition-opacity">
+                   <p className="text-[9px] text-white/20 font-black uppercase tracking-[0.2em] px-1">Accès Développeur (Test)</p>
+                   <a 
+                     href="/api/auth/quickbooks/login?env=sandbox"
+                     className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black tracking-widest uppercase rounded-xl text-white/60"
+                   >
+                     <Database size={14} />
+                     CONNECTER COMPTE TEST (SANDBOX)
+                   </a>
+                 </div>
+               </div>
+            </div>
         </div>
       </div>
 

@@ -100,7 +100,9 @@ export async function getQBInventoryItems(token: QBToken) {
   const query = "SELECT * FROM Item WHERE Active = true";
   const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
 
-  console.log(`[QB Audit] Fetching all active items for Realm: ${token.realmId}`);
+  console.log(`[QB Audit] Environment: ${QB_CONFIG.environment}`);
+  console.log(`[QB Audit] API URL: ${QB_CONFIG.apiUri}`);
+  console.log(`[QB Audit] Realm ID: ${token.realmId}`);
   
   const response = await fetch(url, {
     headers: {
@@ -111,7 +113,17 @@ export async function getQBInventoryItems(token: QBToken) {
 
   if (!response.ok) {
     const error = await response.text();
-    console.error(`[QB Audit] Query Failed:`, error);
+    console.error(`[QB Audit] Query Failed (Status ${response.status}):`, error);
+    
+    // Explicit hint for 403 errors which are common when local realm doesn't match keys/env
+    if (response.status === 403) {
+      const isSandboxRealm = token.realmId.startsWith('9341'); // Common prefix for sandbox but not guaranteed, better check env
+      console.warn('HINT: This 403 error often means your stored Token (Sandbox/Production) does not match your current environment variables.');
+      if (QB_CONFIG.environment === 'production' && token.realmId.length >= 15) {
+        console.warn('CRITICAL: You are in PRODUCTION mode but your Realm ID looks like a Sandbox or old ID. TRY RE-CONNECTING QUICKBOOKS and select your REAL company (Protos).');
+      }
+    }
+    
     throw new Error(`QuickBooks Query Failed: ${error}`);
   }
 
@@ -124,13 +136,10 @@ export async function getQBInventoryItems(token: QBToken) {
   const typeCounts: Record<string, number> = {};
   allItems.forEach((i: any) => {
     typeCounts[i.Type] = (typeCounts[i.Type] || 0) + 1;
-    if (!i.Sku) {
-      // console.log(`[QB Audit] Item "${i.Name}" missing SKU (Type: ${i.Type})`);
-    }
   });
   console.log(`[QB Audit] Item Types Summary:`, typeCounts);
 
-  // Filter for items we can actually use - now allowing missing SKU as we will fallback to Name or ID
+  // Filter for items we can actually use
   const validItems = allItems.filter((item: any) => {
     const isProductType = ['Inventory', 'NonInventory', 'Service'].includes(item.Type);
     const isHockeyStick = 
@@ -141,7 +150,7 @@ export async function getQBInventoryItems(token: QBToken) {
     return isProductType && isHockeyStick;
   });
 
-  console.log(`[QB Audit] Filtered down to ${validItems.length} hockey stick items for synchronization.`);
+  console.log(`[QB Audit] Filtered down to ${validItems.length} hockey stick items.`);
   return {
     items: validItems,
     audit: {
@@ -150,6 +159,58 @@ export async function getQBInventoryItems(token: QBToken) {
       valid: validItems.length
     }
   };
+}
+
+/**
+ * Helper to find default account IDs dynamically
+ */
+export async function findQBAccountIds(token: QBToken) {
+  const query = "SELECT * FROM Account WHERE Name IN ('Sales of Product Income', 'Cost of Goods Sold', 'Inventory Asset')";
+  const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token.access_token}`,
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) throw new Error(`Failed to lookup accounts: ${await response.text()}`);
+
+  const accounts = (await response.json()).QueryResponse.Account || [];
+  
+  return {
+    income: accounts.find((a: any) => a.Name === 'Sales of Product Income')?.Id || '79',
+    expense: accounts.find((a: any) => a.Name === 'Cost of Goods Sold')?.Id || '80',
+    asset: accounts.find((a: any) => a.Name === 'Inventory Asset')?.Id || '81',
+  };
+}
+
+/**
+ * Finds or creates the 'Hockey Sticks' category ID
+ */
+export async function findOrCreateHockeyCategory(token: QBToken) {
+  // Try to find
+  const query = "SELECT * FROM Term WHERE Name = 'Hockey Sticks'"; // QBO calls categories 'Term' in some contexts or uses ParentRef
+  // Correct check for Category: It's actually an Item of type 'Category'
+  const catQuery = "SELECT * FROM Item WHERE Type = 'Category' AND Name = 'Hockey Sticks'";
+  const url = `${QB_CONFIG.apiUri}/${token.realmId}/query?query=${encodeURIComponent(catQuery)}&minorversion=65`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token.access_token}`,
+      'Accept': 'application/json',
+    },
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    const cat = data.QueryResponse.Item?.[0];
+    if (cat) return cat.Id;
+  }
+
+  // Fallback to hardcoded ID if find fails (it was 19 in Sandbox)
+  return '19';
 }
 
 export async function syncQuickBooksInventory() {
@@ -295,21 +356,22 @@ export async function createQBItem(token: QBToken, itemData: {
   price: number;
   qty: number;
 }) {
-  // Account IDs for Sandbox (from quickbooks_ids_lookup)
-  const INCOME_ACCOUNT_ID = '79'; // Sales of Product Income
-  const EXPENSE_ACCOUNT_ID = '80'; // Cost of Goods Sold
-  const ASSET_ACCOUNT_ID = '81'; // Inventory Asset
-  const CATEGORY_ID = '19'; // Hockey Sticks
+  // Find accounts and category dynamically
+  const accounts = await findQBAccountIds(token);
+  const categoryId = await findOrCreateHockeyCategory(token);
+
+  console.log(`[QB Create] Using Accounts: Income=${accounts.income}, Expense=${accounts.expense}, Asset=${accounts.asset}`);
+  console.log(`[QB Create] Using Category: ${categoryId}`);
 
   const body = {
     Name: itemData.name,
     Sku: itemData.sku,
     Description: itemData.description || '',
     Type: 'Inventory',
-    IncomeAccountRef: { value: INCOME_ACCOUNT_ID },
-    ExpenseAccountRef: { value: EXPENSE_ACCOUNT_ID },
-    AssetAccountRef: { value: ASSET_ACCOUNT_ID },
-    ParentRef: { value: CATEGORY_ID },
+    IncomeAccountRef: { value: accounts.income },
+    ExpenseAccountRef: { value: accounts.expense },
+    AssetAccountRef: { value: accounts.asset },
+    ParentRef: { value: categoryId },
     UnitPrice: itemData.price,
     QtyOnHand: itemData.qty,
     InvStartDate: new Date().toISOString().split('T')[0], // Today

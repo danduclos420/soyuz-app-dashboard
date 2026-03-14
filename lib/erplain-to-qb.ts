@@ -57,8 +57,11 @@ export async function pushErplainProductsToQB() {
     const name = variant.name || variant.products?.name || '';
     const description = variant.products?.description || '';
     
-    // Broad detection
+    // Broad detection (Keywords OR Category)
+    const category = variant.products?.category || '';
     const isHockeyStick = 
+      category.toLowerCase().includes('hockey stick') ||
+      category.toLowerCase().includes('bâton') ||
       name.toLowerCase().includes('hockey stick') || 
       name.toLowerCase().includes('baton') ||
       name.toLowerCase().includes('bâton') ||

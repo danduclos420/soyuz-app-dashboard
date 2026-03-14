@@ -249,8 +249,33 @@ export async function findOrCreateHockeyCategory(token: QBToken) {
     if (cat) return cat.Id;
   }
 
-  // Fallback to hardcoded ID if find fails (it was 19 in Sandbox)
-  return '19';
+  // If not found, create it as a Category Item
+  console.log(`[QB Category] "Hockey Sticks" not found. Creating...`);
+  const createBody = {
+    Name: 'Hockey Sticks',
+    Type: 'Category',
+    Active: true
+  };
+
+  const createRes = await fetch(`${config.apiUri}/${token.realmId}/item?minorversion=65`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token.access_token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(createBody),
+  });
+
+  if (createRes.ok) {
+    const newData = await createRes.json();
+    return newData.Item.Id;
+  }
+
+  const errText = await createRes.text();
+  console.error(`[QB Category] Failed to create:`, errText);
+  // Last resort fallback
+  return '1'; 
 }
 
 export async function syncQuickBooksInventory() {

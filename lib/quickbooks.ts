@@ -131,11 +131,17 @@ export async function getQBInventoryItems(token: QBToken) {
   console.log(`[QB Audit] Item Types Summary:`, typeCounts);
 
   // Filter for items we can actually use - now allowing missing SKU as we will fallback to Name or ID
-  const validItems = allItems.filter((item: any) => 
-    ['Inventory', 'NonInventory', 'Service'].includes(item.Type)
-  );
+  const validItems = allItems.filter((item: any) => {
+    const isProductType = ['Inventory', 'NonInventory', 'Service'].includes(item.Type);
+    const isHockeyStick = 
+      item.Name.toLowerCase().includes('hockey stick') || 
+      item.Name.toLowerCase().includes('baton') ||
+      (item.Description && item.Description.toLowerCase().includes('hockey stick'));
+    
+    return isProductType && isHockeyStick;
+  });
 
-  console.log(`[QB Audit] Filtered down to ${validItems.length} valid items for synchronization.`);
+  console.log(`[QB Audit] Filtered down to ${validItems.length} hockey stick items for synchronization.`);
   return {
     items: validItems,
     audit: {

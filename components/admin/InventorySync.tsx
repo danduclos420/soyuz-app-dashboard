@@ -80,6 +80,32 @@ export default function InventorySync() {
     }
   };
 
+  const triggerErplainPush = async () => {
+    setSyncing(true);
+    addLog('DÉMARRAGE PUSH ERPLAIN -> QUICKBOOKS...', 'info');
+    
+    try {
+      const res = await fetch('/api/sync/erplain-to-qb', { method: 'POST' });
+      const data = await res.json();
+      
+      if (data.success) {
+        addLog(`PUSH RÉUSSI : ${data.created} PRODUITS CRÉÉS DANS QB.`, 'success');
+        addLog(`ITEMS IGNORÉS (NON-STICK) : ${data.skipped}.`, 'info');
+        toast.success(`Export Erplain -> QB terminé : ${data.created} items créés.`);
+      } else {
+        const errorMsg = data.error || 'Erreur inconnue';
+        addLog(`ERREUR PUSH : ${errorMsg}`, 'error');
+        toast.error(`Erreur d'export : ${errorMsg}`);
+      }
+    } catch (err: any) {
+      addLog(`ÉCHEC CRITIQUE PUSH : ${err.message}`, 'error');
+      toast.error(`Erreur d'export : ${err.message}`);
+    } finally {
+      setSyncing(false);
+      addLog('MODULE EN ATTENTE.', 'info');
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
       <div className="bg-[#0A0A0A] border border-white/5 p-12 space-y-8 relative overflow-hidden">
@@ -90,7 +116,7 @@ export default function InventorySync() {
         <div className="space-y-4 relative z-10">
            <h3 className="text-3xl font-display italic text-white uppercase tracking-tighter">QUICKBOOKS <span className="text-soyuz">SYNC</span></h3>
            <p className="text-[#888888] text-[10px] font-black uppercase tracking-widest max-w-sm">
-             Synchronisation automatique de l'inventaire toutes les heures. Utilisez le bouton ci-dessous pour forcer une mise à jour immédiate.
+             Gestion centralisée des stocks. Synchronisez Erplain vers QB, puis QB vers Soyuz.
            </p>
         </div>
 
@@ -107,16 +133,29 @@ export default function InventorySync() {
               </div>
            </div>
 
-           <div className="grid grid-cols-2 gap-4">
-              <SoyuzButton 
-                onClick={triggerSync} 
-                isLoading={syncing} 
-                variant="primary" 
-                icon={RefreshCw}
-                className="w-full"
-              >
-                FORCER LA SYNCHRONISATION
-              </SoyuzButton>
+           <div className="grid grid-cols-1 gap-4">
+              <div className="flex flex-col gap-4">
+                <SoyuzButton 
+                  onClick={triggerSync} 
+                  isLoading={syncing} 
+                  variant="primary" 
+                  icon={RefreshCw}
+                  className="w-full"
+                >
+                  SYNCHRONISER QB Vers SOYUZ
+                </SoyuzButton>
+                
+                <SoyuzButton 
+                  onClick={triggerErplainPush} 
+                  isLoading={syncing} 
+                  variant="outline" 
+                  icon={Database}
+                  className="w-full border-white/10 text-white/60 hover:text-white"
+                >
+                  EXPORTER ERPLAIN Vers QB
+                </SoyuzButton>
+              </div>
+
               <a 
                 href="/api/auth/quickbooks/login"
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black tracking-widest uppercase rounded-xl"

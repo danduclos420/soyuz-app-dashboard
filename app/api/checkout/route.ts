@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
       name: string;
       price: number;
       quantity: number;
+      sku: string;
       image?: string;
     }) => ({
       price_data: {
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
         product_data: {
           name: item.name,
           images: item.image ? [item.image] : [],
+          metadata: {
+            sku: item.sku
+          }
         },
         unit_amount: Math.round(item.price * 100),
       },

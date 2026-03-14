@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Stripe from 'stripe';
 import { resend, DEFAULT_FROM_EMAIL } from '@/lib/resend';
 import { getOrderConfirmationTemplate } from '@/lib/email-templates';
+import { refreshQBToken, createQBSalesReceipt, QBToken } from '@/lib/quickbooks';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,14 +25,23 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     
-    // 1. Fetch line items to store in JSONB
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-    const items = lineItems.data.map(item => ({
-      description: item.description,
-      quantity: item.quantity,
-      unit_amount: item.amount_total / 100,
-      currency: item.currency,
-    }));
+    // 1. Fetch line items with expanded product to get SKU metadata
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ['data.price.product'],
+    });
+
+    const items = lineItems.data.map(item => {
+      const product = item.price?.product as Stripe.Product;
+      const sku = product?.metadata?.sku || '';
+      
+      return {
+        description: item.description,
+        quantity: item.quantity,
+        unit_amount: item.amount_total / 100,
+        currency: item.currency,
+        sku: sku,
+      };
+    });
 
     const addr = session.shipping_details?.address;
     const shippingAddress = addr ? (addr as unknown as Record<string, string>) : {};
@@ -104,6 +114,52 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('Order created successfully:', (order as any)?.id);
+
+    // 5. QuickBooks Integration (Deduct Stock via SalesReceipt)
+    try {
+      const { data: qbConfig } = await (supabaseAdmin.from('app_config') as any)
+        .select('value')
+        .eq('key', 'quickbooks_token')
+        .maybeSingle();
+
+      if (qbConfig) {
+        let token = qbConfig.value as QBToken;
+
+        // Refresh token if needed
+        if (Date.now() >= token.expires_at) {
+          console.log('[Webhook] QB Token expired, refreshing for SalesReceipt...');
+          const newToken = await refreshQBToken(token.refresh_token);
+          token = { ...token, ...newToken, realmId: token.realmId };
+          await (supabaseAdmin.from('app_config') as any).upsert({
+            key: 'quickbooks_token',
+            value: token,
+            updated_at: new Date().toISOString()
+          });
+        }
+
+        console.log('[Webhook] Creating QuickBooks SalesReceipt for order:', (order as any).id);
+        const qbItems = items.filter(i => i.sku).map(i => ({
+          sku: i.sku,
+          quantity: i.quantity || 1,
+          amount: i.unit_amount,
+          description: i.description || ''
+        }));
+
+        if (qbItems.length > 0) {
+          const qbResult = await createQBSalesReceipt(token, {
+            customerName: (order as any).customer_name,
+            customerEmail: (order as any).customer_email,
+            items: qbItems
+          });
+          console.log('[Webhook] QuickBooks SalesReceipt created successfully:', qbResult.SalesReceipt?.Id);
+        } else {
+          console.warn('[Webhook] No items with SKUs found for QuickBooks sync.');
+        }
+      }
+    } catch (qbError: any) {
+      console.error('[Webhook] QuickBooks Sync Failed:', qbError.message);
+      // We don't want to fail the whole webhook if QB sync fails, but we log it.
+    }
   }
 
   return NextResponse.json({ received: true });

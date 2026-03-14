@@ -9,12 +9,12 @@ export interface QBToken {
 
 const QB_KEYS = {
   sandbox: {
-    clientId: 'ABD4ytIh7B6KYThHo3NFzT26YKQO4DSk0WvpfeBNPjL3ToebKe',
-    clientSecret: 'Zh1yBkouX9F1kwk6WgNzn5SCkhm7qekDLbz1BTCJ',
-  },
-  production: {
     clientId: 'ABmG9aXFPs1uQC0S5JooXafKZIjVGscwbKP9vCIJKr2JJK01XJ',
     clientSecret: 'wn01EbyejcPviEUoqsN32djwrAl9QeUp0TR9wsMv',
+  },
+  production: {
+    clientId: 'ABD4ytIh7B6KYThHo3NFzT26YKQO4DSk0WvpfeBNPjL3ToebKe',
+    clientSecret: 'Zh1yBkouX9F1kwk6WgNzn5SCkhm7qekDLbz1BTCJ',
   }
 };
 

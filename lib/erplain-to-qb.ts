@@ -1,5 +1,5 @@
 import { syncErplainProducts } from './erplain';
-import { getQBInventoryItems, createQBItem, QBToken, refreshQBToken } from './quickbooks';
+import { getQBInventoryItems, createQBItem, QBToken, refreshQBToken, findOrCreateHockeyCategory } from './quickbooks';
 import { getSupabaseAdmin } from './supabase-admin';
 
 /**
@@ -42,11 +42,12 @@ export async function pushErplainProductsToQB() {
 
   if (epError) throw epError;
 
-  // 3. Get existing items in QB
-  const qbRes = await getQBInventoryItems(token);
+  // 3. Get existing items in QB (filtered by category to be more accurate)
+  const categoryId = await findOrCreateHockeyCategory(token);
+  const qbRes = await getQBInventoryItems(token, categoryId);
   const qbSkus = new Set(qbRes.items.map((i: any) => i.Sku));
 
-  console.log(`[Sync] Found ${(epProducts as any[]).length} variants in DB. QB has ${qbSkus.size} items.`);
+  console.log(`[Sync] Found ${(epProducts as any[]).length} variants in DB. QB Category "${categoryId}" has ${qbSkus.size} items.`);
 
   let createdCount = 0;
   let skippedCount = 0;
@@ -54,9 +55,17 @@ export async function pushErplainProductsToQB() {
   for (const variant of (epProducts as any[])) {
     // 4. Filter for Hockey Sticks only
     const name = variant.name || variant.products?.name || '';
+    const description = variant.products?.description || '';
+    
+    // Broad detection
     const isHockeyStick = 
       name.toLowerCase().includes('hockey stick') || 
-      name.toLowerCase().includes('baton');
+      name.toLowerCase().includes('baton') ||
+      name.toLowerCase().includes('bâton') ||
+      name.toLowerCase().includes('stick') ||
+      description.toLowerCase().includes('hockey stick') ||
+      description.toLowerCase().includes('baton') ||
+      description.toLowerCase().includes('bâton');
 
     if (!isHockeyStick) {
       skippedCount++;
@@ -65,17 +74,16 @@ export async function pushErplainProductsToQB() {
 
     // 5. Check if already in QB
     if (qbSkus.has(variant.sku)) {
-      // console.log(`[Sync] Skipping ${variant.sku} - already exists in QB.`);
       continue;
     }
 
     // 6. Push to QB
     try {
-      console.log(`[Sync] Creating ${variant.sku} (${name}) in QuickBooks...`);
+      console.log(`[Sync] Creating ${variant.sku} (${name}) in QuickBooks Category "${categoryId}"...`);
       await createQBItem(token, {
         name: name,
         sku: variant.sku,
-        description: variant.products?.description || '',
+        description: description,
         price: variant.price_retail || 0,
         qty: variant.stock_qty || 0
       });

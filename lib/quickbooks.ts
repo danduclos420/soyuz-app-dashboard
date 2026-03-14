@@ -117,17 +117,21 @@ export async function refreshQBToken(refreshToken: string, env: 'sandbox' | 'pro
   };
 }
 
-export async function getQBInventoryItems(token: QBToken) {
+export async function getQBInventoryItems(token: QBToken, categoryId?: string) {
   const env = token.environment || 'production';
   const config = getQBConfig(env);
   
-  // Broaden query to see what's actually there
-  const query = "SELECT * FROM Item WHERE Active = true";
+  // Use category filter if provided, else fetch all active items
+  const query = categoryId 
+    ? `SELECT * FROM Item WHERE Active = true AND ParentRef = '${categoryId}'`
+    : "SELECT * FROM Item WHERE Active = true";
+    
   const url = `${config.apiUri}/${token.realmId}/query?query=${encodeURIComponent(query)}&minorversion=65`;
 
   console.log(`[QB Audit] Environment: ${env}`);
   console.log(`[QB Audit] API URL: ${config.apiUri}`);
   console.log(`[QB Audit] Realm ID: ${token.realmId}`);
+  if (categoryId) console.log(`[QB Audit] Category Filter (ParentRef): ${categoryId}`);
   
   const response = await fetch(url, {
     headers: {
@@ -279,10 +283,11 @@ export async function syncQuickBooksInventory() {
       });
     }
 
-    // 3. Fetch Items
-    const qbRes = await getQBInventoryItems(token);
+    // 3. Find Category and Fetch Items
+    const categoryId = await findOrCreateHockeyCategory(token);
+    const qbRes = await getQBInventoryItems(token, categoryId);
     const qbItems = qbRes.items;
-    console.log(`Fetched ${qbItems.length} items from QBO.`);
+    console.log(`Fetched ${qbItems.length} items from QBO Category "${categoryId}".`);
 
     // 4. Update Supabase
     let updatedCount = 0;

@@ -46,12 +46,19 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === 'ALL' || p.category === selectedCategory;
-    const hasImage = p.images && p.images.length > 0 && p.images[0];
-    return matchesSearch && matchesCategory && hasImage;
-  });
+  const filteredProducts = products
+    .filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = selectedCategory === 'ALL' || p.category === selectedCategory;
+      const hasImage = p.images && p.images.length > 0 && p.images[0];
+      return matchesSearch && matchesCategory && hasImage;
+    })
+    .sort((a, b) => {
+      // Products with stock ( > 0) come first
+      if (a.stock_qty > 0 && b.stock_qty <= 0) return -1;
+      if (a.stock_qty <= 0 && b.stock_qty > 0) return 1;
+      return 0; // Maintain relative order (by created_at from Supabase)
+    });
 
   const CATEGORIES = ['ALL', ...Array.from(new Set(products.map(p => p.category)))];
 
@@ -196,7 +203,7 @@ export default function ProductsPage() {
                         </div>
                         {product.stock_qty <= 0 && (
                           <div className="absolute top-4 right-4 bg-soyuz text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1">
-                            OUT OF STOCK
+                            BACK-ORDER
                           </div>
                         )}
                       </Link>
@@ -216,7 +223,6 @@ export default function ProductsPage() {
                         <div className="pt-4 flex items-center gap-4 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
                            <button 
                             onClick={() => addItem({ ...product, quantity: 1 } as any)}
-                            disabled={product.stock_qty <= 0}
                             className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-soyuz flex items-center gap-2 transition-colors disabled:opacity-30"
                            >
                             <ShoppingBag size={14} /> QUICK ADD

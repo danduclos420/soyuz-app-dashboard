@@ -9,7 +9,6 @@ export interface QBToken {
 export const QB_CONFIG = {
   clientId: process.env.QUICKBOOKS_CLIENT_ID!,
   clientSecret: process.env.QUICKBOOKS_CLIENT_SECRET!,
-  redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/quickbooks/callback`,
   environment: (process.env.QUICKBOOKS_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox',
   authUri: 'https://appcenter.intuit.com/connect/oauth2',
   tokenUri: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
@@ -18,18 +17,18 @@ export const QB_CONFIG = {
     : 'https://sandbox-quickbooks.api.intuit.com/v3/company',
 };
 
-export function getQBAuthUrl() {
+export function getQBAuthUrl(redirectUri: string) {
   const params = new URLSearchParams({
     client_id: QB_CONFIG.clientId,
     response_type: 'code',
     scope: 'com.intuit.quickbooks.accounting',
-    redirect_uri: QB_CONFIG.redirectUri,
+    redirect_uri: redirectUri,
     state: 'soyuz-sync-state', // In production, use a secure CSRF token
   });
   return `${QB_CONFIG.authUri}?${params.toString()}`;
 }
 
-export async function exchangeQBCode(code: string, realmId: string): Promise<QBToken> {
+export async function exchangeQBCode(code: string, realmId: string, redirectUri: string): Promise<QBToken> {
   const authHeader = Buffer.from(`${QB_CONFIG.clientId}:${QB_CONFIG.clientSecret}`).toString('base64');
   
   const response = await fetch(QB_CONFIG.tokenUri, {
@@ -42,7 +41,7 @@ export async function exchangeQBCode(code: string, realmId: string): Promise<QBT
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: QB_CONFIG.redirectUri,
+      redirect_uri: redirectUri,
     }),
   });
 

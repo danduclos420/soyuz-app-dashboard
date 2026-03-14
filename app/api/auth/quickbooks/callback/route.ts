@@ -7,12 +7,17 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get('code');
   const realmId = searchParams.get('realmId');
 
+  const host = req.headers.get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const currentOrigin = `${protocol}://${host}`;
+  const redirectUri = `${currentOrigin}/api/auth/quickbooks/callback`;
+
   if (!code || !realmId) {
     return NextResponse.json({ error: 'Missing code or realmId' }, { status: 400 });
   }
 
   try {
-    const token = await exchangeQBCode(code, realmId);
+    const token = await exchangeQBCode(code, realmId, redirectUri);
     const supabase = getSupabaseAdmin();
 
     // Store the token in app_config
@@ -25,9 +30,9 @@ export async function GET(req: NextRequest) {
     if (error) throw error;
 
     // Redirect to Admin Inventory page
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin?tab=inventory&success=true`);
+    return NextResponse.redirect(`${currentOrigin}/admin?tab=inventory&success=true`);
   } catch (error: any) {
     console.error('QB Callback Error:', error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin?tab=inventory&error=${encodeURIComponent(error.message)}`);
+    return NextResponse.redirect(`${currentOrigin}/admin?tab=inventory&error=${encodeURIComponent(error.message)}`);
   }
 }
